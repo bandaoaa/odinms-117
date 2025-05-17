@@ -3778,7 +3778,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             if (total > 0) {
                 stats.checkEquipLevels(this, total); //gms like
             }
-            if ((level >= 200 || (GameConstants.isKOC(job) && level >= 200))) {
+            if ((level >= 200 || (GameConstants.isKOC(job) && level >= 120))) {
                 setExp(0);
             } else {
                 boolean leveled = false;
