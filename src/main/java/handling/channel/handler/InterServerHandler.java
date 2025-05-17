@@ -229,6 +229,8 @@ public class InterServerHandler {
             final int buddyIds[] = player.getBuddylist().getBuddyIds();
             World.Buddy.loggedOn(player.getName(), player.getId(), c.getChannel(), buddyIds);
             if (player.getParty() != null) {
+                player.receivePartyMemberHP();
+                player.updatePartyMemberHP();
                 final MapleParty party = player.getParty();
                 World.Party.updateParty(party.getId(), PartyOperation.LOG_ONOFF, new MaplePartyCharacter(player));
 

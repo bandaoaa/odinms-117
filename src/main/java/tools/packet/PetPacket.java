@@ -66,17 +66,24 @@ public class PetPacket {
             mplew.write(0);
             mplew.write(hunger ? 1 : 0);
         } else {
-            mplew.write(1);
-            mplew.write(0);
-            mplew.writeInt(pet.getPetItemId());
-            mplew.writeMapleAsciiString(pet.getName());
-            mplew.writeLong(pet.getUniqueId());
-            mplew.writeShort(pet.getPos().x);
-            mplew.writeShort(pet.getPos().y - 20);
-            mplew.write(pet.getStance());
-            mplew.writeInt(pet.getFh());
+            addPetInfo(mplew, pet, true);
         }
         return mplew.getPacket();
+    }
+
+
+    public static void addPetInfo(final MaplePacketLittleEndianWriter mplew, MaplePet pet, boolean showpet) {
+        mplew.write(1);
+        if (showpet) {
+            mplew.write(0);
+        }
+        mplew.writeInt(pet.getPetItemId());
+        mplew.writeMapleAsciiString(pet.getName());
+        mplew.writeLong(pet.getUniqueId());
+        mplew.writeShort(pet.getPos().x);
+        mplew.writeShort(pet.getPos().y - 20);
+        mplew.write(pet.getStance());
+        mplew.writeInt(pet.getFh());
     }
 
     public static final byte[] removePet(int cid, int index) {

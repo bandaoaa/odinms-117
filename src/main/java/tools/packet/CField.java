@@ -47,7 +47,6 @@ import tools.HexTool;
 import tools.Pair;
 import tools.Triple;
 import tools.data.MaplePacketLittleEndianWriter;
-
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -919,6 +918,12 @@ public class CField {
         mplew.write(chr.getStance());
         mplew.writeShort(0);
         mplew.write(0);
+        List<MaplePet> pets = chr.getPets();
+        for (MaplePet pet : pets) {
+            if (pet != null && pet.getSummoned()) {
+                PetPacket.addPetInfo(mplew, pet, false);
+            }
+        }
         mplew.write(0);
         mplew.write(1);
         mplew.write(0);

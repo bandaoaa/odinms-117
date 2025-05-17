@@ -341,8 +341,8 @@ public class MapleTrade {
             c1.getTrade().inTrade = true;
             c2.getClient().getSession().write(PlayerShopPacket.shopVisitorAdd(c1, 1));
             c1.getClient().getSession().write(InteractionPacket.getTradeStart(c1.getClient(), c1.getTrade(), (byte) 1));
-            c1.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
-            c2.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
+            // c1.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
+            // c2.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
         } else {
             c1.getClient().getSession().write(CWvsContext.serverNotice(5, "The other player has already closed the trade"));
         }
