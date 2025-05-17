@@ -219,9 +219,7 @@ public class GMCommand {
         public int execute(MapleClient c, String[] splitted) {
             c.getPlayer().setLevel(Short.parseShort(splitted[1]));
             c.getPlayer().levelUp();
-            if (c.getPlayer().getExp() < 0) {
-                c.getPlayer().gainExp(-c.getPlayer().getExp(), false, false, true);
-            }
+            c.getPlayer().gainExp(-c.getPlayer().getExp(), false, false, true);
             return 1;
         }
     }

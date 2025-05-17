@@ -3778,7 +3778,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             if (total > 0) {
                 stats.checkEquipLevels(this, total); //gms like
             }
-            if ((level >= 200 || (GameConstants.isKOC(job) && level >= 120))) {
+            if ((level >= 200 || (GameConstants.isKOC(job) && level >= 200))) {
                 setExp(0);
             } else {
                 boolean leveled = false;
@@ -3823,7 +3823,6 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             FileoutputUtil.outputFileError(FileoutputUtil.ScriptEx_Log, e); //all jobs throw errors :(
         }
     }
-
     public void setGmLevel(byte level) {
         this.gmLevel = level;
     }
@@ -3860,22 +3859,28 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             total = Integer.MAX_VALUE;
         }
         int needed = GameConstants.getExpNeededForLevel(level);
-        if (level >= 200 || (GameConstants.isKOC(job) && level >= 120)) {//等级上限 等级上限回头你改一下 我改成255了
+        if (level >= 200 || (GameConstants.isKOC(job) && level >= 120)) {
             setExp(0);
         } else {
             boolean leveled = false;
             if (exp + total >= needed) {
-                int exp1 = exp;
-                int needed1 = needed;//这个
+                int Exp = exp;
+                int Needed = needed;
                 exp += total;
                 levelUp();
                 leveled = true;
                 needed = GameConstants.getExpNeededForLevel(level);
-
-                if (exp >= needed) { //大致意思就是 
-                    setExp(needed - 1);//这我加的  这是给到下一级 就给到99%  防止连升2级以上
+                if ((level >= 200 || (GameConstants.isKOC(job) && level >= 120)) && !isIntern()) {
+                    setExp(0);
                 } else {
-                    setExp(total - needed1 + exp1);//如果获得的经验大于剩余需要的经验 就过继给下一级 
+                    needed = getNeededExp();
+                    if (level == 200 || (GameConstants.isKOC(job) && level == 120)) {
+                        setExp(0);
+                    } else if (exp >= needed) {
+                        setExp(needed - 1);
+                    } else {
+                        setExp(total - Needed + Exp);
+                    }
                 }
             } else {
                 exp += total;
@@ -4362,7 +4367,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         }
         maxmp += stats.getTotalInt() / 10;
 
-        exp -= getNeededExp();
+        exp = 0;
+        //exp -= getNeededExp();
         if (getOccupation() / 100 == 2) { // Gamer 
             final int chance = OccupationConstants.getGamerChance(getOccupation());
             if (chance > 0) {
@@ -5699,7 +5705,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     }
 
     public void setLevel(final short level) {
-        this.level = level;
+        this.level = (short) (level - 1);
     }
 
     public void sendNote(String to, String msg) {
