@@ -28,7 +28,6 @@ package handling.channel.handler;
 
 import client.MapleCharacter;
 import client.MapleClient;
-
 import client.MapleQuestStatus;
 import client.SkillFactory;
 import constants.GameConstants;
@@ -50,9 +49,7 @@ import handling.world.PlayerBuffStorage;
 import handling.world.World;
 import handling.world.exped.MapleExpedition;
 import handling.world.guild.MapleGuild;
-
 import java.util.List;
-
 import server.maps.FieldLimitType;
 import server.maps.MapleMap;
 import server.maps.SavedLocationType;
@@ -229,8 +226,6 @@ public class InterServerHandler {
             final int buddyIds[] = player.getBuddylist().getBuddyIds();
             World.Buddy.loggedOn(player.getName(), player.getId(), c.getChannel(), buddyIds);
             if (player.getParty() != null) {
-                player.receivePartyMemberHP();
-                player.updatePartyMemberHP();
                 final MapleParty party = player.getParty();
                 World.Party.updateParty(party.getId(), PartyOperation.LOG_ONOFF, new MaplePartyCharacter(player));
 
