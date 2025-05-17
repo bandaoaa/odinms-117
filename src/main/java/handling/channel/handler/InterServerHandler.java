@@ -235,6 +235,8 @@ public class InterServerHandler {
                         c.getSession().write(CWvsContext.ExpeditionPacket.expeditionStatus(me, false, true));
                     }
                 }
+                player.receivePartyMemberHP();
+                player.updatePartyMemberHP();
             }
             final CharacterIdChannelPair[] onlineBuddies = World.Find.multiBuddyFind(player.getId(), buddyIds);
             for (CharacterIdChannelPair onlineBuddy : onlineBuddies) {

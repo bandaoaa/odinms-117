@@ -4758,6 +4758,10 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             if (followid > 0 && followon) {
                 client.getSession().write(CField.followEffect(followinitiator ? followid : id, followinitiator ? id : followid, null));
             }
+            MapleCharacter player = client.getPlayer();
+            if (player.getParty() != null) {
+                player.updatePartyMemberHP();
+            }
         }
     }
 
