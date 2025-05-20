@@ -296,18 +296,18 @@ public class PlayerHandler {
                     attacker.setMp(attacker.getMp() - attackInfo.getMpCon());
                 }
                 if (attacker.getId() == 9400809 || attacker.getId() == 9300498 || attacker.getId() == 9300507) {
-                List<BanishInfo> infos = attacker.getStats().getBanishInfo();
-                BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
-                if (info != null) {
-                    chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+                    List<BanishInfo> infos = attacker.getStats().getBanishInfo();
+                    BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
+                    if (info != null) {
+                        chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+                    }
                 }
-            }
-            if (chr.getMapId() == 915000300) {
-                MapleMap to = chr.getClient().getChannelServer().getMapFactory().getMap(915000200);
-                chr.dropMessage(5, "You've been found out! Retreat!");
-                chr.changeMap(to, to.getPortal(1));
-                return;
-            }
+                if (chr.getMapId() == 915000300) {
+                    MapleMap to = chr.getClient().getChannelServer().getMapFactory().getMap(915000200);
+                    chr.dropMessage(5, "You've been found out! Retreat!");
+                    chr.changeMap(to, to.getPortal(1));
+                    return;
+                }
             }
             skillid = slea.readInt();
             pDMG = slea.readInt();
