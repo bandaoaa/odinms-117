@@ -267,22 +267,6 @@ public class PlayerHandler {
             return;
         }
         PlayerStats stats = chr.getStat();
-        if (attacker != null) { //等有问题再改。
-            MobAttackInfo attackInfo = attacker.getStats().getMobAttack(type);
-            if (attackInfo != null) {
-                if (attackInfo.isDeadlyAttack()) {
-                    isDeadlyAttack = true;
-                    mpattack = stats.getMp() - 1;
-                } else {
-                    mpattack += attackInfo.getMpBurn();
-                }
-                final MobSkill skill = MobSkillFactory.getMobSkill(attackInfo.getDiseaseSkill(), attackInfo.getDiseaseLevel());
-                if (skill != null && (damage == -1 || damage > 0)) {
-                    skill.applyEffect(chr, attacker, false);
-                }
-                attacker.setMp(attacker.getMp() - attackInfo.getMpCon());
-            }
-        }
         if ((type != -2) && (type != -3) && (type != -4)) {
             monsteridfrom = slea.readInt();
             oid = slea.readInt();
@@ -291,19 +275,6 @@ public class PlayerHandler {
 //            if ((attacker == null) || (attacker.getId() != monsteridfrom) || (attacker.getLinkCID() > 0) || (attacker.isFake()) || (attacker.getStats().isFriendly())) {
 //                return;
 //            }
-            if (attacker.getId() == 9400809 || attacker.getId() == 9300498 || attacker.getId() == 9300507) {
-                List<BanishInfo> infos = attacker.getStats().getBanishInfo();
-                BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
-                if (info != null) {
-                    chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
-                }
-            }
-            if (chr.getMapId() == 915000300) {
-                MapleMap to = chr.getClient().getChannelServer().getMapFactory().getMap(915000200);
-                chr.dropMessage(5, "You've been found out! Retreat!");
-                chr.changeMap(to, to.getPortal(1));
-                return;
-            }
 //            if ((type != -1) && (damage > 0)) {
             if (attacker != null) {
                 MobAttackInfo attackInfo = attacker.getStats().getMobAttack(type);
@@ -324,6 +295,19 @@ public class PlayerHandler {
                     }
                     attacker.setMp(attacker.getMp() - attackInfo.getMpCon());
                 }
+                if (attacker.getId() == 9400809 || attacker.getId() == 9300498 || attacker.getId() == 9300507) {
+                List<BanishInfo> infos = attacker.getStats().getBanishInfo();
+                BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
+                if (info != null) {
+                    chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+                }
+            }
+            if (chr.getMapId() == 915000300) {
+                MapleMap to = chr.getClient().getChannelServer().getMapFactory().getMap(915000200);
+                chr.dropMessage(5, "You've been found out! Retreat!");
+                chr.changeMap(to, to.getPortal(1));
+                return;
+            }
             }
             skillid = slea.readInt();
             pDMG = slea.readInt();
