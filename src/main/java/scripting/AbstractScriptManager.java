@@ -21,17 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package scripting;
 
 import client.MapleClient;
-
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
+import java.io.FileInputStream;
 import tools.FileoutputUtil;
+import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * @author Matze
@@ -45,7 +45,6 @@ public abstract class AbstractScriptManager {
     }
 
     protected Invocable getInvocable(String path, MapleClient c, boolean npc) {
-        FileReader fr = null;
         try {
             path = "scripts/" + path;
             ScriptEngine engine = null;
@@ -53,32 +52,47 @@ public abstract class AbstractScriptManager {
             if (c != null) {
                 engine = c.getScriptEngine(path);
             }
+
             if (engine == null) {
-                File scriptFile = new File(path);
-                if (!scriptFile.exists()) {
+                InputStream in = null;
+
+                // 优先尝试读取文件系统
+                File file = new File(path);
+                if (file.exists() && file.isFile()) {
+                    in = new FileInputStream(file);
+                } else {
+                    // 若文件系统无对应文件，再从 JAR 包内读取
+                    in = getClass().getResourceAsStream("/" + path);
+                }
+
+                if (in == null) {
+                    FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Script not found: " + path);
                     return null;
                 }
-                engine = sem.getEngineByName("javascript");
+
+                engine = sem.getEngineByName("graal.js");
+                if (engine == null) {
+                    engine = sem.getEngineByName("nashorn");
+                }
+                if (engine == null) {
+                    throw new RuntimeException("No JavaScript engine available.");
+                }
+
+                try (BufferedReader bf = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                    String lines = "load('nashorn:mozilla_compat.js');" +
+                            bf.lines().collect(Collectors.joining(System.lineSeparator()));
+                    engine.eval(lines);
+                }
+
                 if (c != null) {
                     c.setScriptEngine(path, engine);
                 }
-                fr = new FileReader(scriptFile);
-                engine.eval(fr);
-            } else if (c != null && npc) {
-                c.getPlayer().dropMessage(-1, "You already are talking to this NPC. Use @dispose if this is not intended.");
             }
+
             return (Invocable) engine;
-        } catch (FileNotFoundException | ScriptException e) {
-            System.err.println("Error executing script. Path: " + path + "\nException " + e);
-            FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Error executing script. Path: " + path + "\nException " + e);
+        } catch (Exception e) {
+            FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Error in script: " + path);
             return null;
-        } finally {
-            try {
-                if (fr != null) {
-                    fr.close();
-                }
-            } catch (IOException ignore) {
-            }
         }
     }
 }

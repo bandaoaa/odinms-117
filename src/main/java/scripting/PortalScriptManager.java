@@ -21,15 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package scripting;
 
 import client.MapleClient;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.script.*;
-
 import server.MaplePortal;
 import tools.FileoutputUtil;
 
@@ -43,38 +40,47 @@ public class PortalScriptManager {
         return instance;
     }
 
-    private PortalScript getPortalScript(final String scriptName) {
+    private final PortalScript getPortalScript(final String scriptName) {
         if (scripts.containsKey(scriptName)) {
             return scripts.get(scriptName);
         }
 
-        final File scriptFile = new File("scripts/portal/" + scriptName + ".js");
-        if (!scriptFile.exists()) {
+        final String path = "scripts/portal/" + scriptName + ".js";
+        ScriptEngine engine = sef.getScriptEngine();
+        InputStream in = null;
+
+        try {
+            // 优先尝试从文件系统读取
+            File file = new File(path);
+            if (file.exists() && file.isFile()) {
+                in = new FileInputStream(file);
+            } else {
+                // 若文件系统无对应文件，再从 JAR 包中读取
+                in = getClass().getClassLoader().getResourceAsStream(path);
+            }
+
+            if (in == null) {
+                System.err.println("Portal script not found: " + path);
+                FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Portal script not found: " + path);
+                return null;
+            }
+
+            try (BufferedReader bf = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                String scriptCode = bf.lines().collect(Collectors.joining(System.lineSeparator()));
+                ((Compilable) engine).compile(scriptCode).eval();
+            }
+
+            final PortalScript script = ((Invocable) engine).getInterface(PortalScript.class);
+            scripts.put(scriptName, script);
+            return script;
+
+        } catch (Exception e) {
+            System.err.println("Error loading portal script: " + scriptName + " : " + e);
+            FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Error executing portal script: (" + scriptName + ") " + e);
             return null;
         }
-
-        FileReader fr = null;
-        final ScriptEngine portal = sef.getScriptEngine();
-        try {
-            fr = new FileReader(scriptFile);
-            CompiledScript compiled = ((Compilable) portal).compile(fr);
-            compiled.eval();
-        } catch (final FileNotFoundException | ScriptException e) {
-            System.err.println("Error executing Portalscript: " + scriptName + ":" + e);
-            FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Error executing Portal script. (" + scriptName + ") " + e);
-        } finally {
-            if (fr != null) {
-                try {
-                    fr.close();
-                } catch (final IOException e) {
-                    System.err.println("ERROR CLOSING" + e);
-                }
-            }
-        }
-        final PortalScript script = ((Invocable) portal).getInterface(PortalScript.class);
-        scripts.put(scriptName, script);
-        return script;
     }
+
 
     public final void executePortalScript(final MaplePortal portal, final MapleClient c) {
         final PortalScript script = getPortalScript(portal.getScriptName());
