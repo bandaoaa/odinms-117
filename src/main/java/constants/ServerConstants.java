@@ -20,10 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package constants;
 
+import server.ServerProperties;
+
 public class ServerConstants {
 
     public static boolean DEBUG = false; // true
     public static final byte[] NEXON_IP = new byte[]{(byte) 8, (byte) 31, (byte) 98, (byte) 53};
+    public static boolean AUTOMATIC_REGISTER; //账号注册
     //public static final byte[] Gateway_IP = new byte[]{(byte) 127, (byte) 0, (byte) 0, (byte) 1};
 
     /*
@@ -106,5 +109,13 @@ public class ServerConstants {
         public int getType() {
             return level;
         }
+    }
+
+    static {
+        loadSetting();
+    }
+
+    public static void loadSetting() {
+        AUTOMATIC_REGISTER = Boolean.parseBoolean(ServerProperties.getProperty("net.sf.odinms.login.AUTOMATIC_REGISTER", "false")); //账号注册
     }
 }

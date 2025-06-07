@@ -10,13 +10,10 @@ import handling.channel.ChannelServer;
 import handling.channel.MapleGuildRanking;
 import handling.login.LoginInformationProvider;
 import handling.login.LoginServer;
-
 import static handling.login.LoginServer.TIMEZONE;
-
 import handling.world.World;
 import handling.world.family.MapleFamily;
 import handling.world.guild.MapleGuild;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.TimeZone;
@@ -24,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
-
 import server.Timer.BuffTimer;
 import server.Timer.EtcTimer;
 import server.Timer.EventTimer;
@@ -55,6 +51,8 @@ public class Start {
         } catch (SQLException ex) {
             System.err.println("[Database Error] Could not clear loggedin status: " + ex.getMessage());
         }
+
+        ServerConstants.loadSetting();
 
         System.out.println("[World] Initializing World...");
         World.init();

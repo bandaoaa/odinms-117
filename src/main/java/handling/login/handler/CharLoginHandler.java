@@ -94,29 +94,29 @@ public class CharLoginHandler {
     public static final void login(final LittleEndianAccessor slea, final MapleClient c) {
         String login = slea.readMapleAsciiString();
         String pwd = slea.readMapleAsciiString();
-        int checkId = AutoRegister.checkAccount(c, login, pwd);
-        if (checkId == 0) { //생성 가능한 아이디일때
-            AutoRegister.registerAccount(c, login, pwd);
-            c.getSession().write(CWvsContext.serverNotice(1, "The account has been successfully created."));
-            c.getSession().write(LoginPacket.getLoginFailed(20));
-            return;
-        } else if (checkId == 1) { //계정 찾기 실패
-            c.getSession().write(CWvsContext.serverNotice(1, "Account registration failed, automatic registration function not enabled. Please go to the website to register an account."));
-            c.getSession().write(LoginPacket.getLoginFailed(20));
-            return;
-        } else if (checkId == 2) { //php오류
-            c.getSession().write(CWvsContext.serverNotice(1, "An unknown error has occurred."));
-            c.getSession().write(LoginPacket.getLoginFailed(20));
-            return;
-        } else if (checkId == 3) { //레벨
-            c.getSession().write(CWvsContext.serverNotice(1, "The site level is incorrect. Please use it after obtaining an account rating."));
-            c.getSession().write(LoginPacket.getLoginFailed(20));
-            return;
-        } else if (checkId == 6) { //ㅇㅇ
-            c.getSession().write(CWvsContext.serverNotice(1, "Each IP can only create two new accounts."));
-            c.getSession().write(LoginPacket.getLoginFailed(20));
-            return;
-        }
+//        int checkId = AutoRegister.checkAccount(c, login, pwd);
+//        if (checkId == 0) { //생성 가능한 아이디일때
+//            AutoRegister.registerAccount(c, login, pwd);
+//            c.getSession().write(CWvsContext.serverNotice(1, "The account has been successfully created."));
+//            c.getSession().write(LoginPacket.getLoginFailed(20));
+//            return;
+//        } else if (checkId == 1) { //계정 찾기 실패
+//            c.getSession().write(CWvsContext.serverNotice(1, "Account registration failed, automatic registration function not enabled. Please go to the website to register an account."));
+//            c.getSession().write(LoginPacket.getLoginFailed(20));
+//            return;
+//        } else if (checkId == 2) { //php오류
+//            c.getSession().write(CWvsContext.serverNotice(1, "An unknown error has occurred."));
+//            c.getSession().write(LoginPacket.getLoginFailed(20));
+//            return;
+//        } else if (checkId == 3) { //레벨
+//            c.getSession().write(CWvsContext.serverNotice(1, "The site level is incorrect. Please use it after obtaining an account rating."));
+//            c.getSession().write(LoginPacket.getLoginFailed(20));
+//            return;
+//        } else if (checkId == 6) { //ㅇㅇ
+//            c.getSession().write(CWvsContext.serverNotice(1, "Each IP can only create two new accounts."));
+//            c.getSession().write(LoginPacket.getLoginFailed(20));
+//            return;
+//        }
         final boolean ipBan = c.hasBannedIP();
         final boolean macBan = c.hasBannedMac();
         int loginok = c.login(login, pwd, ipBan || macBan);
