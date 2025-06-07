@@ -146,12 +146,12 @@ public class MaplePacketLittleEndianWriter {
     }
 
     public final void writeAsciiString(String s, final int max) {
-        if (s.length() > max) {
+        if (s.getBytes(ASCII).length > max) {
             s = s.substring(0, max);
         }
         write(s.getBytes(ASCII));
-        for (int i = s.length(); i < max; i++) {
-            write(0);
+        for (int i = s.getBytes(ASCII).length; i < max; i++) {
+            write((byte) 0);
         }
     }
 
