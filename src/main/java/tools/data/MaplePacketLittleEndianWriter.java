@@ -21,12 +21,10 @@
 package tools.data;
 
 import constants.ServerConstants;
-
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
-
 import tools.HexTool;
 
 /**
@@ -39,7 +37,7 @@ import tools.HexTool;
 public class MaplePacketLittleEndianWriter {
 
     private final ByteArrayOutputStream baos;
-    private static final Charset ASCII = Charset.forName("US-ASCII"); // ISO-8859-1, UTF-8
+    public static final Charset ASCII = Charset.forName("GBK"); // ISO-8859-1, UTF-8
 
     /**
      * Constructor - initializes this stream with a default size.
@@ -163,7 +161,7 @@ public class MaplePacketLittleEndianWriter {
      * @param s The ASCII string to use maple-convention to write.
      */
     public final void writeMapleAsciiString(final String s) {
-        writeShort((short) s.length());
+        writeShort((short) s.getBytes(ASCII).length);
         writeAsciiString(s);
     }
 

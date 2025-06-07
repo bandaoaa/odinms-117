@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package tools.data;
 
+import tools.data.output.GenericLittleEndianWriter;
 import java.awt.Point;
 import java.io.IOException;
 
@@ -145,11 +146,11 @@ public class LittleEndianAccessor {
      * @return The string read.
      */
     public final String readAsciiString(final int n) {
-        final char ret[] = new char[n];
-        for (int x = 0; x < n; x++) {
-            ret[x] = (char) readByte();
+        byte[] bytes = new byte[n];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = readByte();
         }
-        return new String(ret);
+        return new String(bytes, MaplePacketLittleEndianWriter.ASCII);
     }
 
     /**
