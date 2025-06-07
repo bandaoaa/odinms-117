@@ -8,9 +8,7 @@ import handling.login.LoginServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
 import java.util.concurrent.locks.Lock;
-
 import tools.FileoutputUtil;
 import tools.HexTool;
 import tools.MapleAESOFB;
@@ -29,18 +27,18 @@ public class MaplePacketEncoder extends MessageToByteEncoder<Object> {
             byte[] input = inputInitialPacket;
             int pHeader = ((input[0]) & 0xFF) + (((input[1]) & 0xFF) << 8);
 
-            if (ServerConstants.DEBUG) {
-                int packetLen = inputInitialPacket.length;
-                String pHeaderStr = Integer.toHexString(pHeader).toUpperCase();
-                pHeaderStr = StringUtil.getLeftPaddedStr(pHeaderStr, '0', 4);
-                String op = nameOf(pHeader);
-                String Recv = "Servo end sending " + op + " [" + pHeaderStr + "] (" + packetLen + ")\r\n";
-                if (packetLen <= 50000) {
-                    //String RecvTo = Recv + HexTool.toString(inputInitialPacket) + "\r\n" + HexTool.toStringFromAscii(inputInitialPacket);//數據包解析
-                    String RecvTo = Recv + HexTool.toString(inputInitialPacket);
-                    System.out.println(RecvTo + "\r\n");
-                }
-            }
+	    if (ServerConstants.DEBUG) {
+	        int packetLen = inputInitialPacket.length;
+	        String pHeaderStr = Integer.toHexString(pHeader).toUpperCase();
+	        pHeaderStr = StringUtil.getLeftPaddedStr(pHeaderStr, '0', 4);
+	        String op = nameOf(pHeader);
+	        String Send = "Send " + op + " [" + pHeaderStr + "] (" + packetLen + ")\r\n";
+	        if (packetLen <= 50000) {
+	            //String Send = Send + HexTool.toString(inputInitialPacket) + "\r\n" + HexTool.toStringFromAscii(inputInitialPacket);//數據包解析
+	            //String Send = Send + HexTool.toString(inputInitialPacket);
+	            System.out.println(Send + "\r\n");
+	        }
+	    }
             final byte[] unencrypted = new byte[inputInitialPacket.length];
             System.arraycopy(inputInitialPacket, 0, unencrypted, 0, inputInitialPacket.length); // Copy the input > "unencrypted"
             final byte[] ret = new byte[unencrypted.length + 4]; // Create new bytes with length = "unencrypted" + 4
@@ -67,9 +65,9 @@ public class MaplePacketEncoder extends MessageToByteEncoder<Object> {
 
     private String nameOf(int val) {
         for (SendPacketOpcode op : SendPacketOpcode.values()) {
-            if (op.getValue() == val) {
-                return op.name();
-            }
+          if (op.getValue() == val) {
+            return op.name();
+          }
         }
         return "UNKNOWN";
     }

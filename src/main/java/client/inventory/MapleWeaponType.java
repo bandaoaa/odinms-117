@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -40,23 +34,22 @@ public enum MapleWeaponType {
     AXE2H(1.32f, 20),
     SWORD2H(1.32f, 20),
     BLUNT2H(1.32f, 20),
-    POLE_ARM(1.49f, 20),
+    POLE_ARM(1.49f, 20), 
     SPEAR(1.49f, 20),
     STAFF(1.0f, 25),
     WAND(1.0f, 25),
     KNUCKLE(1.7f, 20),
     GUN(1.5f, 15),
     CANNON(1.35f, 15),
-    DUAL_BOW(1.35f, 15), //beyond op
-    MAGIC_ARROW(2.0f, 15),
-    CARTE(2.0f, 15),
+    DUAL_BOW(2.0f, 15), //beyond op
+	MAGIC_ARROW(2.0f, 15),
     KATARA(1.3f, 20);
     private final float damageMultiplier;
     private final int baseMastery;
 
     private MapleWeaponType(final float maxDamageMultiplier, int baseMastery) {
         this.damageMultiplier = maxDamageMultiplier;
-        this.baseMastery = baseMastery;
+	this.baseMastery = baseMastery;
     }
 
     public final float getMaxDamageMultiplier() {
@@ -64,6 +57,6 @@ public enum MapleWeaponType {
     }
 
     public final int getBaseMastery() {
-        return baseMastery;
+	return baseMastery;
     }
 };

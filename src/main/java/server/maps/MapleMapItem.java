@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,15 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.maps;
 
-import java.awt.Point;
-
-import client.inventory.Item;
 import client.MapleCharacter;
 import client.MapleClient;
-
+import client.inventory.Item;
+import java.awt.Point;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import tools.packet.CField;
 
 public class MapleMapItem extends MapleMapObject {
@@ -162,31 +153,31 @@ public class MapleMapItem extends MapleMapObject {
     }
 
     public void registerExpire(final long time) {
-        nextExpiry = System.currentTimeMillis() + time;
+	nextExpiry = System.currentTimeMillis() + time;
     }
 
     public void registerFFA(final long time) {
-        nextFFA = System.currentTimeMillis() + time;
+	nextFFA = System.currentTimeMillis() + time;
     }
 
     public boolean shouldExpire(long now) {
-        return !pickedUp && nextExpiry > 0 && nextExpiry < now;
+	return !pickedUp && nextExpiry > 0 && nextExpiry < now;
     }
 
     public boolean shouldFFA(long now) {
-        return !pickedUp && type < 2 && nextFFA > 0 && nextFFA < now;
+	return !pickedUp && type < 2 && nextFFA > 0 && nextFFA < now;
     }
 
     public boolean hasFFA() {
-        return nextFFA > 0;
+	return nextFFA > 0;
     }
 
     public void expire(final MapleMap map) {
-        pickedUp = true;
-        map.broadcastMessage(CField.removeItemFromMap(getObjectId(), 0, 0));
-        map.removeMapObject(this);
-        if (randDrop) {
-            map.spawnRandDrop();
-        }
+	pickedUp = true;
+	map.broadcastMessage(CField.removeItemFromMap(getObjectId(), 0, 0));
+	map.removeMapObject(this);
+	if (randDrop) {
+	   map.spawnRandDrop();
+	}
     }
 }

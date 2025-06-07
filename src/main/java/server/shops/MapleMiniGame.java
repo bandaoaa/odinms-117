@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,26 +21,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.shops;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import client.MapleCharacter;
 import client.MapleClient;
 import client.MapleQuestStatus;
 import constants.GameConstants;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import server.quest.MapleQuest;
 import tools.packet.PlayerShopPacket;
 
-public class MapleMiniGame extends AbstractPlayerStore {
+public final class MapleMiniGame extends AbstractPlayerStore {
 
-    private final static int slots = 6; //change?!
+    private final static int slots = 2; //change?!
     private boolean[] exitAfter;
     private boolean[] ready;
     private int[] points;
     private int GameType = 0;
     private int[][] piece = new int[15][15];
-    private List<Integer> matchcards = new ArrayList<Integer>();
+    private List<Integer> matchcards = new ArrayList<>();
     int loser = 0;
     int turn = 1;
     int piecetype = 0;
@@ -53,7 +47,7 @@ public class MapleMiniGame extends AbstractPlayerStore {
     int tie = -1;
 
     public MapleMiniGame(MapleCharacter owner, int itemId, String description, String pass, int GameType) {
-        super(owner, itemId, description, pass, slots - 1); //?
+        super(owner, itemId, description, pass, slots-1); //?
         this.GameType = GameType;
         this.points = new int[slots];
         this.exitAfter = new boolean[slots];
@@ -94,18 +88,18 @@ public class MapleMiniGame extends AbstractPlayerStore {
         if (getPoints() >= getMatchesToWin() && !isOpen()) {
             int x = 0;
             int highest = 0;
-            boolean tie = false;
+            boolean tiefe = false;
             for (int i = 0; i < slots; i++) {
                 if (points[i] > highest) {
                     x = i;
                     highest = points[i];
-                    tie = false;
+                    tiefe = false;
                 } else if (points[i] == highest) {
-                    tie = true;
+                    tiefe = true;
                 }
                 points[i] = 0;
             }
-            this.broadcastToVisitors(PlayerShopPacket.getMiniGameResult(this, tie ? 1 : 2, x));
+            this.broadcastToVisitors(PlayerShopPacket.getMiniGameResult(this, tiefe ? 1 : 2, x));
             this.setOpen(true);
             update();
             checkExitAfterGame();
@@ -159,10 +153,10 @@ public class MapleMiniGame extends AbstractPlayerStore {
     }
 
     public void send(MapleClient c) {
-        if (getMCOwner() == null) {
-            closeShop(false, false);
-            return;
-        }
+	if (getMCOwner() == null) {
+	    closeShop(false, false);
+	    return;
+	}
         c.getSession().write(PlayerShopPacket.getMiniGame(c, this));
     }
 
@@ -178,7 +172,7 @@ public class MapleMiniGame extends AbstractPlayerStore {
         if (piece[move1][move2] == 0 && !isOpen()) {
             piece[move1][move2] = type;
             this.broadcastToVisitors(PlayerShopPacket.getMiniGameMoveOmok(move1, move2, type));
-            boolean found = false;
+	    boolean found = false;
             for (int y = 0; y < 15; y++) {
                 for (int x = 0; x < 15; x++) {
                     if (!found && searchCombo(x, y, type)) {
@@ -186,7 +180,7 @@ public class MapleMiniGame extends AbstractPlayerStore {
                         this.setOpen(true);
                         update();
                         checkExitAfterGame();
-                        found = true;
+			found = true;
                     }
                 }
             }
@@ -202,9 +196,9 @@ public class MapleMiniGame extends AbstractPlayerStore {
     }
 
     public void exit(MapleCharacter player) {
-        if (player == null) {
-            return;
-        }
+	if (player == null) {
+	    return;
+	}
         player.setPlayerShop(null);
         if (isOwner(player)) {
             update();
@@ -231,7 +225,7 @@ public class MapleMiniGame extends AbstractPlayerStore {
         for (int i = 0; i < slots; i++) {
             if (exitAfter[i]) {
                 exitAfter[i] = false;
-                exit(i == 0 ? getMCOwner() : chrs[i - 1].get());
+                exit(i == 0 ? getMCOwner() : chrs[i-1].get());
             }
         }
     }
@@ -366,9 +360,9 @@ public class MapleMiniGame extends AbstractPlayerStore {
     @Override
     public void closeShop(boolean s, boolean z) {
         removeAllVisitors(3, 1);
-        if (getMCOwner() != null) {
+	if (getMCOwner() != null) {
             getMCOwner().setPlayerShop(null);
-        }
+	}
         update();
         getMap().removeMapObject(this);
     }

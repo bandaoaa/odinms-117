@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,10 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.maps;
 
-import java.awt.Point;
-
 import client.MapleCharacter;
 import handling.world.World;
+import java.awt.Point;
 import server.MapleItemInformationProvider;
 import server.Randomizer;
 import server.Timer.EventTimer;
@@ -45,16 +38,16 @@ public class AramiaFireWorks {
     private short sunshines = MAX_SUN / 6; //start at 1/6 then go from that
     private short decorations = MAX_DEC / 6;
     private static final int[] arrayMob = {9500168, 9500169, 9500170, 9500171, 9500173,
-            9500174, 9500175, 9500176, 9500170, 9500171, 9500172, 9500173, 9500174, 9500175,
-            9400569};
+        9500174, 9500175, 9500176, 9500170, 9500171, 9500172, 9500173, 9500174, 9500175,
+        9400569};
     private static final int[] arrayX = {2100, 2605, 1800, 2600, 3120, 2700, 2320, 2062,
-            2800, 3100, 2300, 2840, 2700, 2320, 1950};
+        2800, 3100, 2300, 2840, 2700, 2320, 1950};
     private static final int[] arrayY = {574, 364, 574, 316, 574, 574, 403, 364, 574, 574,
-            403, 574, 574, 403, 574};
+        403, 574, 574, 403, 574};
     private static final int[] array_X = {720, 180, 630, 270, 360, 540, 450, 142,
-            142, 218, 772, 810, 848, 232, 308, 142};
+        142, 218, 772, 810, 848, 232, 308, 142};
     private static final int[] array_Y = {1234, 1234, 1174, 1234, 1174, 1174, 1174, 1260,
-            1234, 1234, 1234, 1234, 1234, 1114, 1114, 1140};
+        1234, 1234, 1234, 1234, 1234, 1114, 1114, 1140};
     private static final int flake_Y = 149;
 
     public final void giveKegs(final MapleCharacter c, final int kegs) {
@@ -65,7 +58,7 @@ public class AramiaFireWorks {
         }
     }
 
-    private final void broadcastServer(final MapleCharacter c, final int itemid) {
+    private void broadcastServer(final MapleCharacter c, final int itemid) {
         World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, itemid, "<Channel " + c.getClient().getChannel() + "> " + c.getMap().getMapName() + " : The amount of {" + MapleItemInformationProvider.getInstance().getName(itemid) + "} has reached the limit!"));
     }
 
@@ -73,7 +66,7 @@ public class AramiaFireWorks {
         return (short) ((kegs / MAX_KEGS) * 10000);
     }
 
-    private final void broadcastEvent(final MapleCharacter c) {
+    private void broadcastEvent(final MapleCharacter c) {
         broadcastServer(c, KEG_ID);
         // Henesys Park
         EventTimer.getInstance().schedule(new Runnable() {
@@ -85,7 +78,7 @@ public class AramiaFireWorks {
         }, 10000);
     }
 
-    private final void startEvent(final MapleMap map) {
+    private void startEvent(final MapleMap map) {
         map.startMapEffect("Who's going crazy with the fireworks?", 5121010);
 
         EventTimer.getInstance().schedule(new Runnable() {
@@ -97,7 +90,7 @@ public class AramiaFireWorks {
         }, 5000);
     }
 
-    private final void spawnMonster(final MapleMap map) {
+    private void spawnMonster(final MapleMap map) {
         Point pos;
 
         for (int i = 0; i < arrayMob.length; i++) {
@@ -141,10 +134,10 @@ public class AramiaFireWorks {
         return (short) ((sunshines / MAX_SUN) * 10000);
     }
 
-    private final void broadcastSun(final MapleCharacter c) {
+    private void broadcastSun(final MapleCharacter c) {
         broadcastServer(c, SUN_ID);
         // Henesys Park
-        EventTimer.getInstance().schedule(new Runnable() {
+       EventTimer.getInstance().schedule(new Runnable() {
 
             @Override
             public final void run() {
@@ -153,7 +146,7 @@ public class AramiaFireWorks {
         }, 10000);
     }
 
-    private final void startSun(final MapleMap map) {
+    private void startSun(final MapleMap map) {
         map.startMapEffect("The tree is bursting with sunshine!", 5121010);
         for (int i = 0; i < 3; i++) {
             EventTimer.getInstance().schedule(new Runnable() {
@@ -166,25 +159,25 @@ public class AramiaFireWorks {
         }
     }
 
-    private final void spawnItem(final MapleMap map) {
+    private void spawnItem(final MapleMap map) {
         Point pos;
 
         for (int i = 0; i < Randomizer.nextInt(5) + 10; i++) {
             pos = new Point(array_X[i], array_Y[i]);
-            int itemId = 4001246;
-            switch (Randomizer.nextInt(15)) {
-                case 0:
-                case 1:
-                    itemId = 3010141;
-                    break;
-                case 2:
-                    itemId = 3010146;
-                    break;
-                case 3:
-                case 4:
-                    itemId = 3010025;
-                    break;
-            }
+	    int itemId = 4001246;
+	    switch(Randomizer.nextInt(15)) {
+		case 0:
+		case 1:
+		    itemId = 3010141;
+		    break;
+		case 2:
+		    itemId = 3010146;
+		    break;
+		case 3:
+		case 4:
+		    itemId = 3010025;
+		    break;
+	    }
             map.spawnAutoDrop(itemId, pos);
         }
     }
@@ -224,7 +217,7 @@ public class AramiaFireWorks {
         return (short) ((decorations / MAX_DEC) * 10000);
     }
 
-    private final void broadcastDec(final MapleCharacter c) {
+    private void broadcastDec(final MapleCharacter c) {
         broadcastServer(c, DEC_ID);
         EventTimer.getInstance().schedule(new Runnable() {
 
@@ -235,7 +228,7 @@ public class AramiaFireWorks {
         }, 10000); //no msg
     }
 
-    private final void startDec(final MapleMap map) {
+    private void startDec(final MapleMap map) {
         map.startMapEffect("The tree is bursting with snow!", 5120000);
         for (int i = 0; i < 3; i++) {
             EventTimer.getInstance().schedule(new Runnable() {
@@ -248,7 +241,7 @@ public class AramiaFireWorks {
         }
     }
 
-    private final void spawnDec(final MapleMap map) {
+    private void spawnDec(final MapleMap map) {
         Point pos;
 
         for (int i = 0; i < Randomizer.nextInt(10) + 40; i++) {

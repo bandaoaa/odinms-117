@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc>
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,73 +21,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.channel;
 
 import client.MapleCharacter;
-import constants.GameConstants;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import handling.MapleServerHandler;
 import handling.login.LoginServer;
 import handling.netty.ServerConnection;
 
-import handling.world.CheaterData;
-
+import handling.world.World;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.Map.Entry;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import scripting.EventScriptManager;
 import server.MapleSquad;
 import server.MapleSquad.MapleSquadType;
-import server.maps.MapleMapFactory;
-import server.shops.HiredMerchant;
-import server.shops.HiredMerchantSave;
-import server.life.PlayerNPC;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import server.ServerProperties;
 import server.events.*;
+import server.life.PlayerNPC;
 import server.maps.AramiaFireWorks;
+import server.maps.MapleMapFactory;
 import server.maps.MapleMapObject;
+import server.shops.HiredMerchant;
 import tools.ConcurrentEnumMap;
 import tools.packet.CWvsContext;
 
 public class ChannelServer {
 
     public static long serverStartTime;
-    private int expRate, mesoRate, dropRate = 2, cashRate = 1, traitRate = 3, BossDropRate = 3;
-    private short port = 8585;
-    private static final short DEFAULT_PORT = 8585;
+    private int expRate, mesoRate, dropRate, cashRate = 3, traitRate = 1; //性向經驗倍率
+    private short port = 7575;
+    private static final short DEFAULT_PORT = 7575;
     private int channel, running_MerchantID = 0, flags = 0;
     private String serverMessage, ip, serverName;
-    private boolean shutdown = false, finishedShutdown = false, MegaphoneMuteState = false, adminOnly = false, LogIP = false;
+    private boolean shutdown = false, finishedShutdown = false, MegaphoneMuteState = false, adminOnly = false;
     private PlayerStorage players;
     private ServerConnection acceptor;
     private final MapleMapFactory mapFactory;
     private EventScriptManager eventSM;
     private AramiaFireWorks works = new AramiaFireWorks();
-    private static final Map<Integer, ChannelServer> instances = new HashMap<Integer, ChannelServer>();
-    private final Map<MapleSquadType, MapleSquad> mapleSquads = new ConcurrentEnumMap<MapleSquadType, MapleSquad>(MapleSquadType.class);
-    private final Map<Integer, HiredMerchant> merchants = new HashMap<Integer, HiredMerchant>();
-    private final List<PlayerNPC> playerNPCs = new LinkedList<PlayerNPC>();
+    private static final Map<Integer, ChannelServer> instances = new HashMap<>();
+    private final Map<MapleSquadType, MapleSquad> mapleSquads = new ConcurrentEnumMap<>(MapleSquadType.class);
+    private final Map<Integer, HiredMerchant> merchants = new HashMap<>();
+    private final List<PlayerNPC> playerNPCs = new LinkedList<>();
     private final ReentrantReadWriteLock merchLock = new ReentrantReadWriteLock(); //merchant
     private int eventmap = -1;
-    private final Map<MapleEventType, MapleEvent> events = new EnumMap<MapleEventType, MapleEvent>(MapleEventType.class);
+    private final Map<MapleEventType, MapleEvent> events = new EnumMap<>(MapleEventType.class);
     public boolean eventOn = false;
+    public boolean eventClosed = false;
     public int eventMap = 0;
-    private boolean eventWarp;
-    private String eventHost;
-    private String eventName;
 
     private ChannelServer(final int channel) {
         this.channel = channel;
@@ -101,11 +76,29 @@ public class ChannelServer {
     }
 
     public static Set<Integer> getAllInstance() {
-        return new HashSet<Integer>(instances.keySet());
+        return new HashSet<>(instances.keySet());
+    }
+    
+    public final HiredMerchant findAndGetMerchant(final int accid, int cid) { //雇傭商人遙控器
+
+        merchLock.readLock().lock();
+        try {
+            final Iterator itr = merchants.values().iterator();
+
+            while (itr.hasNext()) {
+                HiredMerchant hm = (HiredMerchant) itr.next();
+                if (hm.getOwnerAccId() == accid || hm.getOwnerId() == cid) {
+                    return hm;
+                }
+            }
+        } finally {
+            merchLock.readLock().unlock();
+        }
+        return null;
     }
 
     public final void loadEvents() {
-        if (events.size() != 0) {
+        if (!events.isEmpty()) {
             return;
         }
         events.put(MapleEventType.CokePlay, new MapleCoconut(channel, MapleEventType.CokePlay)); //yep, coconut. same shit
@@ -122,13 +115,11 @@ public class ChannelServer {
         try {
             expRate = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.world.exp"));
             mesoRate = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.world.meso"));
-            dropRate = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.world.drop"));
-            BossDropRate = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.world.bossdrop"));
+            dropRate = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.world.dropRate"));
             serverMessage = ServerProperties.getProperty("net.sf.odinms.world.serverMessage");
             serverName = ServerProperties.getProperty("net.sf.odinms.login.serverName");
             flags = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.world.flags", "0"));
             adminOnly = Boolean.parseBoolean(ServerProperties.getProperty("net.sf.odinms.world.admin", "false"));
-            LogIP = Boolean.parseBoolean(ServerProperties.getProperty("net.sf.odinms.world.LogIP", "false"));
             eventSM = new EventScriptManager(this, ServerProperties.getProperty("net.sf.odinms.channel.events").split(","));
             port = Short.parseShort(ServerProperties.getProperty("net.sf.odinms.channel.net.port" + channel, String.valueOf(DEFAULT_PORT + channel)));
         } catch (Exception e) {
@@ -142,8 +133,10 @@ public class ChannelServer {
         try {
             acceptor = new ServerConnection(port, 0, channel, false);
             acceptor.run();
+
             System.out.println("Channel " + channel + ": Listening on port " + port + "");
             eventSM.init();
+
         } catch (Exception e) {
             System.out.println("Binding to port " + port + " failed (ch: " + getChannel() + ")" + e);
         }
@@ -163,11 +156,17 @@ public class ChannelServer {
 
         System.out.println("Channel " + channel + ", Unbinding...");
 
+        acceptor.close();
+        acceptor = null;
+
         //temporary while we dont have !addchannel
         instances.remove(channel);
         setFinishShutdown();
     }
 
+    public final void unbind() {
+        acceptor.close();
+    }
 
     public final boolean hasFinishedShutdown() {
         return finishedShutdown;
@@ -177,19 +176,19 @@ public class ChannelServer {
         return mapFactory;
     }
 
-    public static final ChannelServer newInstance(final int channel) {
+    public static ChannelServer newInstance(final int channel) {
         return new ChannelServer(channel);
     }
 
-    public static final ChannelServer getInstance(final int channel) {
+    public static ChannelServer getInstance(int channel) {
         return instances.get(channel);
     }
 
-    public final void addPlayer(final MapleCharacter chr) {
+    public void addPlayer(final MapleCharacter chr) {
         getPlayerStorage().registerPlayer(chr);
     }
 
-    public final PlayerStorage getPlayerStorage() {
+    public PlayerStorage getPlayerStorage() {
         if (players == null) { //wth
             players = new PlayerStorage(channel); //wthhhh
         }
@@ -248,8 +247,8 @@ public class ChannelServer {
         LoginServer.addChannel(channel);
     }
 
-    public static final ArrayList<ChannelServer> getAllInstances() {
-        return new ArrayList<ChannelServer>(instances.values());
+    public static ArrayList<ChannelServer> getAllInstances() {
+        return new ArrayList<>(instances.values());
     }
 
     public final String getIP() {
@@ -286,19 +285,7 @@ public class ChannelServer {
         return dropRate;
     }
 
-    public final int getBossDropRate() {
-        return BossDropRate;
-    }
-
-    public final void setBossDropRate(final int BossDropRate) {
-        this.BossDropRate = BossDropRate;
-    }
-
-    public final void setDropRate(final int dropRate) {
-        this.dropRate = dropRate;
-    }
-
-    public static final void startChannel_Main() {
+    public static void startChannel_Main() {
         serverStartTime = System.currentTimeMillis();
 
         for (int i = 0; i < Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.channel.count", "0")); i++) {
@@ -336,8 +323,7 @@ public class ChannelServer {
         return false;
     }
 
-    public final int closeAllMerchant() {
-        int ret = 0;
+    public final void closeAllMerchant() {
         merchLock.writeLock().lock();
         try {
             final Iterator<Entry<Integer, HiredMerchant>> merchants_ = merchants.entrySet().iterator();
@@ -347,7 +333,6 @@ public class ChannelServer {
                 //HiredMerchantSave.QueueShopForSave(hm);
                 hm.getMap().removeMapObject(hm);
                 merchants_.remove();
-                ret++;
             }
         } finally {
             merchLock.writeLock().unlock();
@@ -356,11 +341,9 @@ public class ChannelServer {
         for (int i = 910000001; i <= 910000022; i++) {
             for (MapleMapObject mmo : mapFactory.getMap(i).getAllHiredMerchantsThreadsafe()) {
                 ((HiredMerchant) mmo).closeShop(true, false);
-                //HiredMerchantSave.QueueShopForSave((HiredMerchant) mmo);
-                ret++;
+				//HiredMerchantSave.QueueShopForSave((HiredMerchant) mmo);
             }
         }
-        return ret;
     }
 
     public final int addMerchant(final HiredMerchant hMerchant) {
@@ -405,7 +388,7 @@ public class ChannelServer {
     }
 
     public final List<HiredMerchant> searchMerchant(final int itemSearch) {
-        final List<HiredMerchant> list = new LinkedList<HiredMerchant>();
+        final List<HiredMerchant> list = new LinkedList<>();
         merchLock.readLock().lock();
         try {
             final Iterator itr = merchants.values().iterator();
@@ -470,15 +453,16 @@ public class ChannelServer {
     }
 
     public final String getTrueServerName() {
-        return serverName.substring(0, serverName.length() - (GameConstants.GMS ? 2 : 3));
+        return serverName.substring(0, serverName.length()/* - (GameConstants.GMS ? 2 : 3)
+         */ );
     }
 
     public final int getPort() {
         return port;
     }
 
-    public static final Set<Integer> getChannelServer() {
-        return new HashSet<Integer>(instances.keySet());
+    public static Set<Integer> getChannelServer() {
+        return new HashSet<>(instances.keySet());
     }
 
     public final void setShutdown() {
@@ -495,11 +479,7 @@ public class ChannelServer {
         return adminOnly;
     }
 
-    public final boolean isLogIP() {
-        return LogIP;
-    }
-
-    public final static int getChannelCount() {
+    public static int getChannelCount() {
         return instances.size();
     }
 
@@ -508,7 +488,7 @@ public class ChannelServer {
     }
 
     public static Map<Integer, Integer> getChannelLoad() {
-        Map<Integer, Integer> ret = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> ret = new HashMap<>();
         for (ChannelServer cs : instances.values()) {
             ret.put(cs.getChannel(), cs.getConnectedClients());
         }
@@ -519,19 +499,7 @@ public class ChannelServer {
         return getPlayerStorage().getConnectedClients();
     }
 
-    public List<CheaterData> getCheaters() {
-        List<CheaterData> cheaters = getPlayerStorage().getCheaters();
-
-        Collections.sort(cheaters);
-        return cheaters;
-    }
-
-    public List<CheaterData> getReports() {
-        List<CheaterData> cheaters = getPlayerStorage().getReports();
-
-        Collections.sort(cheaters);
-        return cheaters;
-    }
+  
 
     public void broadcastMessage(byte[] message) {
         broadcastPacket(message);
@@ -552,7 +520,7 @@ public class ChannelServer {
     public int getTraitRate() {
         return traitRate;
     }
-    
+
     public void writeinitemtosql(Integer accid, boolean bool) {
         merchLock.readLock().lock();
         try {
@@ -571,21 +539,4 @@ public class ChannelServer {
             merchLock.readLock().unlock();
         }
     }
-
-    public final HiredMerchant findAndGetMerchant(final int accid, int cid) {
-        merchLock.readLock().lock();
-        try {
-            final Iterator itr = merchants.values().iterator();
-            while (itr.hasNext()) {
-                HiredMerchant hm = (HiredMerchant) itr.next();
-                if (hm.getOwnerAccId() == accid || hm.getOwnerId() == cid) {
-                    return hm;
-                }
-            }
-        } finally {
-            merchLock.readLock().unlock();
-        }
-        return null;
-    }
-    
 }

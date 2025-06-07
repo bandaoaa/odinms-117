@@ -1,45 +1,11 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-
 import database.DatabaseConnection;
-
 import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collection;
-import java.util.LinkedList;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -49,14 +15,15 @@ import server.CashItemInfo.CashModInfo;
 public class CashItemFactory {
 
     private final static CashItemFactory instance = new CashItemFactory();
-    private final static int[] bestItems = new int[]{10003055, 10003090, 10103464, 10002960, 10103363};
-    private final Map<Integer, CashItemInfo> itemStats = new HashMap<Integer, CashItemInfo>();
-    private final Map<Integer, List<Integer>> itemPackage = new HashMap<Integer, List<Integer>>();
-    private final Map<Integer, CashModInfo> itemMods = new HashMap<Integer, CashModInfo>();
+
+    private final static int[] bestItems = new int[]{10002885, 10100889, 10103362, 10001203, 10100826};//熱賣商品
+    private final Map<Integer, CashItemInfo> itemStats = new HashMap<>();
+    private final Map<Integer, List<Integer>> itemPackage = new HashMap<>();
+    private final Map<Integer, CashModInfo> itemMods = new HashMap<>();
     private final Map<Integer, List<Integer>> openBox = new HashMap<>();
     private final MapleDataProvider data = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/Etc.wz"));
 
-    public static final CashItemFactory getInstance() {
+    public static CashItemFactory getInstance() {
         return instance;
     }
 
@@ -76,13 +43,12 @@ public class CashItemFactory {
                 itemStats.put(SN, stats);
             }
         }
-
         final MapleData b = data.getData("CashPackage.img");
         for (MapleData c : b.getChildren()) {
             if (c.getChildByPath("SN") == null) {
                 continue;
             }
-            final List<Integer> packageItems = new ArrayList<Integer>();
+            final List<Integer> packageItems = new ArrayList<>();
             for (MapleData d : c.getChildByPath("SN").getChildren()) {
                 packageItems.add(MapleDataTool.getIntConvert(d));
             }
@@ -91,22 +57,20 @@ public class CashItemFactory {
 
         try {
             Connection con = DatabaseConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM cashshop_modified_items");
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                CashModInfo ret = new CashModInfo(rs.getInt("serial"), rs.getInt("discount_price"), rs.getInt("mark"), rs.getInt("showup") > 0, rs.getInt("itemid"), rs.getInt("priority"), rs.getInt("package") > 0, rs.getInt("period"), rs.getInt("gender"), rs.getInt("count"), rs.getInt("meso"), rs.getInt("unk_1"), rs.getInt("unk_2"), rs.getInt("unk_3"), rs.getInt("extra_flags"));
-                itemMods.put(ret.sn, ret);
-                if (ret.showUp) {
-                    final CashItemInfo cc = itemStats.get(Integer.valueOf(ret.sn));
-                    if (cc != null) {
-                        ret.toCItem(cc); //init
+            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM cashshop_modified_items"); 
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) { //添加数据库加值道具
+                    CashModInfo ret = new CashModInfo(rs.getInt("serial"), rs.getInt("discount_price"), rs.getInt("mark"), rs.getInt("showup") > 0, rs.getInt("itemid"), rs.getInt("priority"), rs.getInt("package") > 0, rs.getInt("period"), rs.getInt("gender"), rs.getInt("count"), rs.getInt("meso"), rs.getInt("unk_1"), rs.getInt("unk_2"), rs.getInt("unk_3"), rs.getInt("extra_flags"));
+                    itemMods.put(ret.sn, ret);
+                    if (ret.showUp) {
+                        final CashItemInfo cc = itemStats.get(Integer.valueOf(ret.sn));
+                        if (cc != null) {
+                            ret.toCItem(cc); //init
+                        }
                     }
                 }
             }
-            rs.close();
-            ps.close();
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
         List<Integer> availableSN = new LinkedList<>();
@@ -165,8 +129,35 @@ public class CashItemFactory {
         return stats;
     }
 
+    /*
+    神奇服飾箱相關內容
+    */
+    public final CashItemInfo getItem(int sn, boolean exception) {
+        final CashItemInfo stats = itemStats.get(Integer.valueOf(sn));
+        final CashModInfo z = getModInfo(sn);
+        if (exception && stats != null) {
+            return stats;
+        }
+        if (z != null && z.showUp) {
+            return z.toCItem(stats); //null doesnt matter
+        }
+        if (stats == null || !stats.onSale()) {
+            return null;
+        }
+        return stats;
+    }
+
     public final List<Integer> getPackageItems(int itemId) {
         return itemPackage.get(itemId);
+    }
+
+    public final int getItemSN(int itemid) {
+        for (Map.Entry<Integer, CashItemInfo> ci : itemStats.entrySet()) {
+            if (ci.getValue().getId() == itemid) {
+                return ci.getValue().getSN();
+            }
+        }
+        return 0;
     }
 
     public final CashModInfo getModInfo(int sn) {
@@ -183,14 +174,5 @@ public class CashItemFactory {
 
     public final int[] getBestItems() {
         return bestItems;
-    }
-
-    public final int getItemSN(int itemid) {
-        for (Map.Entry<Integer, CashItemInfo> ci : itemStats.entrySet()) {
-            if (ci.getValue().getId() == itemid) {
-                return ci.getValue().getSN();
-            }
-        }
-        return 0;
     }
 }

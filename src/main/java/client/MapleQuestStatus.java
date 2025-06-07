@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,13 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import constants.GameConstants;
-
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.io.Serializable;
-
 import java.util.Map.Entry;
-
 import server.life.MapleLifeFactory;
 import server.quest.MapleQuest;
 
@@ -48,12 +39,10 @@ public class MapleQuestStatus implements Serializable {
     private int forfeited = 0;
     private String customData;
 
-    /**
-     * Creates a new instance of MapleQuestStatus
-     */
+    /** Creates a new instance of MapleQuestStatus */
     public MapleQuestStatus(final MapleQuest quest, final int status) {
         this.quest = quest;
-        this.setStatus((byte) status);
+        this.setStatus((byte)status);
         this.completionTime = System.currentTimeMillis();
         if (status == 1) { // Started
             if (!quest.getRelevantMobs().isEmpty()) {
@@ -75,7 +64,7 @@ public class MapleQuestStatus implements Serializable {
     }
 
     public final void setQuest(int qid) {
-        this.quest = MapleQuest.getInstance(qid);
+	this.quest = MapleQuest.getInstance(qid);
     }
 
     public final MapleQuest getQuest() {
@@ -100,17 +89,17 @@ public class MapleQuestStatus implements Serializable {
 
 
     public boolean isCustom() {
-        return GameConstants.isCustomQuest(quest.getId());
+	return GameConstants.isCustomQuest(quest.getId());
     }
 
-    private final void registerMobs() {
-        killedMobs = new LinkedHashMap<Integer, Integer>();
+    private void registerMobs() {
+        killedMobs = new LinkedHashMap<>();
         for (final int i : quest.getRelevantMobs().keySet()) {
             killedMobs.put(i, 0);
         }
     }
 
-    private final int maxMob(final int mobid) {
+    private int maxMob(final int mobid) {
         for (final Map.Entry<Integer, Integer> qs : quest.getRelevantMobs().entrySet()) {
             if (qs.getKey() == mobid) {
                 return qs.getValue();
@@ -147,7 +136,7 @@ public class MapleQuestStatus implements Serializable {
         return false;
     }
 
-    private final boolean questCount(final int mo, final int id) {
+    private boolean questCount(final int mo, final int id) {
         if (MapleLifeFactory.getQuestCount(mo) != null) {
             for (int i : MapleLifeFactory.getQuestCount(mo)) {
                 if (i == id) {

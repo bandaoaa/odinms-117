@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.world;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class CheaterData implements Serializable, Comparable<CheaterData> {
 
@@ -47,6 +42,7 @@ public class CheaterData implements Serializable, Comparable<CheaterData> {
         return points;
     }
 
+    @Override
     public int compareTo(CheaterData o) {
         int thisVal = getPoints();
         int anotherVal = o.getPoints();
@@ -60,5 +56,13 @@ public class CheaterData implements Serializable, Comparable<CheaterData> {
         }
         final CheaterData obj = (CheaterData) oth;
         return obj.points == this.points && obj.info.equals(this.info);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 83 * hash + this.points;
+        hash = 83 * hash + Objects.hashCode(this.info);
+        return hash;
     }
 }

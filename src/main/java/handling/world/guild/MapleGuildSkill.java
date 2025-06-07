@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,10 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.world.guild;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-
 public class MapleGuildSkill implements java.io.Serializable {
 
     public static final long serialVersionUID = 3565477792055301248L;
@@ -39,9 +29,9 @@ public class MapleGuildSkill implements java.io.Serializable {
 
     public MapleGuildSkill(final int skillID, final int level, final long timestamp, final String purchaser, final String activator) {
         this.timestamp = timestamp;
-        this.skillID = skillID;
-        this.level = level;
-        this.purchaser = purchaser;
-        this.activator = activator;
+	this.skillID = skillID;
+	this.level = level;
+	this.purchaser = purchaser;
+	this.activator = activator;
     }
 }

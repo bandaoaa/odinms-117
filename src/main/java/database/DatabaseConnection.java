@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -32,10 +26,11 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import constants.ServerConstants;
-
 /**
- * @author Burblish
+ * All OdinMS servers maintain a Database Connection. This class therefore "singletonices" the connection per process.
+ * 
+ * 
+ * @author Frz
  */
 public class DatabaseConnection {
 
@@ -85,21 +80,21 @@ public class DatabaseConnection {
      */
     public static final int NO_GENERATED_KEYS = 2;
 
-    public static final Connection getConnection() {
+    public static Connection getConnection() {
         return con.get();
     }
 
-    public static final void closeAll() throws SQLException {
+    public static void closeAll() throws SQLException {
         for (final Connection con : DatabaseConnection.ThreadLocalConnection.allConnections) {
-            if (con != null) {
-                con.close();
-            }
+	    if (con != null) {
+            	con.close();
+	    }
         }
     }
 
     private static final class ThreadLocalConnection extends ThreadLocal<Connection> {
 
-        public static final Collection<Connection> allConnections = new LinkedList<Connection>();
+        public static final Collection<Connection> allConnections = new LinkedList<>();
 
         @Override
         protected final Connection initialValue() {
@@ -109,9 +104,7 @@ public class DatabaseConnection {
                 System.err.println("ERROR" + e);
             }
             try {
-                final Connection con = DriverManager.getConnection(
-                        "jdbc:mysql://" + ServerConstants.SQL_IP + ":" + ServerConstants.SQL_PORT + "/" + ServerConstants.SQL_DB + "?autoReconnect=true",
-                        ServerConstants.SQL_USER, ServerConstants.SQL_PASS);
+                  Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/v117?autoReconnect=true","root", "root");
                 allConnections.add(con);
                 return con;
             } catch (SQLException e) {

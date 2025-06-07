@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -29,14 +23,13 @@ package client.inventory;
 import client.MapleBuffStat;
 import client.MapleCharacter;
 import database.DatabaseConnection;
-import server.Randomizer;
-import tools.packet.CWvsContext;
-
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import server.Randomizer;
+import tools.packet.CWvsContext;
 
 public class MapleMount implements Serializable {
 
@@ -53,7 +46,7 @@ public class MapleMount implements Serializable {
         this.fatigue = fatigue;
         this.level = level;
         this.exp = exp;
-        this.owner = new WeakReference<MapleCharacter>(owner);
+        this.owner = new WeakReference<>(owner);
     }
 
     public void saveMount(final int charid) throws SQLException {
@@ -61,13 +54,13 @@ public class MapleMount implements Serializable {
             return;
         }
         Connection con = DatabaseConnection.getConnection();
-        PreparedStatement ps = con.prepareStatement("UPDATE mountdata set `Level` = ?, `Exp` = ?, `Fatigue` = ? WHERE characterid = ?");
-        ps.setByte(1, level);
-        ps.setInt(2, exp);
-        ps.setByte(3, fatigue);
-        ps.setInt(4, charid);
-        ps.executeUpdate();
-        ps.close();
+        try (PreparedStatement ps = con.prepareStatement("UPDATE mountdata set `Level` = ?, `Exp` = ?, `Fatigue` = ? WHERE characterid = ?")) {
+            ps.setByte(1, level);
+            ps.setInt(2, exp);
+            ps.setByte(3, fatigue);
+            ps.setInt(4, charid);
+            ps.executeUpdate();
+        }
     }
 
     public int getItemId() {
@@ -123,15 +116,15 @@ public class MapleMount implements Serializable {
     }
 
     public final boolean canTire(long now) {
-        return lastFatigue > 0 && lastFatigue + 30000 < now;
+	return lastFatigue > 0 && lastFatigue + 30000 < now;
     }
 
     public void startSchedule() {
-        lastFatigue = System.currentTimeMillis();
+	lastFatigue = System.currentTimeMillis();
     }
 
     public void cancelSchedule() {
-        lastFatigue = 0;
+	lastFatigue = 0;
     }
 
     public void increaseExp() {

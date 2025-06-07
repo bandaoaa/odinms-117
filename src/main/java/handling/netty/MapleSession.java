@@ -7,10 +7,10 @@ package handling.netty;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-
 import java.net.SocketAddress;
 
 /**
+ *
  * @author wubin
  */
 public class MapleSession {

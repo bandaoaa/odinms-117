@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -28,10 +22,10 @@ package client.status;
 
 
 import client.MapleCharacter;
+import java.lang.ref.WeakReference;
+import java.util.TimerTask;
 import server.life.MapleMonster;
 import server.life.MobSkill;
-
-import java.lang.ref.WeakReference;
 
 public class MonsterStatusEffect {
 
@@ -44,6 +38,8 @@ public class MonsterStatusEffect {
     private int poisonSchedule = 0;
     private boolean reflect = false;
     private long cancelTime = 0;
+    private long dotTime = 0;
+    private boolean newpoison = true;
 
     public MonsterStatusEffect(final MonsterStatus stat, final Integer x, final int skillId, final MobSkill mobskill, final boolean monsterSkill) {
         this.stati = stat;
@@ -59,7 +55,7 @@ public class MonsterStatusEffect {
         this.monsterSkill = monsterSkill;
         this.mobskill = mobskill;
         this.x = x;
-        this.reflect = reflect;
+	this.reflect = reflect;
     }
 
     public final MonsterStatus getStati() {
@@ -92,24 +88,24 @@ public class MonsterStatusEffect {
     }
 
     public final long getCancelTask() {
-        return this.cancelTime;
+	return this.cancelTime;
     }
 
     public final void setPoisonSchedule(final int poisonSchedule, MapleCharacter chrr) {
         this.poisonSchedule = poisonSchedule;
-        this.weakChr = new WeakReference<MapleCharacter>(chrr);
+	this.weakChr = new WeakReference<>(chrr);
     }
 
     public final int getPoisonSchedule() {
-        return this.poisonSchedule;
+	return this.poisonSchedule;
     }
 
     public final boolean shouldCancel(long now) {
-        return (cancelTime > 0 && cancelTime <= now);
+	return (cancelTime > 0 && cancelTime <= now);
     }
 
     public final void cancelTask() {
-        cancelTime = 0;
+	cancelTime = 0;
     }
 
     public final boolean isReflect() {
@@ -117,45 +113,85 @@ public class MonsterStatusEffect {
     }
 
     public final int getFromID() {
-        return weakChr == null || weakChr.get() == null ? 0 : weakChr.get().getId();
+	return weakChr == null || weakChr.get() == null ? 0 : weakChr.get().getId();
     }
 
     public final void cancelPoisonSchedule(MapleMonster mm) {
-        mm.doPoison(this, weakChr);
+	mm.doPoison(this, weakChr);
         this.poisonSchedule = 0;
-        this.weakChr = null;
+	this.weakChr = null;
     }
 
-    public final static int genericSkill(MonsterStatus stat) {
-        switch (stat) {
-            case STUN:
-                return 90001001;
-            case SPEED:
-                return 90001002;
-            case POISON:
-                return 90001003;
-            case DARKNESS:
-                return 90001004;
-            case SEAL:
-                return 90001005;
-            case FREEZE:
-                return 90001006;
-            case MAGIC_CRASH:
-                return 1111007;
-            case SHOWDOWN:
-                return 4121003;
-            case IMPRINT:
-                return 22161002;
-            case SHADOW_WEB:
-                return 4111003;
-            case BURN:
-                return 5211004;
-            case DOOM: //not used
-                return 2311005;
-            case NINJA_AMBUSH: //not used
-                return 4121004;
+    /*
+    中毒持續傷害相關內容
+    */
+    public WeakReference<MapleCharacter> getchr() {
+	return this.weakChr;
+    }
 
+    public void setDotTime(long duration) {
+	this.dotTime = duration;
+    }
+
+    public long getDotTime() {
+	return this.dotTime;
+    }
+
+    public void setnewpoison(boolean s) {
+	this.newpoison = s;
+    }
+
+    public void scheduledoPoison(final MapleMonster mon) {
+        final java.util.Timer timer = new java.util.Timer(true);
+        final long time = System.currentTimeMillis();
+        final MonsterStatusEffect eff = this;
+        if (newpoison) {
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                if (time + getDotTime() > System.currentTimeMillis() && mon.isAlive()) {
+
+                        setnewpoison(false);
+                        mon.doPoison(eff, weakChr);
+                    } else {
+                        setnewpoison(true);
+                        //cancelPoisonSchedule(mon);
+                        timer.cancel();
+                    }
+                }
+            };
+            timer.schedule(task, 0, 1000);
         }
-        return 0;
+    }
+
+    public static int genericSkill(MonsterStatus stat) {
+	switch(stat) {
+	    case STUN:
+		return 90001001;
+	    case SPEED:
+		return 90001002;
+	    case POISON:
+		return 90001003;
+	    case DARKNESS:
+		return 90001004;
+	    case SEAL:
+		return 90001005;
+	    case FREEZE:
+		return 90001006;
+	    case MAGIC_CRASH:
+		return 1111007; //防禦消除
+	    case SHOWDOWN:
+		return 4121003; //挑釁
+	    case IMPRINT:
+		return 22161002; //鬼神詛咒
+	    case SHADOW_WEB:
+		return 4111003; //影網術
+	    case BURN:
+		return 5211004; //火焰噴射(已經過時的技能)
+	    case DOOM: //not used
+		return 2311005;  //喚化術
+
+	}
+	return 0;
     }
 }

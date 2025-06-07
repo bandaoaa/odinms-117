@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,8 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import database.DatabaseConnection;
-import tools.packet.CWvsContext.BuddylistPacket;
-
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,6 +29,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import tools.packet.CWvsContext.BuddylistPacket;
 
 public class BuddyList implements Serializable {
 
@@ -49,13 +42,12 @@ public class BuddyList implements Serializable {
 
         BUDDYLIST_FULL, ALREADY_ON_LIST, OK
     }
-
     private static final long serialVersionUID = 1413738569L;
-    private Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<Integer, BuddylistEntry>();
-    private byte capacity;
+    private Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<>();
+    private int capacity;
     private boolean changed = false;
 
-    public BuddyList(byte capacity) {
+    public BuddyList(int capacity) {
         this.capacity = capacity;
     }
 
@@ -71,11 +63,11 @@ public class BuddyList implements Serializable {
         return ble.isVisible();
     }
 
-    public byte getCapacity() {
+    public int getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(byte capacity) {
+    public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
 
@@ -95,12 +87,12 @@ public class BuddyList implements Serializable {
 
     public void put(BuddylistEntry entry) {
         buddies.put(Integer.valueOf(entry.getCharacterId()), entry);
-        changed = true;
+	changed = true;
     }
 
     public void remove(int characterId) {
         buddies.remove(Integer.valueOf(characterId));
-        changed = true;
+	changed = true;
     }
 
     public Collection<BuddylistEntry> getBuddies() {
@@ -115,9 +107,9 @@ public class BuddyList implements Serializable {
         int buddyIds[] = new int[buddies.size()];
         int i = 0;
         for (BuddylistEntry ble : buddies.values()) {
-            if (ble.isVisible()) {
+	    if (ble.isVisible()) {
                 buddyIds[i++] = ble.getCharacterId();
-            }
+	    }
         }
         return buddyIds;
     }
@@ -132,14 +124,14 @@ public class BuddyList implements Serializable {
 
     public void loadFromDb(int characterId) throws SQLException {
         Connection con = DatabaseConnection.getConnection();
-        PreparedStatement ps = con.prepareStatement("SELECT b.buddyid, b.pending, c.name as buddyname, b.groupname FROM buddies as b, characters as c WHERE c.id = b.buddyid AND b.characterid = ?");
-        ps.setInt(1, characterId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            put(new BuddylistEntry(rs.getString("buddyname"), rs.getInt("buddyid"), rs.getString("groupname"), -1, rs.getInt("pending") != 1));
+        try (PreparedStatement ps = con.prepareStatement("SELECT b.buddyid, b.pending, c.name as buddyname, b.groupname FROM buddies as b, characters as c WHERE c.id = b.buddyid AND b.characterid = ?")) {
+            ps.setInt(1, characterId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                put(new BuddylistEntry(rs.getString("buddyname"), rs.getInt("buddyid"), rs.getString("groupname"), -1, rs.getInt("pending") != 1));
+            }
+            rs.close();
         }
-        rs.close();
-        ps.close();
     }
 
     public void addBuddyRequest(MapleClient c, int cidFrom, String nameFrom, int channelFrom, int levelFrom, int jobFrom) {
@@ -148,10 +140,10 @@ public class BuddyList implements Serializable {
     }
 
     public void setChanged(boolean v) {
-        this.changed = v;
+	this.changed = v;
     }
 
     public boolean changed() {
-        return changed;
+	return changed;
     }
 }

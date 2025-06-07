@@ -1,29 +1,3 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package client;
 
 public enum MapleStat {
@@ -56,11 +30,11 @@ public enum MapleStat {
     SENSE(0x8000000), // empathy, int
     CHARM(0x10000000), // int
     TRAIT_LIMIT(0x20000000), // 12 bytes
-    BATTLE_EXP(0x40000000), // byte, int, int
-    BATTLE_RANK(0x80000000L), // byte
-    BATTLE_POINTS(0x100000000L),
-    ICE_GAGE(0x200000000L),
-    VIRTUE(0x400000000L);
+	BATTLE_EXP(0x40000000), // int
+	BATTLE_RANK(0x80000000L), // byte
+	BATTLE_POINTS(0x100000000L),
+	ICE_GAGE(0x200000000L),
+	VIRTUE(0x400000000L);
 
     private final long i;
 
@@ -72,7 +46,7 @@ public enum MapleStat {
         return i;
     }
 
-    public static final MapleStat getByValue(final long value) {
+    public static MapleStat getByValue(final long value) {
         for (final MapleStat stat : MapleStat.values()) {
             if (stat.i == value) {
                 return stat;
@@ -95,8 +69,8 @@ public enum MapleStat {
         AVOID(0x200),
         SPEED(0x400), // byte
         JUMP(0x800), // byte
-        UNKNOWN(0x1000); // byte
-
+		UNKNOWN(0x1000); // byte
+		
         private final int i;
 
         private Temp(int i) {

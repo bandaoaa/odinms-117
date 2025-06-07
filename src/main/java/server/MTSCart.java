@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,35 +21,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server;
 
-import constants.GameConstants;
 import client.inventory.Item;
 import client.inventory.ItemLoader;
 import client.inventory.MapleInventoryType;
-
-import java.sql.Connection;
-
+import constants.GameConstants;
 import database.DatabaseConnection;
-
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import tools.Pair;
 
-public class MTSCart implements Serializable {
+public final class MTSCart implements Serializable {
 
     private static final long serialVersionUID = 231541893513373578L;
     private int characterId, tab = 1, type = 0, page = 0;
     //tab; 1 = buy now, 2 = wanted, 3 = auction, 4 = cart
     //type = inventorytype; 0 = anything
     //page = whatever
-    private List<Item> transfer = new ArrayList<Item>();
-    private List<Integer> cart = new ArrayList<Integer>();
-    private List<Integer> notYetSold = new ArrayList<Integer>(10);
-    private List<Integer> currentViewingItems = new ArrayList<Integer>();
+    private List<Item> transfer = new ArrayList<>();
+    private List<Integer> cart = new ArrayList<>();
+    private List<Integer> notYetSold = new ArrayList<>(10);
+    private List<Integer> currentViewingItems = new ArrayList<>();
     private int owedNX = 0;
 
     public MTSCart(int characterId) throws SQLException {
@@ -125,10 +116,10 @@ public class MTSCart implements Serializable {
     }
 
     public void save() throws SQLException {
-        List<Pair<Item, MapleInventoryType>> itemsWithType = new ArrayList<Pair<Item, MapleInventoryType>>();
+        List<Pair<Item, MapleInventoryType>> itemsWithType = new ArrayList<>();
 
         for (Item item : getInventory()) {
-            itemsWithType.add(new Pair<Item, MapleInventoryType>(item, GameConstants.getInventoryType(item.getItemId())));
+            itemsWithType.add(new Pair<>(item, GameConstants.getInventoryType(item.getItemId())));
         }
 
         ItemLoader.MTS_TRANSFER.saveItems(itemsWithType, characterId);
@@ -152,41 +143,41 @@ public class MTSCart implements Serializable {
     }
 
     public void loadCart() throws SQLException {
-        final PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("SELECT * FROM mts_cart WHERE characterid = ?");
-        ps.setInt(1, characterId);
-        final ResultSet rs = ps.executeQuery();
-        int iId;
-        while (rs.next()) {
-            iId = rs.getInt("itemid");
-            if (iId < 0) {
-                owedNX -= iId;
-            } else if (MTSStorage.getInstance().check(iId)) {
-                cart.add(iId);
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("SELECT * FROM mts_cart WHERE characterid = ?")) {
+            ps.setInt(1, characterId);
+            try (ResultSet rs = ps.executeQuery()) {
+                int iId;
+                while (rs.next()) {
+                    iId = rs.getInt("itemid");
+                    if (iId < 0) {
+                        owedNX -= iId;
+                    } else if (MTSStorage.getInstance().check(iId)) {
+                        cart.add(iId);
+                    }
+                }
             }
         }
-        rs.close();
-        ps.close();
     }
 
     public void loadNotYetSold() throws SQLException {
-        final PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("SELECT * FROM mts_items WHERE characterid = ?");
-        ps.setInt(1, characterId);
-        final ResultSet rs = ps.executeQuery();
-        int pId;
-        while (rs.next()) {
-            pId = rs.getInt("id");
-            if (MTSStorage.getInstance().check(pId)) {
-                notYetSold.add(pId);
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("SELECT * FROM mts_items WHERE characterid = ?")) {
+            ps.setInt(1, characterId);
+            try (ResultSet rs = ps.executeQuery()) {
+                int pId;
+                while (rs.next()) {
+                    pId = rs.getInt("id");
+                    if (MTSStorage.getInstance().check(pId)) {
+                        notYetSold.add(pId);
+                    }
+                }
             }
         }
-        rs.close();
-        ps.close();
     }
 
     public void changeInfo(final int tab, final int type, final int page) {
-        if (tab != this.tab || type != this.type) { //changed
-            refreshCurrentView(tab, type);
-        }
+	if (tab != this.tab || type != this.type) { //changed
+	    refreshCurrentView(tab, type);
+	}
         this.tab = tab;
         this.type = type;
         this.page = page;
@@ -205,45 +196,45 @@ public class MTSCart implements Serializable {
     }
 
     public List<Integer> getCurrentViewPage() {
-        final List<Integer> ret = new ArrayList<Integer>();
-        final int size = currentViewingItems.size() / 16 + (currentViewingItems.size() % 16 > 0 ? 1 : 0);
-        if (page > size) {
-            page = 0;
-        }
-        for (int i = page * 16; i < page * 16 + 16; i++) {
-            if (currentViewingItems.size() > i) {
-                ret.add(currentViewingItems.get(i));
-            } else {
-                break;
-            }
-        }
-        return ret;
+	final List<Integer> ret = new ArrayList<>();
+	final int size = currentViewingItems.size() / 16 + (currentViewingItems.size() % 16 > 0 ? 1 : 0);
+	if (page > size) {
+	    page = 0;
+	}
+	for (int i = page * 16; i < page * 16 + 16; i++) {
+	    if (currentViewingItems.size() > i) {
+		ret.add(currentViewingItems.get(i));
+	    } else {
+		break;
+	    }
+	}
+	return ret;
     }
 
     public List<Integer> getCurrentView() {
-        return currentViewingItems;
+	return currentViewingItems;
     }
 
 
     public void refreshCurrentView() {
-        refreshCurrentView(tab, type);
+	refreshCurrentView(tab, type);
     }
 
     public void refreshCurrentView(final int newTab, final int newType) {
-        currentViewingItems.clear();
-        if (newTab == 1) {
-            currentViewingItems = MTSStorage.getInstance().getBuyNow(newType);
-        } else if (newTab == 4) {
-            for (int i : cart) {
-                if (newType == 0 || (GameConstants.getInventoryType(i).getType() == newType)) {
-                    currentViewingItems.add(i);
-                }
-            }
-        }
+	currentViewingItems.clear();
+	if (newTab == 1) {
+	    currentViewingItems = MTSStorage.getInstance().getBuyNow(newType);
+	} else if (newTab == 4) {
+	    for (int i : cart) {
+		if (newType == 0 || (GameConstants.getInventoryType(i).getType() == newType)) {
+		    currentViewingItems.add(i);
+		}
+	    }
+	}
     }
 
     public void changeCurrentView(List<Integer> items) {
-        currentViewingItems.clear();
-        currentViewingItems = items;
+	currentViewingItems.clear();
+	currentViewingItems = items;
     }
 }

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -29,23 +23,22 @@ package client.status;
 import client.MapleDisease;
 import constants.GameConstants;
 import handling.Buffstat;
-
 import java.io.Serializable;
 
 public enum MonsterStatus implements Serializable, Buffstat {
 
-    WATK(0x1, 1),
-    WDEF(0x2, 1),
-    MATK(0x4, 1),
-    MDEF(0x8, 1),
-    ACC(0x10, 1),
+    WATK(0x1, 1), //物攻
+    WDEF(0x2, 1), //物防
+    MATK(0x4, 1), //魔攻
+    MDEF(0x8, 1), //魔防
+    ACC(0x10, 1), //命中
     AVOID(0x20, 1),
-    SPEED(0x40, 1),
-    STUN(0x80, 1),
-    FREEZE(0x100, 1),
-    POISON(0x200, 1),
-    SEAL(0x400, 1),
-    SHOWDOWN(0x800, 1),
+    SPEED(0x40, 1), //速度
+    STUN(0x80, 1), //眩暈
+    FREEZE(0x100, 1), //冰凍
+    POISON(0x200, 1), //中毒
+    SEAL(0x400, 1), //封印
+    SHOWDOWN(0x800, 1),//挑釁
     WEAPON_ATTACK_UP(0x1000, 1),
     WEAPON_DEFENSE_UP(0x2000, 1),
     MAGIC_ATTACK_UP(0x4000, 1),
@@ -55,7 +48,7 @@ public enum MonsterStatus implements Serializable, Buffstat {
     WEAPON_IMMUNITY(0x40000, 1),
     MAGIC_IMMUNITY(0x80000, 1),
     DAMAGE_IMMUNITY(0x200000, 1),
-    NINJA_AMBUSH(0x400000, 1),
+
     BURN(0x1000000, 1),
     DARKNESS(0x2000000, 1),
     HYPNOTIZE(0x10000000, 1),
@@ -64,7 +57,7 @@ public enum MonsterStatus implements Serializable, Buffstat {
     NEUTRALISE(0x2, 2), // first int on v.87 or else it won't work.
     IMPRINT(0x4, 2),
     MONSTER_BOMB(0x8, 2),
-    MAGIC_CRASH(0x10, 2),
+    MAGIC_CRASH(0x10, 2),  //魔防消除
     //speshul comes after
     EMPTY(0x8000000, 1, true),
     SUMMON(0x80000000, 1, true), //all summon bag mobs have.
@@ -74,8 +67,7 @@ public enum MonsterStatus implements Serializable, Buffstat {
     EMPTY_4(0x100, 2, GameConstants.GMS), //jump
     EMPTY_5(0x200, 2, GameConstants.GMS),
     EMPTY_6(0x400, 2, GameConstants.GMS),
-    EMPTY_7(0x2000, 2, GameConstants.GMS),
-    ;
+    EMPTY_7(0x2000, 2, GameConstants.GMS);
     static final long serialVersionUID = 0L;
     private final int i;
     private final int first;
@@ -93,6 +85,7 @@ public enum MonsterStatus implements Serializable, Buffstat {
         this.end = end;
     }
 
+    @Override
     public int getPosition() {
         return first;
     }
@@ -101,29 +94,13 @@ public enum MonsterStatus implements Serializable, Buffstat {
         return end;
     }
 
+    @Override
     public int getValue() {
         return i;
     }
 
-    public static final MonsterStatus getBySkill_Pokemon(final int skill) {
-        switch (skill) {
-            case 120:
-                return SEAL;
-            case 121:
-                return DARKNESS;
-            case 123:
-                return STUN;
-            case 125:
-                return POISON;
-            case 126:
-                return SPEED;
-            case 137:
-                return FREEZE;
-        }
-        return null;
-    }
 
-    public static final MapleDisease getLinkedDisease(final MonsterStatus skill) {
+    public static MapleDisease getLinkedDisease(final MonsterStatus skill) {
         switch (skill) {
             case STUN:
             case SHADOW_WEB:

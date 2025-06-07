@@ -12,6 +12,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 
 /**
+ *
  * @author wubin
  */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {

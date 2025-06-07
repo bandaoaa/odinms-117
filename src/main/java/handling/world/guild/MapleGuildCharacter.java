@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,12 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.world.guild;
 
 import client.MapleCharacter;
-import database.DatabaseConnection;
-import handling.channel.ChannelServer;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class MapleGuildCharacter implements java.io.Serializable { // alias for a character
 
@@ -53,7 +41,7 @@ public class MapleGuildCharacter implements java.io.Serializable { // alias for 
         jobid = c.getJob();
         guildrank = c.getGuildRank();
         guildid = c.getGuildId();
-        guildContribution = c.getGuildContribution();
+	guildContribution = c.getGuildContribution();
         allianceRank = c.getAllianceRank();
         online = true;
     }
@@ -70,7 +58,7 @@ public class MapleGuildCharacter implements java.io.Serializable { // alias for 
         this.online = on;
         this.guildrank = rank;
         this.allianceRank = allianceRank;
-        this.guildContribution = guildContribution;
+	this.guildContribution = guildContribution;
         this.guildid = gid;
     }
 
@@ -119,11 +107,11 @@ public class MapleGuildCharacter implements java.io.Serializable { // alias for 
     }
 
     public void setGuildContribution(int c) {
-        this.guildContribution = c;
+	this.guildContribution = c;
     }
 
     public int getGuildContribution() {
-        return guildContribution;
+	return guildContribution;
     }
 
     public boolean isOnline() {

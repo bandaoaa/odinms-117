@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -45,10 +39,11 @@ public class SpawnPointAreaBoss extends Spawns {
     private String msg;
 
     public SpawnPointAreaBoss(final MapleMonster monster, final Point pos1, final Point pos2, final Point pos3, final int mobTime, final String msg, final boolean shouldSpawn) {
+        if (monster != null) {
         this.monster = monster.getStats();
         this.id = monster.getId();
-        this.fh = monster.getFh();
-        this.f = monster.getF();
+	this.fh = monster.getFh();
+	this.f = monster.getF();
         this.pos1 = pos1;
         this.pos2 = pos2;
         this.pos3 = pos3;
@@ -56,13 +51,14 @@ public class SpawnPointAreaBoss extends Spawns {
         this.msg = msg;
         this.nextPossibleSpawn = System.currentTimeMillis() + (shouldSpawn ? 0 : this.mobTime);
     }
+    }
 
     public final int getF() {
-        return f;
+	return f;
     }
 
     public final int getFh() {
-        return fh;
+	return fh;
     }
 
     @Override
@@ -96,14 +92,14 @@ public class SpawnPointAreaBoss extends Spawns {
 
     @Override
     public final MapleMonster spawnMonster(final MapleMap map) {
-        final Point pos = getPosition();
+	final Point pos = getPosition();
         final MapleMonster mob = new MapleMonster(id, monster);
         mob.setPosition(pos);
-        mob.setCy(pos.y);
-        mob.setRx0(pos.x - 50);
-        mob.setRx1(pos.x + 50); //these dont matter for mobs
-        mob.setFh(fh);
-        mob.setF(f);
+	mob.setCy(pos.y);
+	mob.setRx0(pos.x - 50);
+	mob.setRx1(pos.x + 50); //these dont matter for mobs
+	mob.setFh(fh);
+	mob.setF(f);
         spawned.set(true);
         mob.addListener(new MonsterListener() {
 

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -28,7 +22,7 @@ package tools.data.input;
 
 /**
  * Represents an abstract stream of bytes.
- *
+ * 
  * @author Frz
  * @version 1.0
  * @since Revision 323
@@ -37,21 +31,18 @@ public interface ByteInputStream {
 
     /**
      * Reads the next byte off the stream.
-     *
      * @return The next byte as an integer.
      */
     int readByte();
 
     /**
      * Gets the number of bytes read from the stream.
-     *
      * @return The number of bytes as a long integer.
      */
     long getBytesRead();
 
     /**
      * Gets the number of bytes still left for reading.
-     *
      * @return The number of bytes as a long integer.
      */
     long available();

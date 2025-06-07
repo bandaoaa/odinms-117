@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2012 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,26 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling;
 
-import constants.ServerConstants;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
 import client.MapleClient;
-import client.inventory.Item;
 import client.inventory.MaplePet;
 import client.inventory.PetDataFactory;
 import constants.GameConstants;
+import constants.ServerConstants;
 import handling.cashshop.CashShopServer;
+import handling.cashshop.handler.CashShopOperation;
+import handling.cashshop.handler.MTSOperation;
 import handling.channel.ChannelServer;
-import handling.cashshop.handler.*;
 import handling.channel.handler.*;
 import handling.login.LoginServer;
-import handling.login.handler.*;
+import handling.login.handler.CharLoginHandler;
 import handling.netty.MaplePacketDecoder;
 import handling.netty.MapleSession;
 import io.netty.channel.ChannelHandlerContext;
@@ -53,28 +39,23 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import server.Randomizer;
-import tools.MapleAESOFB;
-import tools.packet.LoginPacket;
-import tools.data.ByteArrayByteStream;
-import tools.data.LittleEndianAccessor;
-import tools.Pair;
+import javax.management.*;
 
 import scripting.NPCScriptManager;
-import server.CashItemFactory;
-import server.CashItemInfo;
 import server.MTSStorage;
-import server.ServerProperties;
+import server.Randomizer;
 import tools.FileoutputUtil;
 import tools.HexTool;
+import tools.MapleAESOFB;
+import tools.Pair;
+import tools.data.ByteArrayByteStream;
+import tools.data.LittleEndianAccessor;
+import tools.packet.LoginPacket;
 import tools.packet.MTSCSPacket;
 
 public class MapleServerHandler extends ChannelInboundHandlerAdapter implements MapleServerHandlerMBean {
@@ -82,100 +63,20 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
     public static boolean Log_Packets = false;
     private int channel = -1;
     private static int numDC = 0;
-    private boolean cs;
     private static long lastDC = System.currentTimeMillis();
-
-    public static final boolean isSpamPacket(RecvPacketOpcode header) {
-        switch (header) {
-            case MOVE_LIFE:
-            case MOVE_PLAYER:
-            case MOVE_ANDROID:
-            case MOVE_DRAGON:
-            case MOVE_SUMMON:
-            case QUEST_ACTION:
-            case HEAL_OVER_TIME:
-            case CLIENT_HELLO:
-            case VIEW_SERVERLIST:
-            case USE_CHAIR:
-            case CHARLIST_REQUEST:
-            case LOGIN_PASSWORD:
-            case SERVERSTATUS_REQUEST:
-            case SERVERLIST_REQUEST:
-            case CLIENT_START:
-                return true;
-        }
-        return false;
-    }
-
-    private final List<String> BlockedIP = new ArrayList<String>();
-    private final Map<String, Pair<Long, Byte>> tracker = new ConcurrentHashMap<String, Pair<Long, Byte>>();
-    //Screw locking. Doesn't matter.
-//    private static final ReentrantReadWriteLock IPLoggingLock = new ReentrantReadWriteLock();
-    private static final String nl = System.getProperty("line.separator");
-    private static final File loggedIPs = new File("LogIPs.txt");
-    private static final HashMap<String, FileWriter> logIPMap = new HashMap<String, FileWriter>();
-    //Note to Zero: Use an enumset. Don't iterate through an array.
+    private boolean cs;
+    private final List<String> BlockedIP = new ArrayList<>();
+    private final Map<String, Pair<Long, Byte>> tracker = new ConcurrentHashMap<>();
     private static final EnumSet<RecvPacketOpcode> blocked = EnumSet.noneOf(RecvPacketOpcode.class), sBlocked = EnumSet.noneOf(RecvPacketOpcode.class);
 
-    public static void reloadLoggedIPs() {
-//        IPLoggingLock.writeLock().lock();
-//        try {
-        for (FileWriter fw : logIPMap.values()) {
-            if (fw != null) {
-                try {
-                    fw.write("=== Closing Log ===");
-                    fw.write(nl);
-                    fw.flush(); //Just in case.
-                    fw.close();
-                } catch (IOException ex) {
-                    System.out.println("Error closing Packet Log.");
-                    System.out.println(ex);
-                }
-            }
-        }
-        logIPMap.clear();
-        try {
-            Scanner sc = new Scanner(loggedIPs);
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine().trim();
-                if (line.length() > 0) {
-                    addIP(line);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Could not reload packet logged IPs.");
-            System.out.println(e);
-        }
-//        } finally {
-//            IPLoggingLock.writeLock().unlock();
-//        }
-    }
-    //Return the Filewriter if the IP is logged. Null otherwise.
+   
 
-    private static FileWriter isLoggedIP(ChannelHandlerContext ctx) {
-        String a = ctx.channel().remoteAddress().toString();
-        String realIP = a.substring(a.indexOf('/') + 1, a.indexOf(':'));
-        return logIPMap.get(realIP);
-    }
-
-    public static void addIP(String theIP) {
-        try {
-            FileWriter fw = new FileWriter(new File("logs/PacketLog_" + theIP + ".txt"), true);
-            fw.write("=== Creating Log ===");
-            fw.write(nl);
-            fw.flush();
-            logIPMap.put(theIP, fw);
-        } catch (IOException e) {
-            FileoutputUtil.outputFileError(FileoutputUtil.PacketEx_Log, e);
-        }
-
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="Packet Log Implementation">
+ 
+// <editor-fold defaultstate="collapsed" desc="Packet Log Implementation">
     private static final int Log_Size = 10000, Packet_Log_Size = 25;
-    private static final ArrayList<LoggedPacket> Packet_Log = new ArrayList<LoggedPacket>(Log_Size);
+    private static final ArrayList<LoggedPacket> Packet_Log = new ArrayList<>(Log_Size);
     private static final ReentrantReadWriteLock Packet_Log_Lock = new ReentrantReadWriteLock();
-    private static String Packet_Log_Output = "Packet/PacketLog";
+    private static String Packet_Log_Output = "/var/www/logs/";
     private static int Packet_Log_Index = 0;
 
     public static void log(String packet, String op, MapleClient c, ChannelHandlerContext ctx) {
@@ -246,12 +147,12 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             MapleServerHandler mbean = new MapleServerHandler();
             //The log is a static object, so we can just use this hacky method.
             mBeanServer.registerMBean(mbean, new ObjectName("handling:type=MapleServerHandler"));
-        } catch (Exception e) {
+        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
             System.out.println("Error registering PacketLog MBean");
-            e.printStackTrace();
         }
     }
 
+    @Override
     public void writeLog() {
         writeLog(false);
     }
@@ -259,18 +160,18 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
     public void writeLog(boolean crash) {
         Packet_Log_Lock.readLock().lock();
         try {
-            FileWriter fw = new FileWriter(new File(Packet_Log_Output + Packet_Log_Index + (crash ? "_DC.txt" : ".txt")), true);
-            String nl = System.getProperty("line.separator");
-            for (LoggedPacket loggedPacket : Packet_Log) {
-                fw.write(loggedPacket.toString());
+            try (FileWriter fw = new FileWriter(new File(Packet_Log_Output + Packet_Log_Index + (crash ? "_DC.txt" : ".txt")), true)) {
+                String nl = System.getProperty("line.separator");
+                for (LoggedPacket loggedPacket : Packet_Log) {
+                    fw.write(loggedPacket.toString());
+                    fw.write(nl);
+                }
+                final String logString = "Log has been written at " + lastDC + " [" + FileoutputUtil.CurrentReadable_Time() + "] - " + numDC + " have disconnected, within " + (System.currentTimeMillis() - lastDC) + " milliseconds. (" + System.currentTimeMillis() + ")";
+                System.out.println(logString);
+                fw.write(logString);
                 fw.write(nl);
+                fw.flush();
             }
-            final String logString = "Log has been written at " + lastDC + " [" + FileoutputUtil.CurrentReadable_Time() + "] - " + numDC + " have disconnected, within " + (System.currentTimeMillis() - lastDC) + " milliseconds. (" + System.currentTimeMillis() + ")";
-            System.out.println(logString);
-            fw.write(logString);
-            fw.write(nl);
-            fw.flush();
-            fw.close();
             Packet_Log.clear();
             Packet_Log_Index++;
             if (Packet_Log_Index > Packet_Log_Size) {
@@ -285,26 +186,26 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
 
     }
 
-//    public static final void initiate() {
-//        reloadLoggedIPs();
-//        RecvPacketOpcode[] block = new RecvPacketOpcode[]{RecvPacketOpcode.NPC_ACTION, RecvPacketOpcode.MOVE_PLAYER, RecvPacketOpcode.PONG, RecvPacketOpcode.MOVE_PET, RecvPacketOpcode.MOVE_SUMMON, RecvPacketOpcode.MOVE_DRAGON, RecvPacketOpcode.MOVE_LIFE, RecvPacketOpcode.MOVE_ANDROID, RecvPacketOpcode.HEAL_OVER_TIME, RecvPacketOpcode.STRANGE_DATA, RecvPacketOpcode.AUTO_AGGRO, RecvPacketOpcode.CANCEL_DEBUFF, RecvPacketOpcode.MOVE_FAMILIAR};
-//        RecvPacketOpcode[] serverBlock = new RecvPacketOpcode[]{RecvPacketOpcode.CHANGE_KEYMAP, RecvPacketOpcode.ITEM_PICKUP, RecvPacketOpcode.PET_LOOT, RecvPacketOpcode.TAKE_DAMAGE, RecvPacketOpcode.FACE_EXPRESSION, RecvPacketOpcode.USE_ITEM, RecvPacketOpcode.CLOSE_RANGE_ATTACK, RecvPacketOpcode.MAGIC_ATTACK, RecvPacketOpcode.RANGED_ATTACK, RecvPacketOpcode.ARAN_COMBO, RecvPacketOpcode.SPECIAL_MOVE, RecvPacketOpcode.GENERAL_CHAT, RecvPacketOpcode.MONSTER_BOMB, RecvPacketOpcode.PASSIVE_ENERGY, RecvPacketOpcode.PET_AUTO_POT, RecvPacketOpcode.USE_CASH_ITEM, RecvPacketOpcode.PARTYCHAT, RecvPacketOpcode.CANCEL_BUFF, RecvPacketOpcode.SKILL_EFFECT, RecvPacketOpcode.CHAR_INFO_REQUEST, RecvPacketOpcode.ALLIANCE_OPERATION, RecvPacketOpcode.AUTO_ASSIGN_AP, RecvPacketOpcode.DISTRIBUTE_AP, RecvPacketOpcode.USE_MAGNIFY_GLASS, RecvPacketOpcode.SPAWN_PET, RecvPacketOpcode.SUMMON_ATTACK, RecvPacketOpcode.ITEM_MOVE, RecvPacketOpcode.PARTY_SEARCH_STOP};
-//        blocked.addAll(Arrays.asList(block));
-//        sBlocked.addAll(Arrays.asList(serverBlock));
-//        if (Log_Packets) {
-//            for (int i = 1; i <= Packet_Log_Size; i++) {
-//                if (!(new File(Packet_Log_Output + i + ".txt")).exists() && !(new File(Packet_Log_Output + i + "_DC.txt")).exists()) {
-//                    Packet_Log_Index = i;
-//                    break;
-//                }
-//            }
-//            if (Packet_Log_Index <= 0) { //25+ files, do not log
-//                Log_Packets = false;
-//            }
-//        }
-//
-//        registerMBean();
-//    }
+    public static void initiate() {
+        //RecvPacketOpcode[] block = new RecvPacketOpcode[]{RecvPacketOpcode.NPC_ACTION, RecvPacketOpcode.MOVE_PLAYER, RecvPacketOpcode.PONG, RecvPacketOpcode.MOVE_PET, RecvPacketOpcode.MOVE_SUMMON, RecvPacketOpcode.MOVE_DRAGON, RecvPacketOpcode.MOVE_LIFE, RecvPacketOpcode.MOVE_ANDROID, RecvPacketOpcode.HEAL_OVER_TIME, RecvPacketOpcode.AUTO_AGGRO, RecvPacketOpcode.CANCEL_DEBUFF, RecvPacketOpcode.MOVE_FAMILIAR};
+    //    RecvPacketOpcode[] serverBlock = new RecvPacketOpcode[]{RecvPacketOpcode.CHANGE_KEYMAP, RecvPacketOpcode.ITEM_PICKUP, RecvPacketOpcode.PET_LOOT, RecvPacketOpcode.TAKE_DAMAGE, RecvPacketOpcode.FACE_EXPRESSION, RecvPacketOpcode.USE_ITEM, RecvPacketOpcode.CLOSE_RANGE_ATTACK, RecvPacketOpcode.MAGIC_ATTACK, RecvPacketOpcode.RANGED_ATTACK, RecvPacketOpcode.ARAN_COMBO, RecvPacketOpcode.SPECIAL_MOVE, RecvPacketOpcode.GENERAL_CHAT, RecvPacketOpcode.MONSTER_BOMB, RecvPacketOpcode.PASSIVE_ENERGY, RecvPacketOpcode.PET_AUTO_POT, RecvPacketOpcode.USE_CASH_ITEM, RecvPacketOpcode.PARTYCHAT, RecvPacketOpcode.CANCEL_BUFF, RecvPacketOpcode.SKILL_EFFECT, RecvPacketOpcode.CHAR_INFO_REQUEST, RecvPacketOpcode.ALLIANCE_OPERATION, RecvPacketOpcode.AUTO_ASSIGN_AP, RecvPacketOpcode.DISTRIBUTE_AP, RecvPacketOpcode.USE_MAGNIFY_GLASS, RecvPacketOpcode.SPAWN_PET, RecvPacketOpcode.SUMMON_ATTACK, RecvPacketOpcode.ITEM_MOVE, RecvPacketOpcode.PARTY_SEARCH_STOP};
+     //   blocked.addAll(Arrays.asList(block));
+    //    sBlocked.addAll(Arrays.asList(serverBlock));
+        if (Log_Packets) {
+            for (int i = 1; i <= Packet_Log_Size; i++) {
+                if (!(new File(Packet_Log_Output + i + ".txt")).exists() && !(new File(Packet_Log_Output + i + "_DC.txt")).exists()) {
+                    Packet_Log_Index = i;
+                    break;
+                }
+            }
+           // if (Packet_Log_Index <= 0) { //25+ files, do not log
+           //     Log_Packets = false;
+         //   }
+        }
+
+        registerMBean();
+    }
+
     public MapleServerHandler() {
         //ONLY FOR THE MBEAN
     }
@@ -328,6 +229,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
+        // Start of IP checking
         final String address = ctx.channel().remoteAddress().toString().split(":")[0];
 
         if (BlockedIP.contains(address)) {
@@ -355,12 +257,29 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 return;
             }
         }
-        tracker.put(address, new Pair<Long, Byte>(System.currentTimeMillis(), count));
+        tracker.put(address, new Pair<>(System.currentTimeMillis(), count));
         // End of IP checking.
         String IP = address.substring(address.indexOf('/') + 1, address.length());
-        if (LoginServer.isShutdown()) {
-            ctx.channel().close();
-            return;
+        if (channel > -1) {
+            if (ChannelServer.getInstance(channel).isShutdown()) {
+                ctx.channel().close();
+                return;
+            }
+            if (!LoginServer.containsIPAuth(IP)) {
+                ctx.channel().close();
+                return;
+            }
+
+        } else if (cs) {
+            if (CashShopServer.isShutdown()) {
+                ctx.channel().close();
+                return;
+            }
+        } else {
+            if (LoginServer.isShutdown()) {
+                ctx.channel().close();
+                return;
+            }
         }
         LoginServer.removeIPAuth(IP);
         final byte ivRecv[] = new byte[]{(byte) Randomizer.nextInt(255), (byte) Randomizer.nextInt(255), (byte) Randomizer.nextInt(255), (byte) Randomizer.nextInt(255)};
@@ -370,30 +289,25 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 new MapleAESOFB(ivSend, (short) (0xFFFF - ServerConstants.MAPLE_VERSION)), // Sent Cypher
                 new MapleAESOFB(ivRecv, ServerConstants.MAPLE_VERSION), // Recv Cypher
                 new MapleSession(ctx.channel()));
-        client.setChannel(-1);
+        client.setChannel(channel);
 
         MaplePacketDecoder.DecoderState decoderState = new MaplePacketDecoder.DecoderState();
         ctx.channel().attr(MaplePacketDecoder.DECODER_STATE_KEY).set(decoderState);
 
+
         ctx.writeAndFlush(LoginPacket.getHello(ServerConstants.MAPLE_VERSION, ivSend, ivRecv));
-        //System.out.println("GETHELLO SENT TO " + address);
 
         ctx.channel().attr(MapleClient.CLIENT_KEY).set(client);
 
-//        if (ServerConstants.Use_Localhost) {
-//            RecvPacketOpcode.reloadValues();
-//            SendPacketOpcode.reloadValues();
-//        }
-        if (LoginServer.isLogIP()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("IP Logged In: ").append(address);
-            System.out.println(sb.toString());
+        StringBuilder sb = new StringBuilder();
+        if (channel > -1) {
+            sb.append(address).append("[Channel Server] Attempting to connect to the channel server.");
+        } else if (cs) {
+            sb.append(address).append("[Cash Server] Attempting to connect to Maple Valley Mall server.");
+        } else {
+            sb.append(address).append("[Login Server] Attempting to connect to the world server.");
         }
-
-        FileWriter fw = isLoggedIP(ctx);
-        if (fw != null) {
-            client.setMonitored(true);
-        }
+        System.out.println(sb.toString());
     }
 
     @Override
@@ -402,14 +316,14 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
 
         if (client != null) {
             byte state = MapleClient.CHANGE_CHANNEL;
-            if (Log_Packets && !LoginServer.isShutdown() && client.getPlayer() != null) {
+            if (Log_Packets && !LoginServer.isShutdown() && !cs && channel > -1) {
                 state = client.getLoginState();
             }
             if (state != MapleClient.CHANGE_CHANNEL) {
                 log("Data: " + numDC, "CLOSED", client, ctx);
-                if (System.currentTimeMillis() - lastDC < 60000) { //within the minute
+                if (System.currentTimeMillis() - lastDC < 600000) { //within the minute
                     numDC++;
-                    if (numDC > 100) { //100+ people have dc'd in minute in channelserver
+                    if (numDC >= 1) { //100+ people have dc'd in minute in channelserver
                         System.out.println("Writing log...");
                         writeLog();
                         numDC = 0;
@@ -421,14 +335,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 }
             }
             try {
-                FileWriter fw = isLoggedIP(ctx);
-                if (fw != null) {
-                    fw.write("=== Session Closed ===");
-                    fw.write(nl);
-                    fw.flush();
-                }
-
-                client.disconnect(true, true);
+                client.disconnect(true, cs);
             } finally {
                 ctx.channel().close();
                 ctx.channel().attr(MapleClient.CLIENT_KEY).set(null);
@@ -465,9 +372,12 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
         }
         final short header_num = slea.readShort();
 
-        // final StringBuilder sb = new StringBuilder("Received data :\n");
-        // sb.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
-        //System.out.println(sb.toString());
+   
+   // final StringBuilder sb = new StringBuilder("Received data :\n");
+  //  sb.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
+
+    //System.out.println(sb.toString());
+
         for (final RecvPacketOpcode recv : RecvPacketOpcode.values()) {
             if (recv.getValue() == header_num) {
                 if (recv.NeedsChecking()) {
@@ -476,40 +386,15 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                     }
                 }
                 try {
-                    if (c.getPlayer() != null && c.isMonitored() && !blocked.contains(recv)) {
-                        FileWriter fw = new FileWriter(new File("MonitorLogs/" + c.getPlayer().getName() + "_log.txt"), true);
-                        fw.write(String.valueOf(recv) + " (" + Integer.toHexString(header_num) + ") Handled: \r\n" + slea.toString() + "\r\n");
-                        fw.flush();
-                        fw.close();
-                    }
                     //no login packets
-                    if (Log_Packets && !blocked.contains(recv) && !sBlocked.contains(recv) && c.getPlayer() != null) {
+                    if (Log_Packets && !blocked.contains(recv) && !sBlocked.contains(recv) && (cs || channel > -1)) {
                         log(slea.toString(), recv.toString(), c, ctx);
                     }
-                    handlePacket(recv, slea, c);
+                    handlePacket(recv, slea, c, cs);
                     //Log after the packet is handle. You'll see why =]
-                    FileWriter fw = isLoggedIP(ctx);
-                    if (fw != null && !blocked.contains(recv)) {
-                        if (recv == RecvPacketOpcode.PLAYER_LOGGEDIN && c != null) { // << This is why. Win.
-                            fw.write(">> [AccountName: "
-                                    + (c.getAccountName() == null ? "null" : c.getAccountName()) + "] | [IGN: "
-                                    + (c.getPlayer() == null || c.getPlayer().getName() == null ? "null" : c.getPlayer().getName()) + "] | [Time: "
-                                    + FileoutputUtil.CurrentReadable_Time() + "]");
-                            fw.write(nl);
-                        }
-                        fw.write("[" + recv.toString() + "]" + slea.toString(true));
-                        fw.write(nl);
-                        fw.flush();
-                    }
-                } catch (NegativeArraySizeException e) {
+                } catch (NegativeArraySizeException | ArrayIndexOutOfBoundsException e) {
                     //swallow, no one cares
-                    if (ServerConstants.Use_Localhost) {
-                        FileoutputUtil.outputFileError(FileoutputUtil.PacketEx_Log, e);
-                        FileoutputUtil.log(FileoutputUtil.PacketEx_Log, "Packet: " + header_num + "\n" + slea.toString(true));
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    //swallow, no one cares
-                    if (ServerConstants.Use_Localhost) {
+                    if (!ServerConstants.Use_Fixed_IV) {
                         FileoutputUtil.outputFileError(FileoutputUtil.PacketEx_Log, e);
                         FileoutputUtil.log(FileoutputUtil.PacketEx_Log, "Packet: " + header_num + "\n" + slea.toString(true));
                     }
@@ -521,42 +406,22 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 return;
             }
         }
-        //final StringBuilder sb = new StringBuilder("Received data : (Unhandled)\n");
-        //sb.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
-        //System.out.println(sb.toString());
+    //  final StringBuilder sbd = new StringBuilder("Received data : (Unhandled)\n");
+      //sbd.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
+      //System.out.println(sbd.toString());
     }
 
-    public static final void handlePacket(final RecvPacketOpcode header, final LittleEndianAccessor slea, final MapleClient c) throws Exception {
-        if (Boolean.parseBoolean(ServerProperties.getProperty("net.sf.odinms.world.logpackets")) && !isSpamPacket(header)) {
-            System.out.println("Packet Used: " + header.name() + " Decimal Vaule: " + header.getValue() + " Hex Value: " + HexTool.getOpcodeToString(header.getValue()));
-        }
+    public static void handlePacket(final RecvPacketOpcode header, final LittleEndianAccessor slea, final MapleClient c, final boolean cs) throws Exception {
         switch (header) {
             case PONG:
                 c.pongReceived();
                 break;
-            case STRANGE_DATA:
-                // Does nothing for now, HackShield's heartbeat
-                break;
-            case UPDATE_RED_LEAF:
-                PlayersHandler.updateRedLeafHigh(slea, c);
-                break;
             case LOGIN_PASSWORD:
                 CharLoginHandler.login(slea, c);
                 break;
-            case SEND_ENCRYPTED:
-                //if (c.isLocalhost()) {
-                //    CharLoginHandler.login(slea, c);
-                //} else {
-                //    c.getSession().write(LoginPacket.getCustomEncryption());
-                //}
-                break;
             case CLIENT_START:
-                if (c.isLocalhost()) {
-                    CharLoginHandler.login(slea, c);
-                }
-                break;
             case CLIENT_FAILED:
-//                c.getSession().write(LoginPacket.getCustomEncryption());
+                // c.getSession().write(LoginPacket.getCustomEncryption());
                 break;
             case VIEW_SERVERLIST:
                 if (slea.readByte() == 0) {
@@ -595,28 +460,33 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 CharLoginHandler.ViewChar(slea, c);
                 break;
             case PICK_ALL_CHAR:
+                //System.out.println("PICK_ALL_CHAR");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, false, true);
                 break;
             case CHAR_SELECT_NO_PIC:
+               // System.out.println("CHAR_SELECT_NO_PIC");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, false, false);
                 break;
             case VIEW_REGISTER_PIC:
+              //  System.out.println("VIEW_REGISTER_PIC");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, true, true);
                 break;
             case CHAR_SELECT:
+               // System.out.println("CHAR_SELECT");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, true, false);
                 break;
             case VIEW_SELECT_PIC:
+               // System.out.println("VIEW_SELECT_PIC");
                 CharLoginHandler.Character_WithSecondPassword(slea, c, true);
                 break;
             case AUTH_SECOND_PASSWORD:
+               // System.out.println("AUTH_SECOND_PASSWORD");
                 CharLoginHandler.Character_WithSecondPassword(slea, c, false);
                 break;
-            case CHARACTER_CARDS:
-                //CharLoginHandler.updateCCards(slea, c);
+            case CHARACTER_CARD:
+                CharLoginHandler.updateCCards(slea, c);
                 break;
             case CLIENT_ERROR:
-                System.out.println("Client error: " + slea.toString());
                 if (slea.available() < 8) {
                     return;
                 }
@@ -636,14 +506,10 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 short data_length = slea.readShort();
                 slea.skip(4); // ?B3 86 01 00 00 00 FF 00 00 00 00 00 9E 05 C8 FF 02 00 CD 05 C9 FF 7D 00 00 00 3F 00 00 00 00 00 02 77 01 00 25 06 C9 FF 7D 00 00 00 40 00 00 00 00 00 02 C1 02
                 short opcodeheader = slea.readShort();
-                FileoutputUtil.log("logs/ErrorCodes.txt", "Error Type: " + errortype + "\r\n" + "Data Length: " + data_length + "\r\n" + "Error for player ; " + c.getPlayer().getName() + " - account ; " + c.getAccountName() + "\r\n" + SendPacketOpcode.getOpcodeName(opcodeheader) + " Opcode: " + opcodeheader + "\r\n" + HexTool.toString(slea.read((int) slea.available())) + "\r\n MapID: " + c.getPlayer().getMapId() + "\r\n\r\n");
+                FileoutputUtil.log("ErrorCodes.txt","Error Type: " + errortype + "\r\n" + "Data Length: " + data_length + "\r\n" + "Character: " + c.getPlayer().getName() + " Map: " + c.getPlayer().getMap().getId() + " - Account: " + c.getAccountName() + "\r\n" + SendPacketOpcode.getOpcodeName(opcodeheader) + " Opcode: " + opcodeheader + "\r\n" + HexTool.toString(slea.read((int) slea.available())) + "\r\n\r\n");
                 break;
             case ENABLE_SPECIAL_CREATION:
                 c.getSession().write(LoginPacket.enableSpecialCreation(c.getAccID(), true));
-                break;
-            case RSA_KEY: // Fix this somehow
-                //c.getSession().write(LoginPacket.getLoginAUTH());
-                // c.getSession().write(LoginPacket.StrangeDATA());
                 break;
             // END OF LOGIN SERVER
             case CHANGE_CHANNEL:
@@ -652,10 +518,14 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 break;
             case PLAYER_LOGGEDIN:
                 final int playerid = slea.readInt();
-                InterServerHandler.Loggedin(playerid, c);
+                if (cs) {
+                    CashShopOperation.EnterCS(playerid, c);
+                } else {
+                    InterServerHandler.Loggedin(playerid, c);
+                }
                 break;
             case ENTER_PVP:
-            case ENTER_PVP_PARTY:
+            case ENTER_PVP_PARTY:               
                 PlayersHandler.EnterPVP(slea, c);
                 break;
             case PVP_RESPAWN:
@@ -670,25 +540,33 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case PVP_SUMMON:
                 SummonHandler.SummonPVP(slea, c);
                 break;
-            //case ENTER_AZWAN:
-            //  PlayersHandler.EnterAzwan(slea, c);
-            //  break;
             case ENTER_CASH_SHOP:
                 InterServerHandler.EnterCS(c, c.getPlayer(), false);
                 break;
             case ENTER_MTS:
                 InterServerHandler.EnterMTS(c, c.getPlayer());
-                //InterServerHandler.EnterCS(c, c.getPlayer(), true);
+              //  InterServerHandler.EnterCS(c, c.getPlayer(), true);
                 break;
             case MOVE_PLAYER:
                 PlayerHandler.MovePlayer(slea, c, c.getPlayer());
                 break;
             case CHAR_INFO_REQUEST:
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 PlayerHandler.CharInfoRequest(slea.readInt(), c, c.getPlayer());
                 break;
             case CLOSE_RANGE_ATTACK:
                 PlayerHandler.closeRangeAttack(slea, c, c.getPlayer(), false);
+                break;
+            case PART_TIME_JOB:
+                System.out.println("PTJ accessed");
+                CharLoginHandler.PartTimeJob(slea, c);
+                break;
+            case MAGIC_WHEEL:
+                InventoryHandler.UseMagicWheel(slea, c);
+                break;
+            case RESET_CORE_AURA:
+            case SOLIDIFY_CORE_AURA:
+                InventoryHandler.ResetCoreAura(slea.readInt(), c, c.getPlayer());
                 break;
             case RANGED_ATTACK:
                 PlayerHandler.rangedAttack(slea, c, c.getPlayer());
@@ -708,8 +586,15 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case MONSTER_BOOK_DROPS:
                 PlayersHandler.MonsterBookDropsRequest(slea, c, c.getPlayer());
                 break;
+            case YOUR_INFORMATION:
+                PlayersHandler.loadInfo(slea, c, c.getPlayer());
+                break;
+            case FIND_FRIEND: 
+                PlayersHandler.findFriend(slea, c, c.getPlayer());
+                break;
             case CHANGE_CODEX_SET:
-                PlayersHandler.ChangeSet(slea, c, c.getPlayer());
+                 // 41 = honor level up
+               PlayersHandler.ChangeSet(slea, c, c.getPlayer());
                 break;
             case PROFESSION_INFO:
                 ItemMakerHandler.ProfessionInfo(slea, c);
@@ -801,7 +686,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 PlayerHandler.QuickSlot(slea, c.getPlayer());
                 break;
             case MESO_DROP:
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 PlayerHandler.DropMeso(slea.readInt(), c.getPlayer());
                 break;
             case CHANGE_KEYMAP:
@@ -811,7 +696,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 // We handle this in MapleMap
                 break;
             case CHANGE_MAP:
-                if (c.getPlayer().getMap() == null) {
+                if (cs) {
                     CashShopOperation.LeaveCS(slea, c, c.getPlayer());
                 } else {
                     PlayerHandler.ChangeMap(slea, c, c.getPlayer());
@@ -856,13 +741,13 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case TOUCH_REACTOR:
                 PlayersHandler.TouchReactor(slea, c);
                 break;
-            case CLOSE_CHALKBOARD:
+            case CLOSE_CHALKBOARD: //小黑板
                 c.getPlayer().setChalkboard(null);
                 break;
             case ITEM_SORT:
                 InventoryHandler.ItemSort(slea, c);
                 break;
-            case ITEM_GATHER:
+            case ITEM_GATHER: //整理背包
                 InventoryHandler.ItemGather(slea, c);
                 break;
             case ITEM_MOVE:
@@ -878,6 +763,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 ItemMakerHandler.ItemMaker(slea, c);
                 break;
             case ITEM_PICKUP:
+              //  System.out.println("dddpickup");
                 InventoryHandler.Pickup_Player(slea, c, c.getPlayer());
                 break;
             case USE_CASH_ITEM:
@@ -904,7 +790,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case USE_ALIEN_SOCKET:
                 InventoryHandler.UseAlienSocket(slea, c);
                 break;
-            case USE_ALIEN_SOCKET_RESPONSE:
+           case USE_ALIEN_SOCKET_RESPONSE:
                 slea.skip(4); // all 0
                 c.getSession().write(MTSCSPacket.useAlienSocket(false));
                 break;
@@ -917,14 +803,17 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 InventoryHandler.UseNebuliteFusion(slea, c);
                 break;
             case USE_UPGRADE_SCROLL:
-                c.getPlayer().updateTick(slea.readInt());
-                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), slea.readShort(), c, c.getPlayer(), slea.readByte() > 0);
+                slea.readInt();
+                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), slea.readShort(), c, c.getPlayer(), slea.readByte() > 0, false);
                 break;
-            case USE_FLAG_SCROLL:
+            case USE_FLAG_SCROLL: //装备保护
+                slea.readInt();
+                InventoryHandler.UseProtectShield(slea, c);
+                break;
             case USE_POTENTIAL_SCROLL:
             case USE_EQUIP_SCROLL:
-                c.getPlayer().updateTick(slea.readInt());
-                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), (short) 0, c, c.getPlayer(), slea.readByte() > 0);
+                slea.readInt();
+                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), (short) 0, c, c.getPlayer(), slea.readByte() > 0, false);
                 break;
             case USE_SUMMON_BAG:
                 InventoryHandler.UseSummonBag(slea, c, c.getPlayer());
@@ -932,8 +821,11 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case USE_TREASUER_CHEST:
                 InventoryHandler.UseTreasureChest(slea, c, c.getPlayer());
                 break;
+            case USE_REMOTE:
+                CashShopOperation.UseGachapon(slea, c);
+                break;
             case USE_SKILL_BOOK:
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 InventoryHandler.UseSkillBook((byte) slea.readShort(), slea.readInt(), c, c.getPlayer());
                 break;
             case USE_CATCH_ITEM:
@@ -955,6 +847,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 MobHandler.DisplayNode(slea, c.getPlayer());
                 break;
             case MOVE_LIFE:
+               // System.out.println("ddd");
                 MobHandler.MoveMonster(slea, c, c.getPlayer());
                 break;
             case AUTO_AGGRO:
@@ -995,12 +888,12 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 break;
             case GENERAL_CHAT:
                 if (c.getPlayer() != null && c.getPlayer().getMap() != null) {
-                    c.getPlayer().updateTick(slea.readInt());
+                    slea.readInt();
                     ChatHandler.GeneralChat(slea.readMapleAsciiString(), slea.readByte(), c, c.getPlayer());
                 }
                 break;
             case PARTYCHAT:
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 ChatHandler.Others(slea, c, c.getPlayer());
                 break;
             case WHISPER:
@@ -1016,7 +909,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 StatsHandling.DistributeAP(slea, c, c.getPlayer());
                 break;
             case DISTRIBUTE_SP:
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 StatsHandling.DistributeSP(slea.readInt(), c, c.getPlayer());
                 break;
             case PLAYER_INTERACTION:
@@ -1065,18 +958,9 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case COUPON_CODE:
                 //FileoutputUtil.log(FileoutputUtil.PacketEx_Log, "Coupon : \n" + slea.toString(true));
                 //System.out.println(slea.toString());
-                //CashShopOperation.CouponCode(slea.readMapleAsciiString(), c);
-                //PAUL   c.getSession().write(MTSCSPacket.showOneADayInfo(true, 10003055));
+                CashShopOperation.CouponCode(slea.readMapleAsciiString(), c);
+                CashShopOperation.CouponCode(slea.readMapleAsciiString(), c);
                 CashShopOperation.doCSPackets(c);
-                break;
-            case TWIN_DRAGON_EGG:
-                System.out.println("TWIN_DRAGON_EGG: " + slea.toString());
-                final CashItemInfo item = CashItemFactory.getInstance().getItem(10003055);
-                Item itemz = c.getPlayer().getCashInventory().toItem(item);
-                //PAUL c.getSession().write(MTSCSPacket.sendTwinDragonEgg(true, true, 38, itemz, 1));
-                break;
-            case XMAS_SURPRISE:
-                System.out.println("XMAS_SURPRISE: " + slea.toString());
                 break;
             case CS_UPDATE:
                 CashShopOperation.CSUpdate(c);
@@ -1110,10 +994,14 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 SummonHandler.MoveSummon(slea, c.getPlayer());
                 break;
             case SUMMON_ATTACK:
+       //         c.getPlayer().dropMessage(5, "durr");
                 SummonHandler.SummonAttack(slea, c, c.getPlayer());
                 break;
             case MOVE_DRAGON:
                 SummonHandler.MoveDragon(slea, c.getPlayer());
+                break;
+            case DRAGON_FLY:
+                SummonHandler.DragonFly(slea, c.getPlayer());
                 break;
             case SUB_SUMMON:
                 SummonHandler.SubSummon(slea, c.getPlayer());
@@ -1133,11 +1021,11 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                     break;
                 }
                 final int petid = GameConstants.GMS ? c.getPlayer().getPetIndex((int) slea.readLong()) : slea.readInt();
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 PetHandler.PetChat(petid, slea.readShort(), slea.readMapleAsciiString(), c.getPlayer());
                 break;
             case PET_COMMAND:
-                MaplePet pet = null;
+                MaplePet pet;
                 if (GameConstants.GMS) {
                     pet = c.getPlayer().getPet(c.getPlayer().getPetIndex((int) slea.readLong()));
                 } else {
@@ -1153,11 +1041,13 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 PetHandler.PetFood(slea, c, c.getPlayer());
                 break;
             case PET_LOOT:
-                System.out.println("PET_LOOT ACCESSED");
                 InventoryHandler.Pickup_Pet(slea, c, c.getPlayer());
                 break;
             case PET_AUTO_POT:
                 PetHandler.Pet_AutoPotion(slea, c, c.getPlayer());
+                break;
+            case PET_AUTO_BUFF:
+                PetHandler.Pet_AutoBuff(slea, c, c.getPlayer());
                 break;
             case MONSTER_CARNIVAL:
                 MonsterCarnivalHandler.MonsterCarnival(slea, c);
@@ -1174,8 +1064,6 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case CANCEL_DEBUFF:
                 // Ignore for now
                 break;
-            case MAPLETV:
-                break;
             case LEFT_KNOCK_BACK:
                 PlayerHandler.leftKnockBack(slea, c);
                 break;
@@ -1190,9 +1078,6 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 break;
             case REPAIR_ALL:
                 NPCHandler.repairAll(c);
-                break;
-            case GAME_POLL:
-                UserInterfaceHandler.InGame_Poll(slea, c);
                 break;
             case OWL:
                 InventoryHandler.Owl(slea, c);
@@ -1212,8 +1097,11 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case USE_ITEM_QUEST:
                 NPCHandler.UseItemQuest(slea, c);
                 break;
+            case QUEST_ITEM:
+                NPCHandler.QuestItem(slea, c);
+                break;
             case FOLLOW_REQUEST:
-                PlayersHandler.FollowRequest(slea, c);
+              PlayersHandler.FollowRequest(slea, c);
                 break;
             case AUTO_FOLLOW_REPLY:
             case FOLLOW_REPLY:
@@ -1273,8 +1161,17 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case PAM_SONG:
                 InventoryHandler.PamSong(slea, c);
                 break;
+            case XMAS_SURPRISE:
+                CashShopOperation.CsSurprise(slea, c);
+                break;
+            case INNER_CIRCULATOR:
+                InventoryHandler.useInnerCirculator(slea, c);
+                break;
             case REPORT:
                 PlayersHandler.Report(slea, c);
+                break;
+            case TEACH_SKILL: //連結技能
+                PlayersHandler.TeachSkill(slea, c, c.getPlayer());
                 break;
             case SET_GENDER:
                 CharLoginHandler.SetGenderRequest(slea, c);
@@ -1282,27 +1179,17 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case CANCEL_OUT_SWIPE:
                 slea.readInt();
                 break;
-            case VIEW_SKILLS:
-                PlayersHandler.viewSkills(slea, c);
+            case EQUIP_STOLEN_SKILL:
+                PlayersHandler.UpdateEquippedSkills(slea, c, c.getPlayer());
                 break;
-            case USE_REMOTE:
-                CashShopOperation.UseGachapon(slea, c);
+            case UPDATE_STOLEN_SKILL:
+                PlayersHandler.UpdateStolenSkills(slea, c, c.getPlayer());
                 break;
-            case SKILL_SWIPE:
-                PlayersHandler.StealSkill(slea, c);
+            case SKILL_SWIPE_REQUEST:
+                 PlayersHandler.SkillSwipeRequest(slea, c, c.getPlayer());
                 break;
-            case CHOOSE_SKILL:
-                PlayersHandler.ChooseSkill(slea, c);
-                break;
-
-            case MAGIC_WHEEL:
-                System.out.println("[MAGIC_WHEEL] [" + slea.toString() + "]");
-                final byte mode = slea.readByte(); // 0 = open, 2 = start.
-                if (mode == 2) {
-                    final int idk = slea.readInt(); // 4? o.o
-                    final short toUseSlot = (short) slea.readInt();
-                    final int tokenId = slea.readInt();
-                }
+            case UPDATE_FRIENDSHIP_POINTS: //楓之高校積分
+                NPCHandler.UpdateFriendshipPoints(slea, c, c.getPlayer());
                 break;
             default:
                 System.out.println("[UNHANDLED] Recv [" + header.toString() + "] found");

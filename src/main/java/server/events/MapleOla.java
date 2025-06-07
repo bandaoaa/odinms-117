@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,14 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.events;
 
-import java.util.concurrent.ScheduledFuture;
-
 import client.MapleCharacter;
 import server.Randomizer;
-import server.Timer.EventTimer;
-import tools.packet.CField;
-import server.maps.MapleMap;
-import server.maps.SavedLocationType;
 
 public class MapleOla extends MapleSurvival { //survival/ola so similar.
     private int[] stages = new int[3];
@@ -42,13 +31,12 @@ public class MapleOla extends MapleSurvival { //survival/ola so similar.
     //stg3 = ch00-ch15 = 16 ports
 
     public MapleOla(final int channel, final MapleEventType type) {
-        super(channel, type);
+	super(channel,type);
     }
 
     @Override
     public void finished(final MapleCharacter chr) {
         givePrize(chr);
-        // chr.finishAchievement(21);
     }
 
     @Override
@@ -61,9 +49,9 @@ public class MapleOla extends MapleSurvival { //survival/ola so similar.
     public void unreset() {
         super.unreset();
         stages = new int[]{Randomizer.nextInt(5), Randomizer.nextInt(8), Randomizer.nextInt(15)};
-        if (stages[0] == 2) {
-            stages[0] = 3; //hack check; 2nd portal cant be access
-        }
+	if (stages[0] == 2) {
+	    stages[0] = 3; //hack check; 2nd portal cant be access
+	}
     }
 
     public boolean isCharCorrect(String portalName, int mapid) {

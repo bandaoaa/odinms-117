@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -24,18 +19,21 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package server.maps;
 
 import client.MapleCharacter;
 import client.MapleClient;
-
 import java.awt.Point;
-
 import tools.packet.CField;
 
 public class MechDoor extends MapleMapObject {
 
-    private int owner, partyid, id;
+    private int owner,partyid,id;
 
     public MechDoor(MapleCharacter owner, Point pos, int id) {
         super();

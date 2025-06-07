@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,16 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package tools;
 
+import constants.ServerConstants;
 import io.netty.buffer.ByteBuf;
-
 import java.io.ByteArrayOutputStream;
+
+
 
 /**
  * Provides a class for manipulating hexadecimal numbers.
  *
  * @author Frz
- * @version 1.0
  * @since Revision 206
+ * @version 1.0
  */
 public class HexTool {
 
@@ -47,17 +43,18 @@ public class HexTool {
      * @param byteValue The byte to convert.
      * @return The hexadecimal representation of <code>byteValue</code>
      */
-    public static final String toString(final byte byteValue) {
+    public static String toString(final byte byteValue) {
         final int tmp = byteValue << 8;
         char[] retstr = new char[]{HEX[(tmp >> 12) & 0x0F], HEX[(tmp >> 8) & 0x0F]};
         return String.valueOf(retstr);
     }
 
     /**
-     * Turns a <code>org.apache.mina.common.ByteBuffer</code> into a hexadecimal
-     * string.
+     * Turns a <code>org.apache.mina.common.ByteBuffer</code> into a
+     * hexadecimal string.
      *
-     * @param buf The <code>org.apache.mina.common.ByteBuffer</code> to convert.
+     * @param buf The <code>org.apache.mina.common.ByteBuffer</code> to
+     *            convert.
      * @return The hexadecimal representation of <code>buf</code>
      */
     public static final String toString(ByteBuf buf) {
@@ -74,7 +71,7 @@ public class HexTool {
      * @param intValue The integer to transform.
      * @return The hexadecimal representation of <code>intValue</code>.
      */
-    public static final String toString(final int intValue) {
+    public static String toString(final int intValue) {
         return Integer.toHexString(intValue);
     }
 
@@ -84,7 +81,7 @@ public class HexTool {
      * @param bytes The bytes to convert.
      * @return The hexadecimal representation of <code>bytes</code>
      */
-    public static final String toString(final byte[] bytes) {
+        public static String toString(final byte[] bytes) {
         StringBuilder hexed = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {
             hexed.append(toString(bytes[i]));
@@ -100,7 +97,7 @@ public class HexTool {
      * @param bytes The bytes to convert.
      * @return The ASCII hexadecimal representation of <code>bytes</code>
      */
-    public static final String toStringFromAscii(final byte[] bytes) {
+    public static String toStringFromAscii(final byte[] bytes) {
         char[] ret = new char[bytes.length];
         for (int x = 0; x < bytes.length; x++) {
             if (bytes[x] < 32 && bytes[x] >= 0) {
@@ -113,7 +110,7 @@ public class HexTool {
         return String.valueOf(ret);
     }
 
-    public static final String toPaddedStringFromAscii(final byte[] bytes) {
+    public static String toPaddedStringFromAscii(final byte[] bytes) {
         final String str = toStringFromAscii(bytes);
         StringBuilder ret = new StringBuilder(str.length() * 3);
         for (int i = 0; i < str.length(); i++) {
@@ -135,7 +132,7 @@ public class HexTool {
         int nextb = 0;
         boolean highoc = true;
         outer:
-        for (; ; ) {
+        for (;;) {
             int number = -1;
             while (number == -1) {
                 if (nexti == hex.length()) {
@@ -165,7 +162,7 @@ public class HexTool {
         return baos.toByteArray();
     }
 
-    public static final String getOpcodeToString(final int op) {
+    public static String getOpcodeToString(final int op) {
         return "0x" + StringUtil.getLeftPaddedStr(Integer.toHexString(op).toUpperCase(), '0', 4);
     }
 }

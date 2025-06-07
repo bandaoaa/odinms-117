@@ -1,42 +1,32 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
+ This file is part of the OdinMS Maple Story Server
+ Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
+ Matthias Butz <matze@odinms.de>
+ Jan Christian Meyer <vimes@odinms.de>
 
-Copyright (C) 2011 ~ 2012 TimelessMS
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License version 3
+ as published by the Free Software Foundation. You may not use, modify
+ or distribute this program under any other version of the
+ GNU Affero General Public License.
 
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel.handler;
 
 import client.*;
+import client.inventory.Equip;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
-import client.anticheat.CheatTracker;
-import client.anticheat.CheatingOffense;
-import client.anticheat.ReportType;
-import client.inventory.Equip;
 import client.inventory.MapleRing;
 import client.status.MonsterStatus;
 import constants.GameConstants;
-
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -45,25 +35,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import scripting.EventInstanceManager;
 import scripting.EventManager;
 import scripting.ReactorScriptManager;
-import server.events.MapleCoconut;
-import server.events.MapleCoconut.MapleCoconuts;
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
 import server.Randomizer;
+import server.events.MapleCoconut;
+import server.events.MapleCoconut.MapleCoconuts;
 import server.events.MapleEventType;
 import server.life.MapleMonsterInformationProvider;
 import server.life.MonsterDropEntry;
 import server.life.MonsterGlobalDropEntry;
-import server.maps.MapleDoor;
-import server.maps.MapleMapObject;
-import server.maps.MapleMist;
-import server.maps.MapleReactor;
-import server.maps.MechDoor;
+import server.maps.*;
 import server.quest.MapleQuest;
 import tools.AttackPair;
 import tools.FileoutputUtil;
@@ -92,7 +77,6 @@ public class PlayersHandler {
                     chr.sendNote(name, msg, fame ? 1 : 0);
                     chr.getCashInventory().sendedNote(itemz.getUniqueId());
                 } catch (Exception e) {
-                    e.printStackTrace();
                 }
                 break;
             case 1:
@@ -159,6 +143,123 @@ public class PlayersHandler {
         }
     }
 
+    /*
+    設定幻影已複製的技能
+    */
+    public static void UpdateEquippedSkills(LittleEndianAccessor slea, MapleClient c, MapleCharacter chr) {
+        if (!GameConstants.isPhantom(chr.getJob())) {
+            return;
+        }
+        int skillid = slea.readInt();
+        int equippedid = slea.readInt();
+        int slot = 0;
+        switch (skillid) {
+            case 24001001: //盜亦有道 Ⅰ
+                slot = 1;
+                break;
+            case 24101001: //盜亦有道 Ⅱ
+                slot = 2;
+                break;
+            case 24111001: //盜亦有道 Ⅲ
+                slot = 3;
+                break;
+            case 24121001: //盜亦有道 Ⅳ
+                slot = 4;
+        }
+        if (slot <= 0) {
+            return;
+        }
+        chr.unequipPhantomSkill(slot);
+
+        if (equippedid > 0) {
+            Skill base = SkillFactory.getSkill(skillid);
+            int skillLevel = chr.getSkillLevel(base);
+
+            Skill equip = SkillFactory.getSkill(equippedid);
+            int skillLevelE = chr.getSkillLevel(equip);
+
+            byte SkillSlot = chr.getSkillSlot(equip);
+
+            if ((!chr.isStolenSkill(equip)) || (!GameConstants.canBeStolen(equippedid)) || (SkillSlot < 0) || (skillLevel <= 0) || (skillLevelE <= 0) || (chr.getSkillExpiry(equip) != -1L) || (chr.getSkillExpiry(base) != -1L)) {
+                return;
+            }
+
+            chr.changeSingleSkillLevel(equip, skillLevelE, (byte) equip.getMasterLevel(), -1L, SkillSlot, (byte) slot);
+
+        }
+        c.getSession().write(CWvsContext.updateEquippedSkill(skillid, equippedid));
+
+    }
+
+    /*
+    新增和删除幻影複製的技能
+    */
+    public static void UpdateStolenSkills(LittleEndianAccessor slea, MapleClient c, MapleCharacter chr) {
+        int skillid = slea.readInt();
+        int targetid = slea.readInt();
+
+        boolean remove = slea.readByte() > 0;
+        MapleCharacter target = chr.getMap().getCharacterById(targetid);
+
+        if ((skillid == 0) || (!GameConstants.isPhantom(chr.getJob())) || ((remove) && (targetid > 0)) || ((!remove) && ((targetid != chr.getStealTarget()) || (target == null) || ((target.isGM()) && (!chr.isGM())) || (!GameConstants.isAdventurer(target.getJob())) || (GameConstants.isCannon(target.getJob())) || (GameConstants.isJett(target.getJob()))))) {
+            chr.setStealTarget(0);
+            c.getSession().write(CWvsContext.updateStolenSkills(1));
+            return;
+        }
+        Skill sx = SkillFactory.getSkill(skillid);
+        byte newSlot = chr.getNextStolenSlot(skillid);
+        int skillLevel = remove ? 1 : target.getSkillLevel(sx);
+        if ((skillLevel <= 0) || ((!remove) && ((target.getSkillExpiry(sx) != -1L) || (newSlot < 0) || (!GameConstants.canBeStolen(skillid, target.getJob())) || (skillid / 10000 % 10 > chr.getJob() % 10)))) {
+            chr.setStealTarget(0);
+            c.getSession().write(CWvsContext.updateStolenSkills(2));
+            return;
+        }
+
+        if (remove) {
+            byte oldSlot = chr.getSkillSlot(sx);
+            byte equipped = chr.getSkillEquipped(sx);
+
+            chr.removeStolenSkill(sx);
+
+            if (equipped > 0) {
+                chr.changeSingleSkillLevel(sx, chr.getSkillLevel(skillid), chr.getSkillLevel(skillid), -1, (byte) 0, (byte) 0);
+                c.getSession().write(CWvsContext.updateEquippedSkill(GameConstants.getPhantomBookSkill(equipped), 0));
+                c.getSession().write(CWvsContext.updateStolenSkills(3, skillid, 0, oldSlot));
+
+            } else {
+                chr.changeSingleSkillLevel(sx, chr.getSkillLevel(skillid), chr.getSkillLevel(skillid), -1, (byte) -1, (byte) -1);
+                c.getSession().write(CWvsContext.updateStolenSkills(3, skillid, 0, oldSlot));
+            }
+        } else {
+            chr.changeSingleSkillLevel(sx, skillLevel, (byte) sx.getMasterLevel(), -1L, newSlot, (byte) 0);
+            c.getSession().write(CWvsContext.updateStolenSkills(0, skillid, skillLevel, newSlot));
+        }
+        chr.setStealTarget(0);
+    }
+
+    /*
+    點擊玩家打開可以複製的技能介面
+    */
+    public static void SkillSwipeRequest(LittleEndianAccessor slea, MapleClient c, MapleCharacter chr) {
+        MapleCharacter target = chr.getMap().getCharacterById(slea.readInt());
+        if ((target == null) || ((target.isGM()) && (!chr.isGM())) || (!GameConstants.isAdventurer(target.getJob())) || (GameConstants.isCannon(target.getJob())) || (GameConstants.isJett(target.getJob())) || (!GameConstants.isPhantom(chr.getJob()))) {
+            c.getSession().write(CWvsContext.updateStolenSkills(1));
+            return;
+        }
+        chr.setStealTarget(target.getId());
+        List<Integer> skills = new ArrayList();
+        for (Map.Entry skill : target.getSkills().entrySet()) {
+            int skillid = ((Skill) skill.getKey()).getId();
+            if ((GameConstants.canBeStolen(skillid, target.getJob())) && (((SkillEntry) skill.getValue()).skillevel > 0) && (((SkillEntry) skill.getValue()).expiration == -1L)) {
+                MapleStatEffect stat = ((Skill) skill.getKey()).getEffect(1);
+                if ((stat != null)) {
+                    skills.add(Integer.valueOf(skillid));
+                }
+            }
+        }
+        c.getSession().write(CWvsContext.showTargetSkills(target.getId(), target.getJob(), skills));
+    }
+
     public static void UseMechDoor(final LittleEndianAccessor slea, final MapleCharacter chr) {
         final int oid = slea.readInt();
         final Point pos = slea.readPos();
@@ -179,7 +280,7 @@ public class PlayersHandler {
         // 11 00
         // A0 C0 21 00
         // 07 00 64 66 62 64 66 62 64
-        chr.updateTick(slea.readInt());
+        slea.readInt();
         final byte slot = (byte) slea.readShort();
         final int itemId = slea.readInt();
         final String target = slea.readMapleAsciiString();
@@ -225,7 +326,7 @@ public class PlayersHandler {
             ReactorScriptManager.getInstance().act(c, reactor); //not sure how touched boolean comes into play
         } else if (reactor.getTouch() == 1 && !reactor.isTimerActive()) {
             if (reactor.getReactorType() == 100) {
-                final int itemid = GameConstants.getCustomReactItem(reactor.getReactorId(), reactor.getReactItem().getLeft());
+                final int itemid = GameConstants.getCustomReactItem(reactor.getReactorId(), reactor.getReactItem().getLeft(), reactor.getMap().getId());
                 if (c.getPlayer().haveItem(itemid, reactor.getReactItem().getRight())) {
                     if (reactor.getArea().contains(c.getPlayer().getTruePosition())) {
                         MapleInventoryManipulator.removeById(c, GameConstants.getInventoryType(itemid), itemid, reactor.getReactItem().getRight(), true, false);
@@ -238,15 +339,21 @@ public class PlayersHandler {
                 }
             } else {
                 //just hit it
+                int id[] = {2001000, 2001001, 2006001, 2008000, 2008001, 2008004, 2008005, 2512001, 2519000, 2519001, 2519002, 2519003, 2618000, 2618001, 2618002, 3002000, 3009000, 9108000, 9108001, 9108002, 9108003, 9108004, 9108005, 9218000};
+                int item[] = {4001053, 4001053, 4001055, 4001046, 4001049, 4001048, 4001045, 4031437, 4001117, 4001117, 4001117, 4001117, 4001132, 4001133, 4001133, 4001161, 4001162, 4001453, 4001453, 4001453, 4001453, 4001453, 4001453, 4001528};
+                for (int i = 0; i < id.length; i++)
+                if (reactor.getReactorId() == id[i]) {
+                    int y = i;
+                    MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, item[i], 1, true, false);//觸發品扣除
+                }
                 reactor.hitReactor(c);
             }
         }
     }
 
     public static void hitCoconut(LittleEndianAccessor slea, MapleClient c) {
-        /*CB 00 A6 00 06 01
-         * A6 00 = coconut id
-         * 06 01 = ?
+        /*
+         * CB 00 A6 00 06 01 A6 00 = coconut id 06 01 = ?
          */
         int id = slea.readShort();
         String co = "coconut";
@@ -461,9 +568,10 @@ public class PlayersHandler {
 
     public static void Solomon(final LittleEndianAccessor slea, final MapleClient c) {
         c.getSession().write(CWvsContext.enableActions());
-        c.getPlayer().updateTick(slea.readInt());
+        slea.readInt();
         Item item = c.getPlayer().getInventory(MapleInventoryType.USE).getItem(slea.readShort());
         if (item == null || item.getItemId() != slea.readInt() || item.getQuantity() <= 0 || c.getPlayer().getGachExp() > 0 || c.getPlayer().getLevel() > 50 || MapleItemInformationProvider.getInstance().getItemEffect(item.getItemId()).getEXP() <= 0) {
+            c.getSession().write(CWvsContext.enableActions());
             return;
         }
         c.getPlayer().setGachExp(c.getPlayer().getGachExp() + MapleItemInformationProvider.getInstance().getItemEffect(item.getItemId()).getEXP());
@@ -473,66 +581,63 @@ public class PlayersHandler {
 
     public static void GachExp(final LittleEndianAccessor slea, final MapleClient c) {
         c.getSession().write(CWvsContext.enableActions());
-        c.getPlayer().updateTick(slea.readInt());
+        slea.readInt();
         if (c.getPlayer().getGachExp() <= 0) {
             return;
         }
-        c.getPlayer().gainExp(c.getPlayer().getGachExp() * GameConstants.getExpRate_Quest(c.getPlayer().getLevel()), true, true, false);
+        c.getPlayer().gainExp(c.getPlayer().getGachExp(), true, true, false);
         c.getPlayer().setGachExp(0);
         c.getPlayer().updateSingleStat(MapleStat.GACHAPONEXP, 0);
     }
 
+    /*
+    玩家舉報
+    */
     public static void Report(final LittleEndianAccessor slea, final MapleClient c) {
         //0 = success 1 = unable to locate 2 = once a day 3 = you've been reported 4+ = unknown reason
-        MapleCharacter other;
-        ReportType type;
-        if (!GameConstants.GMS) {
-            other = c.getPlayer().getMap().getCharacterById(slea.readInt());
-            type = ReportType.getById(slea.readByte());
-        } else {
-            type = ReportType.getById(slea.readByte());
-            other = c.getPlayer().getMap().getCharacterByName(slea.readMapleAsciiString());
-            //then,byte(?) and string(reason)
-        }
-        if (other == null || type == null || other.isIntern()) {
-            c.getSession().write(CWvsContext.report(4));
-            return;
-        }
-        final MapleQuestStatus stat = c.getPlayer().getQuestNAdd(MapleQuest.getInstance(GameConstants.REPORT_QUEST));
-        if (stat.getCustomData() == null) {
-            stat.setCustomData("0");
-        }
-        final long currentTime = System.currentTimeMillis();
-        final long theTime = Long.parseLong(stat.getCustomData());
-        if (theTime + 7200000 > currentTime && !c.getPlayer().isIntern()) {
-            c.getSession().write(CWvsContext.enableActions());
-            c.getPlayer().dropMessage(5, "You may only report every 2 hours.");
-        } else {
-            stat.setCustomData(String.valueOf(currentTime));
-            other.addReport(type);
-            c.getSession().write(CWvsContext.report(2));
-        }
+     /*
+         * MapleCharacter other; ReportType type; /* if (!GameConstants.GMS) {
+         * other = c.getPlayer().getMap().getCharacterById(slea.readInt()); type
+         * = ReportType.getById(slea.readByte()); } else { type =
+         * ReportType.getById(slea.readByte()); other =
+         * c.getPlayer().getMap().getCharacterByName(slea.readMapleAsciiString());
+         * //th
+         *
+         */
+        /*
+         * if (other == null || type == null || other.isIntern()) {
+         * c.getSession().write(CWvsContext.report(4)); return; } final
+         * MapleQuestStatus stat =
+         * c.getPlayer().getQuestNAdd(MapleQuest.getInstance(GameConstants.REPORT_QUEST));
+         * if (stat.getCustomData() == null) { stat.setCustomData("0"); } final
+         * long currentTime = System.currentTimeMillis(); final long theTime =
+         * Long.parseLong(stat.getCustomData()); if (theTime + 7200000 >
+         * currentTime && !c.getPlayer().isIntern()) {
+         * c.getSession().write(CWvsContext.enableActions());
+         * c.getPlayer().dropMessage(5, "You may only report every 2 hours."); }
+         * else { stat.setCustomData(String.valueOf(currentTime));
+         * other.addReport(type); c.getSession().write(CWvsContext.report(2));
+         */
+        // }
     }
 
-    public static final void MonsterBookInfoRequest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void MonsterBookInfoRequest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (c.getPlayer() == null || c.getPlayer().getMap() == null) {
             return;
         }
         slea.readInt(); // tick
         final MapleCharacter player = c.getPlayer().getMap().getCharacterById(slea.readInt());
         c.getSession().write(CWvsContext.enableActions());
-        if (player != null && !player.isClone()) {
-            if (!player.isGM() || c.getPlayer().isGM()) {
-                c.getSession().write(CWvsContext.getMonsterBookInfo(player));
-            }
+        if (player != null) {
+            c.getSession().write(CWvsContext.getMonsterBookInfo(player));
         }
     }
 
-    public static final void MonsterBookDropsRequest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void MonsterBookDropsRequest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (c.getPlayer() == null || c.getPlayer().getMap() == null) {
             return;
         }
-        chr.updateTick(slea.readInt()); // tick
+        slea.readInt();
         final int cardid = slea.readInt();
         final int mobid = MapleItemInformationProvider.getInstance().getCardMobId(cardid);
         if (mobid <= 0 || !chr.getMonsterBook().hasCard(cardid)) {
@@ -554,19 +659,59 @@ public class PlayersHandler {
         c.getSession().write(CWvsContext.getCardDrops(cardid, newDrops));
     }
 
-    public static final void ChangeSet(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void findFriend(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        byte boob = slea.readByte();
+        if (boob == 5) {
+            if (chr.getBIRTHDAY() == 0 && chr.getTODO() == 0 && chr.getLOCATION() == 0 && chr.getFOUND() == 0) {
+                c.getSession().write(CWvsContext.myInfoResult(0));
+            } else {
+                c.getSession().write(CWvsContext.myInfoResult(1));
+            }
+        } else if (boob == 7) {
+            List<MapleCharacter> frends = new LinkedList<>();
+            for (MapleCharacter mch : c.getChannelServer().getPlayerStorage().getAllCharacters()) {
+                if (mch.getId() != c.getPlayer().getId()) {
+                    frends.add(mch);
+                }
+
+            }
+            c.getSession().write(CWvsContext.findFriendResult(frends));
+        } else if (boob == 10) {
+            int cid = slea.readInt();
+            c.getSession().write(CWvsContext.friendCharacterInfo(c.getChannelServer().getPlayerStorage().getCharacterById(cid)));
+        }
+    }
+
+    public static void loadInfo(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        int boob = slea.readByte();
+        if (boob != 1) {
+            int location = slea.readInt();
+            int birthday = slea.readInt();
+            int todo = slea.readInt();
+            int found = slea.readInt();
+            chr.setBIRTHDAY(birthday);
+            chr.setTODO(todo);
+            chr.setFOUND(found);
+            chr.setLOCATION(location);
+            c.getSession().write(CWvsContext.saveInformation(false));
+        } else {
+            c.getSession().write(CWvsContext.loadInformation(chr.getLOCATION(), chr.getTODO(), chr.getBIRTHDAY(), chr.getFOUND()));
+        }
+    }
+
+    public static void ChangeSet(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (c.getPlayer() == null || c.getPlayer().getMap() == null) {
             return;
         }
         final int set = slea.readInt();
-        if (chr.getMonsterBook().changeSet(set)) {
-            chr.getMonsterBook().applyBook(chr, false);
-            chr.getQuestNAdd(MapleQuest.getInstance(GameConstants.CURRENT_SET)).setCustomData(String.valueOf(set));
-            c.getSession().write(CWvsContext.changeCardSet(set));
-        }
+        chr.getMonsterBook().changeSet(set);
+        chr.getMonsterBook().applyBook(chr, false);
+        chr.getQuestNAdd(MapleQuest.getInstance(GameConstants.CURRENT_SET)).setCustomData(String.valueOf(set));
+        c.getSession().write(CWvsContext.changeCardSet(set));
+
     }
 
-    public static final void EnterPVP(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void EnterPVP(final LittleEndianAccessor slea, final MapleClient c) {
         if (c.getPlayer() == null || c.getPlayer().getMap() == null || c.getPlayer().getMapId() != 960000000) {
             c.getSession().write(CField.pvpBlocked(1));
             c.getSession().write(CWvsContext.enableActions());
@@ -577,7 +722,7 @@ public class PlayersHandler {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-        c.getPlayer().updateTick(slea.readInt());
+        slea.readInt();
         slea.skip(1);
         int type = slea.readByte(), lvl = slea.readByte(), playerCount = 0;
         boolean passed = false;
@@ -601,7 +746,7 @@ public class PlayersHandler {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-        final List<Integer> maps = new ArrayList<Integer>();
+        final List<Integer> maps = new ArrayList<>();
         switch (type) {
             case 0:
                 maps.add(960010100);
@@ -649,17 +794,16 @@ public class PlayersHandler {
         em.startInstance_Solo(key.append(maps.get(Randomizer.nextInt(maps.size()))).toString(), c.getPlayer());
     }
 
-    public static final void RespawnPVP(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void RespawnPVP(final LittleEndianAccessor slea, final MapleClient c) {
         final Lock ThreadLock = new ReentrantLock();
-        /*if (c.getPlayer() == null || c.getPlayer().getMap() == null || !c.getPlayer().inPVP() || c.getPlayer().isAlive()) {
-        c.getSession().write(CWvsContext.enableActions());
-        return;
-        }*/
+        if (c.getPlayer() == null || c.getPlayer().getMap() == null || !c.getPlayer().inPVP() || c.getPlayer().isAlive()) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
         final int type = Integer.parseInt(c.getPlayer().getEventInstance().getProperty("type"));
         byte lvl = 0;
         c.getPlayer().getStat().heal_noUpdate(c.getPlayer());
         c.getPlayer().updateSingleStat(MapleStat.MP, c.getPlayer().getStat().getMp());
-        //c.getPlayer().getEventInstance().schedule("broadcastType", 500);   
         ThreadLock.lock();
         try {
             c.getPlayer().getEventInstance().schedule("updateScoreboard", 500);
@@ -678,7 +822,6 @@ public class PlayersHandler {
         } else if (c.getPlayer().getLevel() >= 180) {
             lvl = 3;
         }
-
         List<MapleCharacter> players = c.getPlayer().getEventInstance().getPlayers();
         List<Pair<Integer, String>> players1 = new LinkedList<>();
         for (int xx = 0; xx < players.size(); xx++) {
@@ -688,7 +831,7 @@ public class PlayersHandler {
         c.getSession().write(CField.enablePVP(true));
     }
 
-    public static final void LeavePVP(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void LeavePVP(final LittleEndianAccessor slea, final MapleClient c) {
         if (c.getPlayer() == null || c.getPlayer().getMap() == null || !c.getPlayer().inPVP()) {
             c.getSession().write(CField.pvpBlocked(6));
             c.getSession().write(CWvsContext.enableActions());
@@ -705,58 +848,12 @@ public class PlayersHandler {
         c.getPlayer().changeRemoval();
         c.getPlayer().dispelDebuffs();
         c.getPlayer().clearAllCooldowns();
-        c.getPlayer().updateTick(slea.readInt());
+        slea.readInt();
         c.getSession().write(CWvsContext.clearMidMsg());
         c.getPlayer().changeMap(c.getChannelServer().getMapFactory().getMap(960000000));
         c.getPlayer().getStat().recalcLocalStats(c.getPlayer());
         c.getPlayer().getStat().heal(c.getPlayer());
     }
-
-    public static final void StealSkill(LittleEndianAccessor slea, MapleClient c) {
-        if (c.getPlayer() == null || c.getPlayer().getMap() == null || !GameConstants.isPhantom(c.getPlayer().getJob())) {
-            c.getSession().write(CWvsContext.enableActions());
-            return;
-        }
-        final int skill = slea.readInt();
-        final int cid = slea.readInt();
-
-
-        //then a byte, 0 = learning, 1 = removing, but it doesnt matter since we can just use cid
-        if (cid <= 0) {
-            c.getPlayer().removeStolenSkill(skill);
-        } else {
-            final MapleCharacter other = c.getPlayer().getMap().getCharacterById(cid);
-            if (other != null && other.getId() != c.getPlayer().getId() && other.getTotalSkillLevel(skill) > 0) {
-                c.getPlayer().addStolenSkill(skill, other.getTotalSkillLevel(skill));
-            }
-        }
-    }
-
-    public static final void ChooseSkill(LittleEndianAccessor slea, MapleClient c) {
-        if (c.getPlayer() == null || c.getPlayer().getMap() == null || !GameConstants.isPhantom(c.getPlayer().getJob())) {
-            c.getSession().write(CWvsContext.enableActions());
-            return;
-        }
-        final int base = slea.readInt();
-        final int skill = slea.readInt();
-        if (skill <= 0) {
-            c.getPlayer().unchooseStolenSkill(base);
-        } else {
-            c.getPlayer().chooseStolenSkill(skill);
-        }
-    }
-
-    public static final void viewSkills(final LittleEndianAccessor slea, final MapleClient c) {
-        int victim = slea.readInt();
-        int jobid = c.getChannelServer().getPlayerStorage().getCharacterById(victim).getJob();
-        List<Integer> list = SkillFactory.getSkillsByJob(jobid);
-        if (!c.getChannelServer().getPlayerStorage().getCharacterById(victim).getSkills().isEmpty() && GameConstants.isAdventurer(jobid)) {
-            c.getSession().write(CField.viewSkills(c.getChannelServer().getPlayerStorage().getCharacterById(victim)));
-        } else {
-            c.getPlayer().dropMessage(6, "You cannot take skills off non-adventurer's.");
-        }
-    }
-
 
     public static final void AttackPVP(final LittleEndianAccessor slea, final MapleClient c) {
         final Lock ThreadLock = new ReentrantLock();
@@ -792,7 +889,7 @@ public class PlayersHandler {
         }
         boolean facingLeft = slea.readByte() > 0;
         if (skillid > 0) {
-            if (skillid == 3211006 && chr.getTotalSkillLevel(3220010) > 0) { //hack
+            if (skillid == 3211006 && chr.getTotalSkillLevel(3220010) > 0) { //終極四連箭
                 skillid = 3220010;
             }
             final Skill skil = SkillFactory.getSkill(skillid);
@@ -804,9 +901,11 @@ public class PlayersHandler {
             move = skil.isMovement();
             push = skil.isPush();
             pull = skil.isPull();
+            
+            //PVP冰騎士相關
             if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
                 if (!GameConstants.isIceKnightSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
-                    c.getSession().close();
+                    //c.getSession().close();
                     return;
                 }
                 if (GameConstants.isIceKnightSkill(skillid) && chr.getBuffSource(MapleBuffStat.MORPH) % 10000 != 1105) {
@@ -823,9 +922,7 @@ public class PlayersHandler {
                         try {
                             while (animation == -1) {
                                 final Triple<String, Point, Point> ep = p.get(Randomizer.nextInt(p.size()));
-                                if (!ep.left.contains("stab") && (skillid == 4001002 || skillid == 14001002)) { //disorder hack
-                                    continue;
-                                } else if (ep.left.contains("stab") && weapon != null && weapon.getItemId() / 10000 == 144) {
+                                if (ep.left.contains("stab") && weapon != null && weapon.getItemId() / 10000 == 144) {
                                     continue;
                                 }
                                 if (SkillFactory.getDelay(ep.left) != null) {
@@ -890,9 +987,7 @@ public class PlayersHandler {
                     try {
                         while (animation == -1) {
                             final Triple<String, Point, Point> ep = p.get(Randomizer.nextInt(p.size()));
-                            if (!ep.left.contains("stab") && (skillid == 4001002 || skillid == 14001002)) { //disorder hack
-                                continue;
-                            } else if (ep.left.contains("stab") && weapon != null && weapon.getItemId() / 10000 == 147) {
+                            if (ep.left.contains("stab") && weapon != null && weapon.getItemId() / 10000 == 147) {
                                 continue;
                             }
                             if (SkillFactory.getDelay(ep.left) != null) {
@@ -908,7 +1003,6 @@ public class PlayersHandler {
             }
             box = MapleStatEffect.calculateBoundingBox(chr.getTruePosition(), facingLeft, lt, rb, chr.getStat().defRange);
         }
-        chr.getCheatTracker().checkPVPAttack(skillid);
         final MapleStatEffect shad = chr.getStatForBuff(MapleBuffStat.SHADOWPARTNER);
         final int originalAttackCount = attackCount;
         attackCount *= (shad != null ? 2 : 1);
@@ -968,16 +1062,16 @@ public class PlayersHandler {
                                 //} else if (attacked.getLevel() > chr.getLevel() && Randomizer.nextInt(100) < (attacked.getLevel() - chr.getLevel())) {
                                 //	ourDamage = 0;
                             } else if (attacked.getJob() == 122 && attacked.getTotalSkillLevel(1220006) > 0 && attacked.getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -10) != null) {
-                                final MapleStatEffect eff = SkillFactory.getSkill(1220006).getEffect(attacked.getTotalSkillLevel(1220006));
+                                final MapleStatEffect eff = SkillFactory.getSkill(1220006).getEffect(attacked.getTotalSkillLevel(1220006)); //究極神盾
                                 if (eff.makeChanceResult()) {
                                     ourDamage = 0;
                                 }
-                            } else if (attacked.getJob() == 412 && attacked.getTotalSkillLevel(4120002) > 0) {
+                            } else if (attacked.getJob() == 412 && attacked.getTotalSkillLevel(4120002) > 0) { //瞬身迴避
                                 final MapleStatEffect eff = SkillFactory.getSkill(4120002).getEffect(attacked.getTotalSkillLevel(4120002));
                                 if (eff.makeChanceResult()) {
                                     ourDamage = 0;
                                 }
-                            } else if (attacked.getJob() == 422 && attacked.getTotalSkillLevel(4220006) > 0) {
+                            } else if (attacked.getJob() == 422 && attacked.getTotalSkillLevel(4220002) > 0) { //瞬身迴避
                                 final MapleStatEffect eff = SkillFactory.getSkill(4220002).getEffect(attacked.getTotalSkillLevel(4220002));
                                 if (eff.makeChanceResult()) {
                                     ourDamage = 0;
@@ -985,7 +1079,9 @@ public class PlayersHandler {
                             } else if (shad != null && i >= originalAttackCount) {
                                 ourDamage *= shad.getX() / 100.0;
                             }
-                            if (ourDamage > 0 && skillid != 4211006 && skillid != 3211003 && skillid != 4111004 && (skillid == 4221001 || skillid == 3221007 || skillid == 23121003 || skillid == 4341005 || skillid == 4331006 || skillid == 21120005 || Randomizer.nextInt(100) < critRate)) {
+                            
+                             // 暴風雪箭 楓幣炸彈 隱??鎖鏈地獄
+                            if (ourDamage > 0 && skillid != 3211003 && skillid != 4211006 && (skillid == 4221001 || skillid == 4331006 || Randomizer.nextInt(100) < critRate)) {
                                 ourDamage *= (100.0 + (Randomizer.nextInt(Math.max(2, chr.getStat().passive_sharpeye_percent() - chr.getStat().passive_sharpeye_min_percent())) + chr.getStat().passive_sharpeye_min_percent())) / 100.0;
                                 critical_ = true;
                             }
@@ -1010,8 +1106,8 @@ public class PlayersHandler {
                     addedScore += Math.min(attacked.getStat().getHp() / 100, (totalHPLoss / 100) + (totalMPLoss / 100)); //ive NO idea
                     attacked.addMPHP(-totalHPLoss, -totalMPLoss);
                     ourAttacks.add(new AttackPair(attacked.getId(), attacked.getPosition(), attacks));
-                    chr.onAttack(attacked.getStat().getCurrentMaxHp(), attacked.getStat().getCurrentMaxMp(attacked.getJob()), skillid, attacked.getObjectId(), totalHPLoss, 0);
-                    attacked.getCheatTracker().setAttacksWithoutHit(false);
+                    chr.onAttack(attacked.getStat().getCurrentMaxHp(), attacked.getStat().getCurrentMaxMp(attacked.getJob()), skillid, attacked.getObjectId(), totalHPLoss);
+
                     if (totalHPLoss > 0) {
                         didAttack = true;
                     }
@@ -1035,24 +1131,21 @@ public class PlayersHandler {
                         effect.handleExtraPVP(chr, attacked);
                     }
                     if (chr.getJob() == 121 || chr.getJob() == 122 || chr.getJob() == 2110 || chr.getJob() == 2111 || chr.getJob() == 2112) { // WHITEKNIGHT
-                        if (chr.getBuffSource(MapleBuffStat.WK_CHARGE) == 1211006 || chr.getBuffSource(MapleBuffStat.WK_CHARGE) == 21101006) {
+                        if (chr.getBuffSource(MapleBuffStat.WK_CHARGE) == 1211006 || chr.getBuffSource(MapleBuffStat.WK_CHARGE) == 21101006) { //寒冰之劍
                             final MapleStatEffect eff = chr.getStatForBuff(MapleBuffStat.WK_CHARGE);
                             if (eff.makeChanceResult()) {
                                 attacked.giveDebuff(MapleDisease.FREEZE, 1, eff.getDuration(), MapleDisease.FREEZE.getDisease(), 1);
                             }
-                        }
-                    } else if (chr.getBuffedValue(MapleBuffStat.HAMSTRING) != null) {
-                        final MapleStatEffect eff = chr.getStatForBuff(MapleBuffStat.HAMSTRING);
-                        if (eff != null && eff.makeChanceResult()) {
-                            attacked.giveDebuff(MapleDisease.SLOW, 100 - Math.abs(eff.getX()), eff.getDuration(), MapleDisease.SLOW.getDisease(), 1);
                         }
                     } else if (chr.getBuffedValue(MapleBuffStat.SLOW) != null) {
                         final MapleStatEffect eff = chr.getStatForBuff(MapleBuffStat.SLOW);
                         if (eff != null && eff.makeChanceResult()) {
                             attacked.giveDebuff(MapleDisease.SLOW, 100 - Math.abs(eff.getX()), eff.getDuration(), MapleDisease.SLOW.getDisease(), 1);
                         }
-                    } else if (chr.getJob() == 412 || chr.getJob() == 422 || chr.getJob() == 434 || chr.getJob() == 1411 || chr.getJob() == 1412) {
-                        int[] skills = {4120005, 4220005, 4340001, 14110004};
+                    } else if (chr.getJob() == 411 || chr.getJob() == 412 || chr.getJob() == 421 || chr.getJob() == 422 || chr.getJob() == 432 || chr.getJob() == 433 || chr.getJob() == 434 || chr.getJob() == 1411 || chr.getJob() == 1412) {
+
+                        //飛毒殺
+                        int[] skills = {4110011, 4120011, 4210010, 4220011, 4320005, 4340012, 14110004};
                         ThreadLock.lock();
                         try {
                             for (int i : skills) {
@@ -1069,7 +1162,9 @@ public class PlayersHandler {
                             ThreadLock.unlock();
                         }
                     }
-                    if ((chr.getJob() / 100) % 10 == 2) {//mage
+                    if ((chr.getJob() / 100) % 10 == 2) {
+
+                         //自然力變弱 魔法強化
                         int[] skills = {2000007, 12000006, 22000002, 32000012};
                         ThreadLock.lock();
                         try {
@@ -1133,7 +1228,7 @@ public class PlayersHandler {
         if (didAttack) {
             chr.afterAttack(ourAttacks.size(), attackCount, skillid);
             PlayerHandler.AranCombo(c, chr, ourAttacks.size() * attackCount);
-            if (skillid > 0 && (ourAttacks.size() > 0 || (skillid != 4331003 && skillid != 4341002)) && !GameConstants.isNoDelaySkill(skillid)) {
+            if (skillid > 0 && (ourAttacks.size() > 0 || skillid != 4341002) && !GameConstants.isNoDelaySkill(skillid)) { //絕殺刃
                 effect.applyTo(chr, chr.getTruePosition());
             } else {
                 c.getSession().write(CWvsContext.enableActions());
@@ -1145,14 +1240,6 @@ public class PlayersHandler {
             c.getSession().write(CWvsContext.enableActions());
         }
         chr.getMap().broadcastMessage(CField.pvpAttack(chr.getId(), chr.getLevel(), trueSkill, trueSkillLevel, speed, fakeMastery, visProjectile, attackCount, chargeTime, animation, facingLeft ? 1 : 0, chr.getStat().defRange, skillid, skillLevel, move, push, pull, ourAttacks));
-        if (addedScore > 0 && GameConstants.getAttackDelay(skillid, SkillFactory.getSkill(skillid)) >= 100) {
-            final CheatTracker tracker = chr.getCheatTracker();
-
-            tracker.setAttacksWithoutHit(true);
-            if (tracker.getAttacksWithoutHit() > 1000) {
-                tracker.registerOffense(CheatingOffense.ATTACK_WITHOUT_GETTING_HIT, Integer.toString(tracker.getAttacksWithoutHit()));
-            }
-        }
     }
 
     public static boolean inArea(MapleCharacter chr) {
@@ -1169,16 +1256,72 @@ public class PlayersHandler {
         return false;
     }
 
-    public static final void updateRedLeafHigh(LittleEndianAccessor slea, MapleClient c) {
-        slea.readInt(); //questid or something
-        slea.readInt(); //joe joe
-        int joejoe = slea.readInt();
-        slea.readInt(); //hermoninny
-        int hermoninny = slea.readInt();
-        slea.readInt(); //little dragon
-        int littledragon = slea.readInt();
-        slea.readInt(); //ika
-        int ika = slea.readInt();
-        //c.getPlayer().updateRedLeaf(joejoe, hermoninny, littledragon, ika);
+    /*
+    連結技能相關設定
+    */
+    public static void TeachSkill(LittleEndianAccessor slea, MapleClient c, MapleCharacter chr) {
+        if ((chr == null) || (chr.getMap() == null) || (chr.hasBlockedInventory())) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        if (chr.getLevel() < 70) {
+            chr.dropMessage(1, "After reaching level 70, you can choose a role in the same server to teach this skill.");
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        int skillId = slea.readInt();
+        if (chr.getSkillLevel(skillId) < 1) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        int toChrId = slea.readInt();
+        Pair toChrInfo = MapleCharacterUtil.getNameById(toChrId, 0);
+        if (toChrInfo == null) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        int toChrAccId = ((Integer) toChrInfo.getRight()).intValue();
+        String toChrName = (String) toChrInfo.getLeft();
+        MapleQuest quest = MapleQuest.getInstance(7783);
+        if ((quest != null) && (chr.getAccountID() == toChrAccId)) {
+            int toSkillId;
+            if (GameConstants.isCannon(chr.getJob())) {
+                toSkillId = 80000000;
+            } else {
+                if (GameConstants.isDemon(chr.getJob())) {
+                    toSkillId = 80000001;
+                } else {
+                    if (GameConstants.isPhantom(chr.getJob())) {
+                        toSkillId = 80000002;
+                    } else {
+                        if (GameConstants.isMercedes(chr.getJob())) {
+                            toSkillId = 80001040;
+                        } else {
+                            if (GameConstants.isMihile(chr.getJob())) {
+                                toSkillId = 80001140;
+                            } else {
+                                if (GameConstants.isJett(chr.getJob())) {
+                                    toSkillId = 80001151;
+                                } else {
+                                    chr.dropMessage(1, "Failed to impart skills.");
+                                    c.getSession().write(CWvsContext.enableActions());
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if ((chr.teachSkill(toSkillId, toChrId) > 0) && (toSkillId >= 80000000)) {
+                chr.changeTeachSkill(skillId, toChrId);
+                quest.forceComplete(chr, 0);
+                c.getSession().write(CWvsContext.teachMessage(skillId, toChrId, toChrName));
+            } else {
+                chr.dropMessage(1, new StringBuilder().append("Failed to impart skills, [").append(toChrName).append("] The character has already acquired this skill").toString());
+            }
+        } else {
+            chr.dropMessage(1, "Failed to impart skills.");
+        }
+        c.getSession().write(CWvsContext.enableActions());
     }
 }

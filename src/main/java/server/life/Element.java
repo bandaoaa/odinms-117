@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -32,18 +26,17 @@ public enum Element {
 
     private int value;
     private boolean special = false;
-
     private Element(int v) {
-        this.value = v;
+	this.value = v;
     }
 
     private Element(int v, boolean special) {
-        this.value = v;
-        this.special = special;
+	this.value = v;
+	this.special = special;
     }
 
     public boolean isSpecial() {
-        return special;
+	return special;
     }
 
     public static Element getFromChar(char c) {
@@ -68,14 +61,14 @@ public enum Element {
 
     public static Element getFromId(int c) {
         for (Element e : Element.values()) {
-            if (e.value == c) {
-                return e;
-            }
-        }
-        throw new IllegalArgumentException("unknown elemnt id " + c);
+	    if (e.value == c) {
+		return e;
+	    }
+	}
+	throw new IllegalArgumentException("unknown elemnt id " + c);
     }
 
     public int getValue() {
-        return value;
+	return value;
     }
 }

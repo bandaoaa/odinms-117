@@ -1,65 +1,48 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
+ This file is part of the OdinMS Maple Story Server
+ Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
+ Matthias Butz <matze@odinms.de>
+ Jan Christian Meyer <vimes@odinms.de>
 
-Copyright (C) 2011 ~ 2012 TimelessMS
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License version 3
+ as published by the Free Software Foundation. You may not use, modify
+ or distribute this program under any other version of the
+ GNU Affero General Public License.
 
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel.handler;
 
 import client.MapleCharacter;
+import client.MapleCharacterUtil;
 import client.MapleClient;
 import client.MapleQuestStatus;
 import client.SkillFactory;
+import client.inventory.MapleInventoryType;
 import constants.GameConstants;
-import constants.MapConstants;
-import constants.ServerConstants;
-import constants.TutorialConstants;
 import handling.cashshop.CashShopServer;
-import handling.cashshop.handler.CashShopOperation;
 import handling.channel.ChannelServer;
 import handling.login.LoginServer;
-import handling.world.CharacterIdChannelPair;
-import handling.world.CharacterTransfer;
-import handling.world.MapleMessenger;
-import handling.world.MapleMessengerCharacter;
-import handling.world.MapleParty;
-import handling.world.MaplePartyCharacter;
-import handling.world.PartyOperation;
-import handling.world.PlayerBuffStorage;
-import handling.world.World;
+import handling.world.*;
 import handling.world.exped.MapleExpedition;
 import handling.world.guild.MapleGuild;
 import java.util.List;
+import server.MapleInventoryManipulator;
 import server.maps.FieldLimitType;
 import server.maps.MapleMap;
 import server.maps.SavedLocationType;
 import server.quest.MapleQuest;
 import tools.FileoutputUtil;
-import tools.packet.CField;
 import tools.Pair;
-import tools.Triple;
 import tools.data.LittleEndianAccessor;
-import tools.packet.CField.UIPacket;
+import tools.packet.CField;
 import tools.packet.CWvsContext;
 import tools.packet.CWvsContext.BuddylistPacket;
 import tools.packet.CWvsContext.ExpeditionPacket;
@@ -69,22 +52,20 @@ import tools.packet.MTSCSPacket;
 
 public class InterServerHandler {
 
-    public static final void EnterCS(final MapleClient c, final MapleCharacter chr, final boolean mts) {
-        if (chr.hasBlockedInventory() || chr.getMap() == null || chr.getEventInstance() != null || c.getChannelServer() == null || MapConstants.isStorylineMap(chr.getMapId())) {
+    public static void EnterCS(final MapleClient c, final MapleCharacter chr, final boolean mts) {
+        if (chr.hasBlockedInventory() || chr.getMap() == null || chr.getEventInstance() != null || c.getChannelServer() == null) {
             c.getSession().write(CField.serverBlocked(2));
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-        if (ServerConstants.BLOCK_CS == true) {
-            chr.dropMessage(1, "CashShop has been blocked for the beta server");
-            c.getSession().write(CWvsContext.enableActions());
-            return;
-        }
-        if (mts && chr.getLevel() < 50) {
-            chr.dropMessage(1, "You may not enter the Maple Trading System until level 50.");
-            c.getSession().write(CWvsContext.enableActions());
-            return;
-        }
+        /* if (mts && chr.getLevel() < 50) {
+           
+         chr.dropMessage(1, "You may not enter the Maple Trading System until level 50.");
+         c.getSession().write(CWvsContext.enableActions());
+         return;
+         }
+         * 
+         */
         if (World.getPendingCharacterSize() >= 10) {
             chr.dropMessage(1, "The server is busy at the moment. Please try again in a minute or less.");
             c.getSession().write(CWvsContext.enableActions());
@@ -95,8 +76,7 @@ public class InterServerHandler {
         //    c.getSession().write(CWvsContext.enableActions());
         //    return;
         //}
-        final ChannelServer ch = ChannelServer.getInstance(c.getChannel());
-        chr.dispelBuff(2311002);
+        ChannelServer ch = ChannelServer.getInstance(c.getChannel());
         chr.changeRemoval();
 
         if (chr.getMessenger() != null) {
@@ -116,14 +96,9 @@ public class InterServerHandler {
         c.setReceiving(false);
     }
 
-    public static final void EnterMTS(final MapleClient c, final MapleCharacter chr) {
+    public static void EnterMTS(final MapleClient c, final MapleCharacter chr) {
         if (chr.hasBlockedInventory() || chr.getMap() == null || chr.getEventInstance() != null || c.getChannelServer() == null) {
             chr.dropMessage(1, "Please try again later.");
-            c.getSession().write(CWvsContext.enableActions());
-            return;
-        }
-        if (chr.getLevel() < 15) {
-            chr.dropMessage(1, "You may not enter the Free Market until level 15.");
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
@@ -143,44 +118,35 @@ public class InterServerHandler {
         c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void Loggedin(final int playerid, final MapleClient c) {
+    /*
+    登入遊戲加載
+    */
+    public static void Loggedin(final int playerid, final MapleClient c) {
+        final ChannelServer channelServer = c.getChannelServer();
         MapleCharacter player;
-
-        CharacterTransfer transfer = CashShopServer.getPlayerStorage().getPendingCharacter(playerid);
-        if (transfer != null) {
-            CashShopOperation.EnterCS(transfer, c);
-            return;
-        }
-        for (ChannelServer cserv : ChannelServer.getAllInstances()) {
-            transfer = cserv.getPlayerStorage().getPendingCharacter(playerid);
-            if (transfer != null) {
-                c.setChannel(cserv.getChannel());
-                break;
-            }
-        }
+        final CharacterTransfer transfer = channelServer.getPlayerStorage().getPendingCharacter(playerid);
 
         if (transfer == null) { // Player isn't in storage, probably isn't CC
-            Triple<String, String, Integer> ip = LoginServer.getLoginAuth(playerid);
+            player = MapleCharacter.loadCharFromDB(playerid, c, true);
+            Pair<String, String> ip = LoginServer.getLoginAuth(playerid);
             String s = c.getSessionIPAddress();
             if (ip == null || !s.substring(s.indexOf('/') + 1, s.length()).equals(ip.left)) {
                 if (ip != null) {
-                    LoginServer.putLoginAuth(playerid, ip.left, ip.mid, ip.right);
+                    LoginServer.putLoginAuth(playerid, ip.left, ip.right);
                 }
+                System.out.println(c.getAccountName() + " BUG?2");
                 c.getSession().close();
                 return;
             }
-            c.setTempIP(ip.mid);
-            c.setChannel(ip.right);
-            player = MapleCharacter.loadCharFromDB(playerid, c, true);
+            c.setTempIP(ip.right);
         } else {
             player = MapleCharacter.ReconstructChr(transfer, c, true);
         }
-        final ChannelServer channelServer = c.getChannelServer();
-
         c.setPlayer(player);
         c.setAccID(player.getAccountID());
 
         if (!c.CheckIPAddress()) { // Remote hack
+            System.out.println(c.getAccountName() + " BUG?3");
             c.getSession().close();
             return;
         }
@@ -191,6 +157,7 @@ public class InterServerHandler {
         if (state == MapleClient.LOGIN_SERVER_TRANSITION || state == MapleClient.CHANGE_CHANNEL || state == MapleClient.LOGIN_NOTLOGGEDIN) {
             allowLogin = !World.isCharacterListConnected(c.loadCharacterNames(c.getWorld()));
         }
+
         if (!allowLogin) {
             c.setPlayer(null);
             c.getSession().close();
@@ -206,21 +173,11 @@ public class InterServerHandler {
         c.getSession().write(CField.getCharInfo(player));
         c.getSession().write(MTSCSPacket.enableCSUse());
 
-        /*
-         * if (player.isGM()) { SkillFactory.getSkill(GameConstants.GMS ?
-         * 9101004 : 9001004).getEffect(1).applyTo(player);
-        }
-         */
-      /*  if (MapConstants.isStorylineMap(c.getPlayer().getMapId())) {
-            if (!c.getPlayer().hasSummon()) {
-                c.getPlayer().setHasSummon(true);
-                c.getSession().write(UIPacket.summonHelper(true));
-                c.getSession().write(UIPacket.summonMessage(TutorialConstants.getTutorialTalk(c.getPlayer(), c.getPlayer().getMapId())));
-            }
-        }*/
+        //過濾 -1等級的技能顯示
+        c.getSession().write(CWvsContext.updateSkills(c.getPlayer().getSkills()));//skill to 0 "fix"
         c.getSession().write(CWvsContext.temporaryStats_Reset()); // .
         player.getMap().addPlayer(player);
-        player.getMap().spawnMerchant(player);
+
         try {
             // Start of buddylist
             final int buddyIds[] = player.getBuddylist().getBuddyIds();
@@ -232,11 +189,9 @@ public class InterServerHandler {
                 if (party != null && party.getExpeditionId() > 0) {
                     final MapleExpedition me = World.Party.getExped(party.getExpeditionId());
                     if (me != null) {
-                        c.getSession().write(CWvsContext.ExpeditionPacket.expeditionStatus(me, false, true));
+                        c.getSession().write(ExpeditionPacket.expeditionStatus(me, false, true));
                     }
                 }
-                player.receivePartyMemberHP();
-                player.updatePartyMemberHP();
             }
             final CharacterIdChannelPair[] onlineBuddies = World.Find.multiBuddyFind(player.getId(), buddyIds);
             for (CharacterIdChannelPair onlineBuddy : onlineBuddies) {
@@ -286,27 +241,42 @@ public class InterServerHandler {
         player.showNote();
         player.sendImp();
         player.updatePartyMemberHP();
+        
+        //上線計算角色精靈吊墜時間
         player.startFairySchedule(false);
+
+        if (player.haveItem(1112920) && player.getGMLevel() == 0) {
+            player.setgmLevel((byte) 1);
+        } else if (player.getGMLevel() == 1 && !player.haveItem(1112920)) {
+            player.setgmLevel((byte) 0);
+        }
         player.baseSkills(); //fix people who've lost skills.
+
         c.getSession().write(CField.getKeymap(player.getKeyLayout()));
         player.updatePetAuto();
         player.expirationTask(true, transfer == null);
         if (player.getJob() == 132) { // DARKKNIGHT
             player.checkBerserk();
         }
-        player.spawnClones();
         player.spawnSavedPets();
         if (player.getStat().equippedSummon > 0) {
             SkillFactory.getSkill(player.getStat().equippedSummon).getEffect(1).applyTo(player);
         }
+
         MapleQuestStatus stat = player.getQuestNoAdd(MapleQuest.getInstance(GameConstants.PENDANT_SLOT));
-        //c.getSession().write(CWvsContext.pendantSlot(stat != null && stat.getCustomData() != null && Long.parseLong(stat.getCustomData()) > System.currentTimeMillis()));
+        c.getSession().write(CWvsContext.pendantSlot(stat != null && stat.getCustomData() != null && Long.parseLong(stat.getCustomData()) > System.currentTimeMillis()));
         stat = player.getQuestNoAdd(MapleQuest.getInstance(GameConstants.QUICK_SLOT));
         c.getSession().write(CField.quickSlot(stat != null && stat.getCustomData() != null ? stat.getCustomData() : null));
         c.getSession().write(CWvsContext.getFamiliarInfo(player));
+        player.saveToDB(false, false);
+        // int poop = 11110;
+        //while (poop > 1) {
+        //  c.getSession().write(CWvsContext.serverNotice(1, "Please download the new client!! www.axedms.com - else you won't be able to play"));
+        // }
+
     }
 
-    public static final void ChangeChannel(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr, final boolean room) {
+    public static void ChangeChannel(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr, final boolean room) {
         if (chr == null || chr.hasBlockedInventory() || chr.getEventInstance() != null || chr.getMap() == null || chr.isInBlockedMap() || FieldLimitType.ChannelSwitch.check(chr.getMap().getFieldLimit())) {
             c.getSession().write(CWvsContext.enableActions());
             return;
@@ -321,7 +291,7 @@ public class InterServerHandler {
         if (room) {
             mapid = slea.readInt();
         }
-        chr.updateTick(slea.readInt());
+        slea.readInt();
         if (!World.isChannelAvailable(chc)) {
             chr.dropMessage(1, "The channel is full at the moment.");
             c.getSession().write(CWvsContext.enableActions());

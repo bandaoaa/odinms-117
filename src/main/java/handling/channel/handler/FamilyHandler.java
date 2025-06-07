@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,17 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel.handler;
 
-import client.MapleCharacterUtil;
 import client.MapleCharacter;
+import client.MapleCharacterUtil;
 import client.MapleClient;
 import handling.world.MaplePartyCharacter;
 import handling.world.World;
 import handling.world.family.MapleFamily;
 import handling.world.family.MapleFamilyBuff;
 import handling.world.family.MapleFamilyCharacter;
-
 import java.util.List;
-
 import server.maps.FieldLimitType;
 import tools.data.LittleEndianAccessor;
 import tools.packet.CWvsContext;
@@ -44,18 +36,18 @@ import tools.packet.CWvsContext.FamilyPacket;
 
 public class FamilyHandler {
 
-    public static final void RequestFamily(final LittleEndianAccessor slea, MapleClient c) {
+    public static void RequestFamily(final LittleEndianAccessor slea, MapleClient c) {
         MapleCharacter chr = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString());
         if (chr != null) {
             c.getSession().write(FamilyPacket.getFamilyPedigree(chr));
         }
     }
 
-    public static final void OpenFamily(final LittleEndianAccessor slea, MapleClient c) {
+    public static void OpenFamily(final LittleEndianAccessor slea, MapleClient c) {
         c.getSession().write(FamilyPacket.getFamilyInfo(c.getPlayer()));
     }
 
-    public static final void UseFamily(final LittleEndianAccessor slea, MapleClient c) {
+    public static void UseFamily(final LittleEndianAccessor slea, MapleClient c) {
         int type = slea.readInt();
         if (MapleFamilyBuff.values().length <= type) {
             return;
@@ -65,7 +57,7 @@ public class FamilyHandler {
         if (!success) {
             return;
         }
-        MapleCharacter victim = null;
+        MapleCharacter victim;
         switch (entry) {
             case Teleport: //teleport: need add check for if not a safe place
                 victim = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString());
@@ -101,8 +93,8 @@ public class FamilyHandler {
             case EXP_12_15: // exp rate + 50% 15 min
             case Drop_12_30: // drop rate + 100% 15 min
             case EXP_12_30: // exp rate + 100% 15 min
-            case Drop_15_15:
-            case Drop_15_30:
+	    case Drop_15_15:
+	    case Drop_15_30:
                 //c.getSession().write(FamilyPacket.familyBuff(entry.type, type, entry.effect, entry.duration*60000));
                 entry.applyTo(c.getPlayer());
                 break;
@@ -123,12 +115,12 @@ public class FamilyHandler {
                     }
                 }
                 break;
-            case EXP_Party:
+	    case EXP_Party:
             case Drop_Party_12: // drop rate + 100% party 30 min
             case Drop_Party_15: // exp rate + 100% party 30 min
                 entry.applyTo(c.getPlayer());
                 //c.getSession().write(FamilyPacket.familyBuff(entry.type, type, entry.effect, entry.duration*60000));
-                if (c.getPlayer().getParty() != null) {
+                if (c.getPlayer().getParty() != null ) {
                     for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
                         if (mpc.getId() != c.getPlayer().getId()) {
                             MapleCharacter chr = c.getPlayer().getMap().getCharacterById(mpc.getId());
@@ -150,7 +142,7 @@ public class FamilyHandler {
         }
     }
 
-    public static final void FamilyOperation(final LittleEndianAccessor slea, MapleClient c) {
+    public static void FamilyOperation(final LittleEndianAccessor slea, MapleClient c) {
         if (c.getPlayer() == null) {
             return;
         }
@@ -179,7 +171,7 @@ public class FamilyHandler {
         c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void FamilyPrecept(final LittleEndianAccessor slea, MapleClient c) {
+    public static void FamilyPrecept(final LittleEndianAccessor slea, MapleClient c) {
         MapleFamily fam = World.Family.getFamily(c.getPlayer().getFamilyId());
         if (fam == null || fam.getLeaderId() != c.getPlayer().getId()) {
             return;
@@ -187,7 +179,7 @@ public class FamilyHandler {
         fam.setNotice(slea.readMapleAsciiString());
     }
 
-    public static final void FamilySummon(final LittleEndianAccessor slea, MapleClient c) {
+    public static void FamilySummon(final LittleEndianAccessor slea, MapleClient c) {
         MapleFamilyBuff cost = MapleFamilyBuff.Summon;
         MapleCharacter tt = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString());
         if (c.getPlayer().getFamilyId() > 0 && tt != null && tt.getFamilyId() == c.getPlayer().getFamilyId() && !FieldLimitType.VipRock.check(tt.getMap().getFieldLimit()) &&
@@ -209,7 +201,7 @@ public class FamilyHandler {
         c.getPlayer().setTeleportName("");
     }
 
-    public static final void DeleteJunior(final LittleEndianAccessor slea, MapleClient c) {
+    public static void DeleteJunior(final LittleEndianAccessor slea, MapleClient c) {
         int juniorid = slea.readInt();
         if (c.getPlayer().getFamilyId() <= 0 || juniorid <= 0 || (c.getPlayer().getJunior1() != juniorid && c.getPlayer().getJunior2() != juniorid)) {
             return;
@@ -217,9 +209,9 @@ public class FamilyHandler {
         //junior is not required to be online.
         final MapleFamily fam = World.Family.getFamily(c.getPlayer().getFamilyId());
         final MapleFamilyCharacter other = fam.getMFC(juniorid);
-        if (other == null) {
-            return;
-        }
+	if (other == null) {
+	    return;
+	}
         final MapleFamilyCharacter oth = c.getPlayer().getMFC();
         boolean junior2 = oth.getJunior2() == juniorid;
         if (junior2) {
@@ -243,7 +235,7 @@ public class FamilyHandler {
         c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void DeleteSenior(final LittleEndianAccessor slea, MapleClient c) {
+    public static void DeleteSenior(final LittleEndianAccessor slea, MapleClient c) {
         if (c.getPlayer().getFamilyId() <= 0 || c.getPlayer().getSeniorId() <= 0) {
             return;
         }
@@ -273,7 +265,7 @@ public class FamilyHandler {
         c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void AcceptFamily(LittleEndianAccessor slea, MapleClient c) {
+    public static void AcceptFamily(LittleEndianAccessor slea, MapleClient c) {
         MapleCharacter inviter = c.getPlayer().getMap().getCharacterById(slea.readInt());
         if (inviter != null && c.getPlayer().getSeniorId() == 0 && (c.getPlayer().isGM() || !inviter.isHidden()) && inviter.getLevel() - 20 <= c.getPlayer().getLevel() && inviter.getLevel() >= 10 && inviter.getName().equals(slea.readMapleAsciiString()) && inviter.getNoJuniors() < 2 /*&& inviter.getFamily().getGens() < 1000*/ && c.getPlayer().getLevel() >= 10) {
             boolean accepted = slea.readByte() > 0;
@@ -298,16 +290,16 @@ public class FamilyHandler {
                     if (old > 0 && World.Family.getFamily(old) != null) { //has junior
                         MapleFamily.mergeFamily(fam, World.Family.getFamily(old));
                     } else {
-                        c.getPlayer().setFamily(inviter.getFamilyId(), inviter.getId(), oldj1 <= 0 ? 0 : oldj1, oldj2 <= 0 ? 0 : oldj2);
+			c.getPlayer().setFamily(inviter.getFamilyId(), inviter.getId(), oldj1 <= 0 ? 0 : oldj1, oldj2 <= 0 ? 0 : oldj2);
                         fam.setOnline(c.getPlayer().getId(), true, c.getChannel());
                         c.getPlayer().saveFamilyStatus();
                     }
-                    if (fam != null) {
+		    if (fam != null) {
                         if (inviter.getNoJuniors() == 1 || old > 0) {//just got their first junior whoopee
                             fam.resetDescendants();
                         }
                         fam.resetPedigree(); //is this necessary?
-                    }
+		    }
                 } else {
                     int id = MapleFamily.createFamily(inviter.getId());
                     if (id > 0) {
@@ -315,7 +307,6 @@ public class FamilyHandler {
                         MapleFamily.setOfflineFamilyStatus(id, 0, c.getPlayer().getId(), 0, inviter.getCurrentRep(), inviter.getTotalRep(), inviter.getId());
                         MapleFamily.setOfflineFamilyStatus(id, inviter.getId(), oldj1 <= 0 ? 0 : oldj1, oldj2 <= 0 ? 0 : oldj2, c.getPlayer().getCurrentRep(), c.getPlayer().getTotalRep(), c.getPlayer().getId());
                         inviter.setFamily(id, 0, c.getPlayer().getId(), 0); //load the family
-                        inviter.finishAchievement(36);
                         c.getPlayer().setFamily(id, inviter.getId(), oldj1 <= 0 ? 0 : oldj1, oldj2 <= 0 ? 0 : oldj2);
                         MapleFamily fam = World.Family.getFamily(id);
                         fam.setOnline(inviter.getId(), true, inviter.getClient().getChannel());

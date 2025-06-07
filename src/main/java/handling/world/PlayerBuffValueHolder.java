@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,10 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.world;
 
 import client.MapleBuffStat;
-
 import java.io.Serializable;
 import java.util.Map;
-
 import server.MapleStatEffect;
 
 public class PlayerBuffValueHolder implements Serializable {
@@ -39,13 +31,13 @@ public class PlayerBuffValueHolder implements Serializable {
     public long startTime;
     public int localDuration, cid;
     public MapleStatEffect effect;
-    public Map<MapleBuffStat, Integer> statup;
+    public Map<MapleBuffStat,Integer> statup;
 
-    public PlayerBuffValueHolder(final long startTime, final MapleStatEffect effect, final Map<MapleBuffStat, Integer> statup, int localDuration, int cid) {
+    public PlayerBuffValueHolder(final long startTime, final MapleStatEffect effect, final Map<MapleBuffStat,Integer> statup, int localDuration, int cid) {
         this.startTime = startTime;
         this.effect = effect;
-        this.statup = statup;
-        this.localDuration = localDuration;
-        this.cid = cid;
+	this.statup = statup;
+	this.localDuration = localDuration;
+	this.cid = cid;
     }
 }

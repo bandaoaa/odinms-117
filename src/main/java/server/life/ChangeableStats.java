@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -32,6 +26,23 @@ public class ChangeableStats extends OverrideMonsterStats {
 
     public int watk, matk, acc, eva, PDRate, MDRate, pushed, level;
 
+    /*
+    楓之高校怪物内容設定
+    */
+    public ChangeableStats(int Level) {
+        hp = Level * Level * Level;
+        exp = Level * 100;
+        mp = Level * 100;
+        watk = Level * 10;
+        matk = Level * 10;
+        acc = Level * 2;
+        eva = Level;
+        PDRate = Level / 2;
+        MDRate = Level / 2;
+        pushed = Level;
+        level = Level;
+    }
+
     public ChangeableStats(MapleMonsterStats stats, OverrideMonsterStats ostats) {
         hp = ostats.getHp();
         exp = ostats.getExp();
@@ -46,12 +57,12 @@ public class ChangeableStats extends OverrideMonsterStats {
         level = stats.getLevel();
     }
 
-    public ChangeableStats(MapleMonsterStats stats, int newLevel, boolean pqMob) { // here we go i think
+    public ChangeableStats(MapleMonsterStats stats, int newLevel, boolean pqMob) {
         final double mod = (double) newLevel / (double) stats.getLevel();
         final double hpRatio = (double) stats.getHp() / (double) stats.getExp();
-        final double pqMod = (pqMob ? 1.5 : 1.0); // god damn
-        hp = (long) Math.round((!stats.isBoss() ? GameConstants.getMonsterHP(newLevel) : (stats.getHp() * mod)) * pqMod); // right here lol
-        exp = (int) Math.round((!stats.isBoss() ? (GameConstants.getMonsterHP(newLevel) / hpRatio) : (stats.getExp())) * pqMod);
+        final double pqMod = (pqMob ? 2.5 : 1.0);
+        hp = (long) Math.round((!stats.isBoss() ? GameConstants.getMonsterHP(newLevel) : (stats.getHp() * mod)) * pqMod);
+        exp = (int) Math.round((!stats.isBoss() ? (GameConstants.getMonsterHP(newLevel) / hpRatio) : (stats.getExp() * mod)) * mod * pqMod);
         mp = (int) Math.round(stats.getMp() * mod * pqMod);
         watk = (int) Math.round(stats.getPhysicalAttack() * mod);
         matk = (int) Math.round(stats.getMagicAttack() * mod);

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc>
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,14 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.login;
 
 import constants.GameConstants;
-
 import java.io.File;
-import java.util.List;
 import java.util.ArrayList;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -44,22 +35,19 @@ import tools.Triple;
 public class LoginInformationProvider {
 
     public enum JobType {
-        //180000001 Starter Map (Black Map)
-        UltimateAdventurer(-1, "Ultimate", 0, 130000000),
+
+        UltimateAdventurer(-1, "Ultimate", 0, 100000000),
         Resistance(0, "Resistance", 3000, 931000000),
         Adventurer(1, "", 0, 0),
-        Cygnus(2, "Premium", 1000, 913040000),
+        Cygnus(2, "Premium", 1000, 130030000),
         Aran(3, "Orient", 2000, 914000000),
         Evan(4, "Evan", 2001, 900090000),
         Mercedes(5, "", 2002, 910150000),
         Demon(6, "", 3001, 931050310),
-        Phantom(7, "", 2003, 0),
-        DualBlade(8, "", 0, 0),
-        Mihile(9, "", 0, 0),
-        Jett(10, "", 0, 0);
-        //Luminous(11, "", 2004, 10000), //    
-        //Kaiser(12, "", 6000, 10000),   //       
-        //AngelicBurster(13, "", 6001, 10000); //      
+        Phantom(7, "", 2003, 915000000),
+        DualBlade(8, "", 0, 103050900),
+        Mihile(9, "", 5000, 913070000),
+        Jett(10, "", 508, 552000060);
         public int type, id, map;
         public String job;
 
@@ -90,18 +78,17 @@ public class LoginInformationProvider {
 
         public static JobType getById(int g) {
             for (JobType e : JobType.values()) {
-                if (e.id == g || (g == 508 && e.type == 8)) {
+                if (e.id == g) {
                     return e;
                 }
             }
             return Adventurer;
         }
     }
-
     private final static LoginInformationProvider instance = new LoginInformationProvider();
-    protected final List<String> ForbiddenName = new ArrayList<String>();
+    protected final List<String> ForbiddenName = new ArrayList<>();
     //gender, val, job
-    protected final Map<Triple<Integer, Integer, Integer>, List<Integer>> makeCharInfo = new HashMap<Triple<Integer, Integer, Integer>, List<Integer>>();
+    protected final Map<Triple<Integer, Integer, Integer>, List<Integer>> makeCharInfo = new HashMap<>();
     //0 = eyes 1 = hair 2 = haircolor 3 = skin 4 = top 5 = bottom 6 = shoes 7 = weapon
 
     public static LoginInformationProvider getInstance() {
@@ -130,10 +117,10 @@ public class LoginInformationProvider {
             }
             final int job = JobType.getByJob(dat.getName()).type;
             for (MapleData da : dat) {
-                final Triple<Integer, Integer, Integer> key = new Triple<Integer, Integer, Integer>(val, Integer.parseInt(da.getName()), job);
+                final Triple<Integer, Integer, Integer> key = new Triple<>(val, Integer.parseInt(da.getName()), job);
                 List<Integer> our = makeCharInfo.get(key);
                 if (our == null) {
-                    our = new ArrayList<Integer>();
+                    our = new ArrayList<>();
                     makeCharInfo.put(key, our);
                 }
                 for (MapleData d : da) {
@@ -149,16 +136,16 @@ public class LoginInformationProvider {
                         int val;
                         if (d.getName().endsWith("female")) {
                             val = 1;
-                        } else if (d.getName().endsWith("male")) {
+			} else if (d.getName().endsWith("male")) {
                             val = 0;
                         } else {
                             continue;
                         }
                         for (MapleData da : d) {
-                            final Triple<Integer, Integer, Integer> key = new Triple<Integer, Integer, Integer>(val, Integer.parseInt(da.getName()), type);
+                            final Triple<Integer, Integer, Integer> key = new Triple<>(val, Integer.parseInt(da.getName()), type);
                             List<Integer> our = makeCharInfo.get(key);
                             if (our == null) {
-                                our = new ArrayList<Integer>();
+                                our = new ArrayList<>();
                                 makeCharInfo.put(key, our);
                             }
                             for (MapleData dd : da) {
@@ -172,10 +159,10 @@ public class LoginInformationProvider {
         }
         final MapleData uA = infoData.getChildByPath("UltimateAdventurer");
         for (MapleData dat : uA) {
-            final Triple<Integer, Integer, Integer> key = new Triple<Integer, Integer, Integer>(-1, Integer.parseInt(dat.getName()), JobType.UltimateAdventurer.type);
+            final Triple<Integer, Integer, Integer> key = new Triple<>(-1, Integer.parseInt(dat.getName()), JobType.UltimateAdventurer.type);
             List<Integer> our = makeCharInfo.get(key);
             if (our == null) {
-                our = new ArrayList<Integer>();
+                our = new ArrayList<>();
                 makeCharInfo.put(key, our);
             }
             for (MapleData d : dat) {
@@ -183,13 +170,6 @@ public class LoginInformationProvider {
             }
         }
     }
-
-    public static boolean isExtendedSpJob(int jobId) {
-        return jobId >= 3100 && jobId <= 3512 || jobId / 100 == 22 || jobId / 100 == 23
-                || jobId == 2002 || jobId == 2001 || jobId == 3000 || jobId == 3001
-                || jobId == 508 || jobId == 2003 || jobId / 100 == 24 || jobId / 10 == 57;
-    }
-
 
     public final boolean isForbiddenName(final String in) {
         for (final String name : ForbiddenName) {
@@ -200,14 +180,14 @@ public class LoginInformationProvider {
         return false;
     }
 
-    public final boolean isEligibleItem(final int gender, final int val, final int job, final int item) {
+    public final boolean isEligibleItem(int gender, int val, int job, int item) {
         if (item < 0) {
             return false;
         }
-        final Triple<Integer, Integer, Integer> key = new Triple<Integer, Integer, Integer>(gender, val, job);
+        final Triple<Integer, Integer, Integer> key = new Triple<>(gender, val, job);
         final List<Integer> our = makeCharInfo.get(key);
         if (our == null) {
-            return false;
+	return false;
         }
         return our.contains(item);
     }

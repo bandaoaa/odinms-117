@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -28,15 +22,34 @@ package tools.data.output;
 
 import io.netty.buffer.ByteBuf;
 
+/**
+ * Uses a bytebuffer as an underlying storage method to hold a stream of bytes.
+ *
+ * @author Frz
+ * @version 1.0
+ * @since Revision 323
+ */
 public class ByteBufferOutputstream implements ByteOutputStream {
 
     private final ByteBuf bb;
 
+    /**
+     * Class constructor - Wraps this instance around ByteBuffer <code>bb</code>
+     *
+     * @param bb The <code>org.apache.mina.common.ByteBuffer</code> to wrap
+     *            this stream around.
+     */
     public ByteBufferOutputstream(final ByteBuf bb) {
         super();
         this.bb = bb;
     }
 
+    /**
+     * Writes a byte to the underlying buffer.
+     *
+     * @param b The byte to write.
+     * @see org.apache.mina.common.ByteBuffer#put(byte)
+     */
     @Override
     public void writeByte(final byte b) {
         this.bb.writeByte(b);

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,22 +20,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.locks.Lock;
-
-import client.MapleCharacterUtil;
 import client.MapleCharacter;
-
+import client.MapleCharacterUtil;
 import handling.world.CharacterTransfer;
-import handling.world.CheaterData;
 import handling.world.World;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import server.Timer.PingTimer;
 
 public class PlayerStorage {
@@ -50,14 +38,13 @@ public class PlayerStorage {
     private final Lock rL = mutex.readLock(), wL = mutex.writeLock();
     private final ReentrantReadWriteLock mutex2 = new ReentrantReadWriteLock();
     private final Lock rL2 = mutex2.readLock(), wL2 = mutex2.writeLock();
-    private final Map<String, MapleCharacter> nameToChar = new HashMap<String, MapleCharacter>();
-    private final Map<Integer, MapleCharacter> idToChar = new HashMap<Integer, MapleCharacter>();
-    private final Map<Integer, CharacterTransfer> PendingCharacter = new HashMap<Integer, CharacterTransfer>();
+    private final Map<String, MapleCharacter> nameToChar = new HashMap<>();
+    private final Map<Integer, MapleCharacter> idToChar = new HashMap<>();
+    private final Map<Integer, CharacterTransfer> PendingCharacter = new HashMap<>();
     private int channel;
 
-
     public PlayerStorage(int channel) {
-        this.channel = channel;
+	this.channel = channel;
         // Prune once every 15 minutes
         PingTimer.getInstance().register(new PersistingTask(), 60000);
     }
@@ -65,7 +52,7 @@ public class PlayerStorage {
     public final ArrayList<MapleCharacter> getAllCharacters() {
         rL.lock();
         try {
-            return new ArrayList<MapleCharacter>(idToChar.values());
+            return new ArrayList<>(idToChar.values());
         } finally {
             rL.unlock();
         }
@@ -76,13 +63,10 @@ public class PlayerStorage {
         try {
             nameToChar.put(chr.getName().toLowerCase(), chr);
             idToChar.put(chr.getId(), chr);
-            if (World.getConnected().get(0) > World.getMostPlayers()) {
-                World.updateMostPlayers();
-            }
         } finally {
             wL.unlock();
         }
-        World.Find.register(chr.getId(), chr.getName(), channel);
+	World.Find.register(chr.getId(), chr.getName(), channel);
     }
 
     public final void registerPendingPlayer(final CharacterTransfer chr, final int playerid) {
@@ -91,6 +75,15 @@ public class PlayerStorage {
             PendingCharacter.put(playerid, chr);//new Pair(System.currentTimeMillis(), chr));
         } finally {
             wL2.unlock();
+        }
+    }
+
+    public final void NameDereg(String name) {
+        wL.lock();
+        try {
+            nameToChar.remove(name.toLowerCase());
+        } finally {
+            wL.unlock();
         }
     }
 
@@ -117,7 +110,7 @@ public class PlayerStorage {
     }
 
     public final int pendingCharacterSize() {
-        return PendingCharacter.size();
+	return PendingCharacter.size();
     }
 
     public final void deregisterPendingPlayer(final int charid) {
@@ -160,46 +153,6 @@ public class PlayerStorage {
         return idToChar.size();
     }
 
-    public final List<CheaterData> getCheaters() {
-        final List<CheaterData> cheaters = new ArrayList<CheaterData>();
-
-        rL.lock();
-        try {
-            final Iterator<MapleCharacter> itr = nameToChar.values().iterator();
-            MapleCharacter chr;
-            while (itr.hasNext()) {
-                chr = itr.next();
-
-                if (chr.getCheatTracker().getPoints() > 0) {
-                    cheaters.add(new CheaterData(chr.getCheatTracker().getPoints(), MapleCharacterUtil.makeMapleReadable(chr.getName()) + " (" + chr.getCheatTracker().getPoints() + ") " + chr.getCheatTracker().getSummary()));
-                }
-            }
-        } finally {
-            rL.unlock();
-        }
-        return cheaters;
-    }
-
-    public final List<CheaterData> getReports() {
-        final List<CheaterData> cheaters = new ArrayList<CheaterData>();
-
-        rL.lock();
-        try {
-            final Iterator<MapleCharacter> itr = nameToChar.values().iterator();
-            MapleCharacter chr;
-            while (itr.hasNext()) {
-                chr = itr.next();
-
-                if (chr.getReportPoints() > 0) {
-                    cheaters.add(new CheaterData(chr.getReportPoints(), MapleCharacterUtil.makeMapleReadable(chr.getName()) + " (" + chr.getReportPoints() + ") " + chr.getReportSummary()));
-                }
-            }
-        } finally {
-            rL.unlock();
-        }
-        return cheaters;
-    }
-
     public final void disconnectAll() {
         disconnectAll(false);
     }
@@ -215,7 +168,7 @@ public class PlayerStorage {
                 if (!chr.isGM() || !checkGM) {
                     chr.getClient().disconnect(false, false, true);
                     chr.getClient().getSession().close();
-                    World.Find.forceDeregister(chr.getId(), chr.getName());
+		    World.Find.forceDeregister(chr.getId(), chr.getName());
                     itr.remove();
                 }
             }
@@ -255,6 +208,27 @@ public class PlayerStorage {
                 rL.unlock();
             }
         }
+        return sb.toString();
+    }
+
+    public final String getOnlinePlayers2() {
+        final StringBuilder sb = new StringBuilder();
+
+            rL.lock();
+            try {
+               MapleCharacter chr;
+               final Iterator<MapleCharacter> itr = nameToChar.values().iterator();
+                while (itr.hasNext()) {
+                    chr = itr.next();
+                    if (chr.isGM()) {
+                    sb.append(MapleCharacterUtil.makeMapleReadable(itr.next().getName()));
+                    sb.append(", ");
+                    }
+                }
+            } finally {
+                rL.unlock();
+            }
+        
         return sb.toString();
     }
 

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,24 +21,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.channel.handler;
 
 import client.MapleClient;
-import client.MapleCharacterUtil;
-import constants.ServerConstants;
 import scripting.NPCScriptManager;
-import scripting.EventManager;
-import tools.packet.CField;
 import tools.data.LittleEndianAccessor;
 
 public class UserInterfaceHandler {
 
-    public static final void CygnusSummon_NPCRequest(final MapleClient c) {
+    public static void CygnusSummon_NPCRequest(final MapleClient c) {
         if (c.getPlayer().getJob() == 2000) {
-            NPCScriptManager.getInstance().start(c, 1202000);
+            NPCScriptManager.getInstance().start(c, 1202000, null);
         } else if (c.getPlayer().getJob() == 1000) {
-            NPCScriptManager.getInstance().start(c, 1101008);
+            NPCScriptManager.getInstance().start(c, 1101008, null);
         }
     }
 
-    public static final void InGame_Poll(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void InGame_Poll(final LittleEndianAccessor slea, final MapleClient c) {
         /*if (ServerConstants.PollEnabled) {
             c.getPlayer().updateTick(slea.readInt());
             final int selection = slea.readInt();
@@ -58,7 +48,7 @@ public class UserInterfaceHandler {
         }*/
     }
 
-    public static final void ShipObjectRequest(final int mapid, final MapleClient c) {
+    public static void ShipObjectRequest(final int mapid, final MapleClient c) {
         // BB 00 6C 24 05 06 00 - Ellinia
         // BB 00 6E 1C 4E 0E 00 - Leafre
 

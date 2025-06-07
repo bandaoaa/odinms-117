@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.maps;
 
 import java.awt.Point;
+import java.util.Objects;
 
 public class MapleFoothold implements Comparable<MapleFoothold> {
 
@@ -44,14 +39,14 @@ public class MapleFoothold implements Comparable<MapleFoothold> {
     public boolean isWall() {
         return p1.x == p2.x;
     }
-
-    public Point getPoint1() {
-        return p1;
-    }
-
-    public Point getPoint2() {
-        return p2;
-    }
+	
+	public Point getPoint1() {
+		return p1;
+	}
+	
+	public Point getPoint2() {
+		return p2;
+	}
 
     public int getX1() {
         return p1.x;
@@ -69,6 +64,7 @@ public class MapleFoothold implements Comparable<MapleFoothold> {
         return p2.y;
     }
 
+    @Override
     public int compareTo(MapleFoothold o) {
         MapleFoothold other = (MapleFoothold) o;
         if (p2.y < other.getY1()) {
@@ -87,6 +83,15 @@ public class MapleFoothold implements Comparable<MapleFoothold> {
         }
         final MapleFoothold oth = (MapleFoothold) o;
         return oth.getY1() == p1.y && oth.getY2() == p2.y && oth.getX1() == p1.x && oth.getX2() == p2.x && id == oth.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.p1);
+        hash = 97 * hash + Objects.hashCode(this.p2);
+        hash = 97 * hash + this.id;
+        return hash;
     }
 
     public int getId() {

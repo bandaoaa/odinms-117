@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,18 +20,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package client;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.HashMap;
+import database.DatabaseConnection;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.io.Serializable;
-
-import tools.data.MaplePacketLittleEndianWriter;
-
-import database.DatabaseConnection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import tools.Pair;
+import tools.data.MaplePacketLittleEndianWriter;
 
 public class MapleKeyLayout implements Serializable {
 
@@ -46,7 +38,7 @@ public class MapleKeyLayout implements Serializable {
     private Map<Integer, Pair<Byte, Integer>> keymap;
 
     public MapleKeyLayout() {
-        keymap = new HashMap<Integer, Pair<Byte, Integer>>();
+        keymap = new HashMap<>();
     }
 
     public MapleKeyLayout(Map<Integer, Pair<Byte, Integer>> keys) {
@@ -57,16 +49,16 @@ public class MapleKeyLayout implements Serializable {
         changed = true;
         return keymap;
     }
-
-    public final void unchanged() {
-        changed = false;
-    }
+	
+	public final void unchanged() {
+		changed = false;
+	}
 
     public final void writeData(final MaplePacketLittleEndianWriter mplew) {
-        mplew.write(keymap.isEmpty() ? 1 : 0);
-        if (keymap.isEmpty()) {
-            return;
-        }
+		mplew.write(keymap.isEmpty() ? 1 : 0);
+		if (keymap.isEmpty()) {
+			return;
+		}
         Pair<Byte, Integer> binding;
         for (int x = 0; x < 89; x++) {
             binding = keymap.get(Integer.valueOf(x));
@@ -90,9 +82,9 @@ public class MapleKeyLayout implements Serializable {
         ps.setInt(1, charid);
         ps.execute();
         ps.close();
-        if (keymap.isEmpty()) {
-            return;
-        }
+		if (keymap.isEmpty()) {
+			return;
+		}
         boolean first = true;
         StringBuilder query = new StringBuilder();
 

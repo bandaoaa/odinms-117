@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import constants.GameConstants;
-
 import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
@@ -82,6 +75,9 @@ public class MapleLifeFactory {
         return map;
     }
 
+    /*
+    加載任務和NPC的設定
+    */
     public static final void loadQuestCounts() {
         if (questCount.size() > 0) {
             return;
@@ -103,21 +99,21 @@ public class MapleLifeFactory {
                 }
             }
         }
-        for (MapleData c : npcStringData) {
-            int nid = Integer.parseInt(c.getName());
-            String n = StringUtil.getLeftPaddedStr(nid + ".img", '0', 11);
-            try {
-                if (npcData.getData(n) != null) {//only thing we really have to do is check if it exists. if we wanted to, we could get the script as well :3
-                    String name = MapleDataTool.getString("name", c, "MISSINGNO");
-//                    if (name.contains("Maple TV") || name.contains("Baby Moon Bunny")) {
-//                        continue;
-//                    }
-                    npcNames.put(nid, name);
-                }
-            } catch (NullPointerException e) {
-            } catch (RuntimeException e) { //swallow, don't add if
-            }
-        }
+	for (MapleData c : npcStringData) {
+	    int nid = Integer.parseInt(c.getName());
+	    String n = StringUtil.getLeftPaddedStr(nid + ".img", '0', 11);
+	    try {
+	    	if (npcData.getData(n) != null) {//only thing we really have to do is check if it exists. if we wanted to, we could get the script as well :3
+            	    String name = MapleDataTool.getString("name", c, "MISSINGNO");
+		    if (name.contains("Baby Moon Bunny")) {
+		        continue;
+		    }
+		    npcNames.put(nid, name);
+	    	}
+	    } catch (NullPointerException e) {
+	    } catch (RuntimeException e) { //swallow, don't add if 
+	    }
+	}
     }
 
     public static final List<Integer> getQuestCount(final int id) {
@@ -126,44 +122,47 @@ public class MapleLifeFactory {
 
     public static MapleMonster getMonster(int mid) {
         MapleMonsterStats stats = getMonsterStats(mid);
-        if (stats == null) {
-            return null;
+		if (stats == null) {
+			return null;
         }
         return new MapleMonster(mid, stats);
     }
 
+    /*
+    加載怪物的設定
+    */
     public static MapleMonsterStats getMonsterStats(int mid) {
         MapleMonsterStats stats = monsterStats.get(Integer.valueOf(mid));
 
         if (stats == null) {
             MapleData monsterData = null;
-            try {
-                monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
-            } catch (RuntimeException e) {
-                return null;
-            }
+	    try {
+		monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
+	    } catch (RuntimeException e) {
+		return null;
+	    }
             if (monsterData == null) {
                 return null;
             }
             MapleData monsterInfoData = monsterData.getChildByPath("info");
             stats = new MapleMonsterStats(mid);
 
-            stats.setHp(GameConstants.getPartyPlayHP(mid) > 0 ? GameConstants.getPartyPlayHP(mid) : MapleDataTool.getIntConvert("maxHP", monsterInfoData));
+            stats.setHp((long) MapleDataTool.getIntConvert("maxHP", monsterInfoData)); //超過21億最大HP設定
             stats.setMp(MapleDataTool.getIntConvert("maxMP", monsterInfoData, 0));
-            stats.setExp(mid == 9300027 ? 0 : (GameConstants.getPartyPlayEXP(mid) > 0 ? GameConstants.getPartyPlayEXP(mid) : MapleDataTool.getIntConvert("exp", monsterInfoData, 0)));
+            stats.setExp(mid == 9300027 ? 0 : MapleDataTool.getIntConvert("exp", monsterInfoData, 0));
             stats.setLevel((short) MapleDataTool.getIntConvert("level", monsterInfoData, 1));
             stats.setCharismaEXP((short) MapleDataTool.getIntConvert("charismaEXP", monsterInfoData, 0));
             stats.setRemoveAfter(MapleDataTool.getIntConvert("removeAfter", monsterInfoData, 0));
             stats.setrareItemDropLevel((byte) MapleDataTool.getIntConvert("rareItemDropLevel", monsterInfoData, 0));
             stats.setFixedDamage(MapleDataTool.getIntConvert("fixedDamage", monsterInfoData, -1));
             stats.setOnlyNormalAttack(MapleDataTool.getIntConvert("onlyNormalAttack", monsterInfoData, 0) > 0);
-            stats.setBoss(GameConstants.getPartyPlayHP(mid) > 0 || MapleDataTool.getIntConvert("boss", monsterInfoData, 0) > 0 || mid == 8810018 || mid == 9410066 || (mid >= 8810118 && mid <= 8810122));
+            stats.setBoss(MapleDataTool.getIntConvert("boss", monsterInfoData, 0) > 0 || mid == 8810018 || mid == 9410066 || (mid >= 8810118 && mid <= 8810122));
             stats.setExplosiveReward(MapleDataTool.getIntConvert("explosiveReward", monsterInfoData, 0) > 0);
             stats.setUndead(MapleDataTool.getIntConvert("undead", monsterInfoData, 0) > 0);
             stats.setEscort(MapleDataTool.getIntConvert("escort", monsterInfoData, 0) > 0);
-            stats.setPartyBonus(GameConstants.getPartyPlayHP(mid) > 0 || MapleDataTool.getIntConvert("partyBonusMob", monsterInfoData, 0) > 0);
+            stats.setPartyBonus(MapleDataTool.getIntConvert("partyBonusMob", monsterInfoData, 0) > 0);
             stats.setPartyBonusRate(MapleDataTool.getIntConvert("partyBonusR", monsterInfoData, 0));
-            if (mobStringData.getChildByPath(String.valueOf(mid)) != null) {
+            if (mobStringData.getChildByPath(String.valueOf(mid)) != null) { 
                 stats.setName(MapleDataTool.getString("name", mobStringData.getChildByPath(String.valueOf(mid)), "MISSINGNO"));
             }
             stats.setBuffToGive(MapleDataTool.getIntConvert("buff", monsterInfoData, -1));
@@ -221,7 +220,7 @@ public class MapleLifeFactory {
                     MapleDataTool.getString("portal", d, "sp")));
                 }
             }
-            
+
             final MapleData patrol = monsterInfoData.getChildByPath("patrol");
             if (patrol != null) {
                 stats.setPatrol(true);
@@ -272,10 +271,11 @@ public class MapleLifeFactory {
             for (int i = 0; true; i++) { // TODO: Check and reprint all available values again..doing like below is a ridiculous way
                 final MapleData monsterAtt = monsterInfoData.getChildByPath("attack/" + i);
                 final MapleData attackData = monsterData.getChildByPath("attack" + (i + 1) + "/info");
+
                 if (attackData == null || monsterAtt == null) {
                     break;
                 }
-                final MobAttackInfo ret = new MobAttackInfo();
+                final MobAttackInfo ret = new MobAttackInfo();	
 
                 boolean deadlyAttack = monsterAtt.getChildByPath("deadlyAttack") != null;
                 if (!deadlyAttack) {
@@ -327,17 +327,17 @@ public class MapleLifeFactory {
 
                 boolean magic = MapleDataTool.getInt("magic", monsterAtt, 0) > 0;
                 if (!magic) {
-                    magic = MapleDataTool.getInt("magic", attackData, 0) > 0;
+		    magic = MapleDataTool.getInt("magic", attackData, 0) > 0;
                 }
-                ret.magic = magic;
+                ret.magic = magic;				
                 ret.isElement = monsterAtt.getChildByPath("elemAttr") != null; // we handle it like this, i don't know what it does
 
                 if (attackData.getChildByPath("range") != null) { // Definitely in attackData
-                    ret.range = MapleDataTool.getInt("range/r", attackData, 0);
-                    if (attackData.getChildByPath("range/lt") != null && attackData.getChildByPath("range/rb") != null) {
-                        ret.lt = (Point) attackData.getChildByPath("range/lt").getData();
-                        ret.rb = (Point) attackData.getChildByPath("range/rb").getData();
-                    }
+		    ret.range = MapleDataTool.getInt("range/r", attackData, 0);
+		    if(attackData.getChildByPath("range/lt") != null && attackData.getChildByPath("range/rb") != null) {
+		        ret.lt = (Point)attackData.getChildByPath("range/lt").getData();
+                        ret.rb = (Point)attackData.getChildByPath("range/rb").getData();
+		    }
                 }
                 stats.addMobAttack(ret);
             }
@@ -347,7 +347,7 @@ public class MapleLifeFactory {
                 hpdisplaytype = 0;
             } else if (stats.isFriendly()) {
                 hpdisplaytype = 1;
-            } else if (mid >= 9300184 && mid <= 9300215) { // Mulung TC mobs
+            } else if (mid >= 9305100 && mid <= 9305339) {  // 道場怪物血量顯示
                 hpdisplaytype = 2;
             } else if (!stats.isBoss() || mid == 9410066 || stats.isPartyBonus()) { // Not boss and dong dong chiang
                 hpdisplaytype = 3;
@@ -389,20 +389,20 @@ public class MapleLifeFactory {
     public static MapleNPC getNPC(final int nid) {
         String name = npcNames.get(nid);
         if (name == null) {
-            return null;
+	    return null;
         }
         return new MapleNPC(nid, name);
     }
 
     public static int getRandomNPC() {
-        List<Integer> vals = new ArrayList<Integer>(npcNames.keySet());
-        int ret = 0;
-        while (ret <= 0) {
-            ret = vals.get(Randomizer.nextInt(vals.size()));
-            if (npcNames.get(ret).contains("MISSINGNO")) {
-                ret = 0;
-            }
-        }
-        return ret;
+	List<Integer> vals = new ArrayList<Integer>(npcNames.keySet());
+	int ret = 0;
+	while (ret <= 0) {
+	    ret = vals.get(Randomizer.nextInt(vals.size()));
+	    if (npcNames.get(ret).contains("MISSINGNO")) {
+		ret = 0;
+	    }
+	}
+	return ret;
     }
 }

@@ -1,69 +1,26 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
+import client.MapleTrait.MapleTraitType;
+import client.*;
+import client.inventory.EquipAdditions.RingSet;
+import client.inventory.*;
+import constants.GameConstants;
 import java.awt.Point;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import client.inventory.MapleInventoryIdentifier;
-import constants.GameConstants;
-import client.inventory.Equip;
-import client.inventory.InventoryException;
-import client.inventory.Item;
-import client.inventory.ItemFlag;
-import client.PlayerStats;
-import client.MapleBuffStat;
-import client.inventory.MaplePet;
-import client.MapleCharacter;
-import client.MapleClient;
-import client.MapleQuestStatus;
-import client.MapleTrait.MapleTraitType;
-import client.Skill;
-import client.SkillEntry;
-import client.SkillFactory;
-import client.inventory.*;
+import scripting.EventManager;
+import scripting.NPCScriptManager;
 import server.maps.AramiaFireWorks;
-import tools.packet.MTSCSPacket;
-import tools.StringUtil;
-import constants.MapConstants;
-import constants.ServerConstants;
-import constants.TutorialConstants;
-
-import java.util.HashMap;
-
 import server.quest.MapleQuest;
+import tools.StringUtil;
 import tools.packet.CWvsContext;
 import tools.packet.CWvsContext.InfoPacket;
 import tools.packet.CWvsContext.InventoryPacket;
+import tools.packet.MTSCSPacket;
 
 public class MapleInventoryManipulator {
-
 
     public static void addRing(MapleCharacter chr, int itemId, int ringId, int sn, String partner) {
         CashItemInfo csi = CashItemFactory.getInstance().getItem(sn);
@@ -136,11 +93,13 @@ public class MapleInventoryManipulator {
 
     public static byte addId(MapleClient c, int itemId, short quantity, String owner, MaplePet pet, long period, String gmLog) {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-        if ((ii.isPickupRestricted(itemId) && c.getPlayer().haveItem(itemId, 1, true, false)) || (!ii.itemExists(itemId))) {
-            c.getSession().write(InventoryPacket.getInventoryFull());
-            c.getSession().write(InventoryPacket.showItemUnavailable());
-            return -1;
-        }
+        /*        if ((ii.isPickupRestricted(itemId) && c.getPlayer().haveItem(itemId, 1, true, false)) || (!ii.itemExists(itemId))) {
+         c.getSession().write(InventoryPacket.getInventoryFull());
+         c.getSession().write(InventoryPacket.showItemUnavailable());
+         return -1;
+         }
+         * 
+         */
         final MapleInventoryType type = GameConstants.getInventoryType(itemId);
         int uniqueid = getUniqueId(itemId, pet);
         short newSlot = -1;
@@ -244,7 +203,7 @@ public class MapleInventoryManipulator {
                     c.getPlayer().getStat().handleProfessionTool(c.getPlayer());
                 }
             } else {
-                throw new InventoryException("Trying to create equip with non-one quantity.");
+                throw new InventoryException("Trying to create equip with non-one quantity");
             }
         }
         c.getPlayer().havePartyQuest(itemId);
@@ -256,11 +215,13 @@ public class MapleInventoryManipulator {
             return null;
         }
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-        if ((ii.isPickupRestricted(itemId) && c.getPlayer().haveItem(itemId, 1, true, false)) || (!ii.itemExists(itemId))) {
-            c.getSession().write(InventoryPacket.getInventoryFull());
-            c.getSession().write(InventoryPacket.showItemUnavailable());
-            return null;
-        }
+        /*        if ((ii.isPickupRestricted(itemId) && c.getPlayer().haveItem(itemId, 1, true, false)) || (!ii.itemExists(itemId))) {
+         c.getSession().write(InventoryPacket.getInventoryFull());
+         c.getSession().write(InventoryPacket.showItemUnavailable());
+         return null;
+         }
+         * 
+         */
         final MapleInventoryType type = GameConstants.getInventoryType(itemId);
 
         if (!type.equals(MapleInventoryType.EQUIP)) {
@@ -340,12 +301,15 @@ public class MapleInventoryManipulator {
                 c.getPlayer().havePartyQuest(item.getItemId());
                 return item;
             } else {
-                throw new InventoryException("Trying to create equip with non-one quantity.");
+                throw new InventoryException("Trying to create equip with non-one quantity");
             }
         }
         return null;
     }
 
+    /*
+    道具拾取相關設定
+    */
     public static boolean addFromDrop(final MapleClient c, final Item item, final boolean show) {
         return addFromDrop(c, item, show, false);
     }
@@ -353,11 +317,187 @@ public class MapleInventoryManipulator {
     public static boolean addFromDrop(final MapleClient c, Item item, final boolean show, final boolean enhance) {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
 
-        if (c.getPlayer() == null || (ii.isPickupRestricted(item.getItemId()) && c.getPlayer().haveItem(item.getItemId(), 1, true, false)) || (!ii.itemExists(item.getItemId()))) {
-            c.getSession().write(InventoryPacket.getInventoryFull());
-            c.getSession().write(InventoryPacket.showItemUnavailable());
+        // 異次元通行證 月妙的年糕 氣泡 新進海賊的證明 中級海賊的證明 資深海賊的證明 第三片小碎片 怪物珠 
+        //if (item.getItemId() == 2430115 || item.getItemId() == 2430287  || item.getItemId() == 2430364 || item.getItemId() == 2430373 || item.getItemId() == 2430374 || item.getItemId() == 2430375 || item.getItemId() == 2430383 || item.getItemId() == 2430492) {
+        //    NPCScriptManager.getInstance().startItemScript(c, 9010000, "" + item.getItemId());
+        //    c.getSession().write(CWvsContext.enableActions());
+        //    return false;
+        //}
+
+        final EventManager LudiPQ = c.getChannelServer().getEventSM().getEventManager("LudiPQ"); //遺棄之塔101
+
+        if (item.getItemId() == 2430115 && LudiPQ != null && c.getPlayer().getEventInstance().getProperty("drop") == null) {
+
+            c.getPlayer().getEventInstance().setProperty("count", c.getPlayer().getEventInstance().getProperty("count") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count")) + 1 + "");
+
+            c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("You have collected " + c.getPlayer().getEventInstance().getProperty("count") + " Passes."));
+
+            if (c.getPlayer().getEventInstance().getProperty("count").equals("20")) {
+
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("A portal to the next stage has opened."));
+                c.getPlayer().getMap().startMapEffect("All of the passes have been gathered. Proceed to the next stage by talking to the Red Balloon.", 5120018);
+
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("gate", 2));
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("quest/party/clear", 3));
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
+
+                c.getPlayer().getEventInstance().setProperty("stage1", "1");
+                c.getPlayer().getEventInstance().setProperty("drop", "1");
+            }
+            c.getSession().write(CWvsContext.enableActions());
             return false;
         }
+
+        final EventManager HenesysPQ = c.getChannelServer().getEventSM().getEventManager("HenesysPQ"); //月妙年糕
+
+        if (item.getItemId() == 2430287 && HenesysPQ != null && c.getPlayer().getEventInstance().getProperty("drop") == null) {
+
+            c.getPlayer().getEventInstance().setProperty("count", c.getPlayer().getEventInstance().getProperty("count") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count")) + 1 + "");
+
+            c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("Moon Bunny's Rice Cakes x" + c.getPlayer().getEventInstance().getProperty("count") + " have been obtained."));
+
+            if (c.getPlayer().getEventInstance().getProperty("count").equals("10")) {
+
+                c.getPlayer().getMap().startMapEffect("You've gathered 10 Moon Bunny's Rice Cakes for me. Yum, yum! So tasty. Come see me again so l can give you a reward.", 5120016);
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("quest/party/clear", 3));
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
+
+                for (MapleCharacter ddd : c.getPlayer().getMap().getCharactersThreadsafe()) {
+                    if (ddd.getQuestNAdd(MapleQuest.getInstance(1200)).getStatus() < 2){
+                        MapleQuest.getInstance(1200).forceComplete(ddd, 0);
+                        ddd.getClient().getSession().write(tools.packet.CWvsContext.getShowQuestCompletion(1200));
+                    }
+                    ddd.gainExp(ddd.getLevel() * 500, true, true, true);
+                }
+
+                c.getPlayer().getMap().killAllMonsters(true);
+                c.getPlayer().getMap().removeDrops();
+                c.getPlayer().getMap().setSpawns(false);
+                c.getPlayer().getEventInstance().setProperty("drop", "1");
+                HenesysPQ.setProperty("state", "2");
+            }
+            c.getSession().write(CWvsContext.enableActions());
+            return false;
+        }
+
+        final EventManager Kenta = c.getChannelServer().getEventSM().getEventManager("Kenta"); //陷入危險的坎特
+
+        if (item.getItemId() == 2430364 && Kenta != null && c.getPlayer().getEventInstance().getProperty("drop") == null) {
+
+            c.getPlayer().getEventInstance().setProperty("count", c.getPlayer().getEventInstance().getProperty("count") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count")) + 1 + "");
+
+            c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("Air Bubble " + c.getPlayer().getEventInstance().getProperty("count") + " have been obtained."));
+
+            if (c.getPlayer().getEventInstance().getProperty("count").equals("20")) {
+
+                c.getPlayer().getMap().startMapEffect("I...can't hold...my breath much longer. Get me some Air Bubbles!", 5120052);
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("quest/party/clear", 3));
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
+
+                c.getPlayer().getMap().killAllMonsters(true);
+                c.getPlayer().getMap().resetFully(false);
+                c.getPlayer().getMap().setSpawns(false);
+                c.getPlayer().getEventInstance().setProperty("drop", "1");
+            }
+            c.getSession().write(CWvsContext.enableActions());
+            return false;
+        }
+
+        final EventManager Pirate = c.getChannelServer().getEventSM().getEventManager("Pirate"); //海盜船
+
+        if ((item.getItemId() == 2430373 || item.getItemId() == 2430374 || item.getItemId() == 2430375) && Pirate != null && c.getPlayer().getEventInstance().getProperty("drop") == null) {
+
+            if (item.getItemId() == 2430373) { //新進海賊的證明
+                c.getPlayer().getEventInstance().setProperty("count0", c.getPlayer().getEventInstance().getProperty("count0") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count0")) + 1 + "");
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("Rookie Pirate Mark " + c.getPlayer().getEventInstance().getProperty("count0") + " /10"));
+
+                if (c.getPlayer().getEventInstance().getProperty("count0").equals("10")) {
+                    c.getPlayer().getMap().startMapEffect("You've obtained all the Rookie Pirate Marks. Now you must find the Rising Pirate Marks.", 5120020);
+                    c.getPlayer().getMap().killAllMonsters(true);
+                    c.getPlayer().getEventInstance().setProperty("stage1a", "1");
+                }
+            }
+
+            if (item.getItemId() == 2430374) { //中級海賊的證明
+                c.getPlayer().getEventInstance().setProperty("count1", c.getPlayer().getEventInstance().getProperty("count1") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count1")) + 1 + "");
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("Rising Pirate Mark " + c.getPlayer().getEventInstance().getProperty("count1") + " /10"));
+
+                if (c.getPlayer().getEventInstance().getProperty("count1").equals("10")) {
+                    c.getPlayer().getMap().startMapEffect("You've obtained all the Rising Pirate Marks. Now it's time the find the last marks.", 5120020);
+                    c.getPlayer().getMap().killAllMonsters(true);
+                    c.getPlayer().getEventInstance().setProperty("stage1a", "2");
+                }
+            }
+
+            if (item.getItemId() == 2430375) { //資深海賊的證明
+                c.getPlayer().getEventInstance().setProperty("count2", c.getPlayer().getEventInstance().getProperty("count2") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count2")) + 1 + "");
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("Veteran Pirate Mark " + c.getPlayer().getEventInstance().getProperty("count2") + " /10"));
+
+                if (c.getPlayer().getEventInstance().getProperty("count2").equals("10")) {
+                    c.getPlayer().getMap().startMapEffect("You've obtained all the Veteran Pirate Marks. Now I will break the last seal. Please go through the portal.", 5120020);
+                    c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("quest/party/clear", 3));
+                    c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
+                    c.getPlayer().getMap().killAllMonsters(true);
+                    c.getPlayer().getEventInstance().setProperty("stage1", "1");
+                    c.getPlayer().getEventInstance().setProperty("drop", "1");
+                }
+            }
+            c.getSession().write(CWvsContext.enableActions());
+            return false;
+        }
+
+        final EventManager OrbisPQ = c.getChannelServer().getEventSM().getEventManager("OrbisPQ"); //雅典娜禁地
+
+        if (item.getItemId() == 2430383 && OrbisPQ != null && c.getPlayer().getEventInstance().getProperty("drop") == null) {
+
+            c.getPlayer().getEventInstance().setProperty("count", c.getPlayer().getEventInstance().getProperty("count") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count")) + 1 + "");
+
+            c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("4th Small Fragment " + c.getPlayer().getEventInstance().getProperty("count") + " / 30"));
+
+            if (c.getPlayer().getEventInstance().getProperty("count").equals("30")) {
+
+                c.getPlayer().getMap().startMapEffect("All of the small pieces have been obtained. Get the fourth piece from Chamberain Eak, and proceed to the center room.", 5120019);
+
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("quest/party/clear", 3));
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
+
+                c.getPlayer().getEventInstance().setProperty("stage2a", "1");
+                c.getPlayer().getEventInstance().setProperty("drop", "1");
+            }
+            c.getSession().write(CWvsContext.enableActions());
+            return false;
+        }
+
+        final EventManager Ellin = c.getChannelServer().getEventSM().getEventManager("Ellin"); //毒霧森林
+
+        if (item.getItemId() == 2430492 && Ellin != null && c.getPlayer().getEventInstance().getProperty("drop") == null) {
+
+            c.getPlayer().getEventInstance().setProperty("count", c.getPlayer().getEventInstance().getProperty("count") == null ? "1" : Integer.parseInt(c.getPlayer().getEventInstance().getProperty("count")) + 1 + "");
+
+            c.getPlayer().getMap().broadcastMessage(tools.packet.CWvsContext.getTopMsg("Monster Marbles: " + c.getPlayer().getEventInstance().getProperty("count") + " / 20"));
+
+            if (c.getPlayer().getEventInstance().getProperty("count").equals("20")) {
+
+                c.getPlayer().getMap().startMapEffect("You have obtained all the Monster Marbles. Have your party leader talk to Ellin to move on to the next stage.", 5120023);
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("quest/party/clear", 3));
+                c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
+
+                c.getPlayer().getMap().killAllMonsters(true);
+                c.getPlayer().getMap().removeDrops();
+                c.getPlayer().getMap().setSpawns(false);
+                c.getPlayer().getEventInstance().setProperty("drop", "1");
+            }
+            c.getSession().write(CWvsContext.enableActions());
+            return false;
+        }
+
+        /*        if (c.getPlayer() == null || (ii.isPickupRestricted(item.getItemId()) && c.getPlayer().haveItem(item.getItemId(), 1, true, false)) || (!ii.itemExists(item.getItemId()))) {
+         c.getSession().write(InventoryPacket.getInventoryFull());
+         c.getSession().write(InventoryPacket.showItemUnavailable());
+         return false;
+         }
+         * 
+         */
         final int before = c.getPlayer().itemQuantity(item.getItemId());
         short quantity = item.getQuantity();
         final MapleInventoryType type = GameConstants.getInventoryType(item.getItemId());
@@ -439,19 +579,19 @@ public class MapleInventoryManipulator {
                     c.getPlayer().getStat().handleProfessionTool(c.getPlayer());
                 }
             } else {
-                throw new RuntimeException("Trying to create equip with non-one quantity.");
+                throw new RuntimeException("Trying to create equip with non-one quantity");
             }
-        }
-        if (item.getQuantity() >= 50 && item.getItemId() == 2340000) {
-            c.setMonitored(true);
         }
         if (before == 0) {
             switch (item.getItemId()) {
                 case AramiaFireWorks.KEG_ID:
+                    c.getPlayer().dropMessage(5, "You have gained a Powder Keg, you can give this in to Aramia of Henesys.");
                     break;
                 case AramiaFireWorks.SUN_ID:
+                    c.getPlayer().dropMessage(5, "You have gained a Warm Sun, you can give this in to Maple Tree Hill through @joyce.");
                     break;
                 case AramiaFireWorks.DEC_ID:
+                    c.getPlayer().dropMessage(5, "You have gained a Tree Decoration, you can give this in to White Christmas Hill through @joyce.");
                     break;
             }
         }
@@ -474,10 +614,12 @@ public class MapleInventoryManipulator {
 
     public static boolean checkSpace(final MapleClient c, final int itemid, int quantity, final String owner) {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-        if (c.getPlayer() == null || (ii.isPickupRestricted(itemid) && c.getPlayer().haveItem(itemid, 1, true, false)) || (!ii.itemExists(itemid))) {
-            c.getSession().write(CWvsContext.enableActions());
-            return false;
-        }
+        /*        if (c.getPlayer() == null || (ii.isPickupRestricted(itemid) && c.getPlayer().haveItem(itemid, 1, true, false)) || (!ii.itemExists(itemid))) {
+         c.getSession().write(CWvsContext.enableActions());
+         return false;
+         }
+         * 
+         */
         if (quantity <= 0 && !GameConstants.isRechargable(itemid)) {
             return false;
         }
@@ -524,6 +666,7 @@ public class MapleInventoryManipulator {
             return false;
         }
         final Item item = c.getPlayer().getInventory(type).getItem(slot);
+
         if (item != null) {
             final boolean allowZero = consume && GameConstants.isRechargable(item.getItemId());
             c.getPlayer().getInventory(type).removeItem(slot, quantity, allowZero);
@@ -652,21 +795,25 @@ public class MapleInventoryManipulator {
                 c.getSession().write(InventoryPacket.moveAndMergeInventoryItem(type, src, dst, ((Item) c.getPlayer().getInventory(type).getItem(dst)).getQuantity(), bag, switchSrcDst, bothBag));
             }
         } else {
+            if (c.getPlayer().isGM()) {
+                c.getPlayer().dropMessage(6, "ITEM ID " + source.getItemId());
+            }
             c.getSession().write(InventoryPacket.moveInventoryItem(type, switchSrcDst ? dst : src, switchSrcDst ? src : dst, eqIndicator, bag, bothBag));
         }
     }
 
+    /*
+    裝備道具相關設定
+    */
     public static void equip(final MapleClient c, final short src, short dst) {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         final MapleCharacter chr = c.getPlayer();
         if (chr == null || (GameConstants.GMS && dst == -55)) {
             return;
         }
-        c.getPlayer().getStat().recalcLocalStats(c.getPlayer());
         final PlayerStats statst = c.getPlayer().getStat();
-        statst.recalcLocalStats(c.getPlayer());
         Equip source = (Equip) chr.getInventory(MapleInventoryType.EQUIP).getItem(src);
-        Equip target = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
+        Equip target;
 
         if (source == null || source.getDurability() == 0 || GameConstants.isHarvesting(source.getItemId())) {
             c.getSession().write(CWvsContext.enableActions());
@@ -682,17 +829,17 @@ public class MapleInventoryManipulator {
         if (dst > -1200 && dst < -999 && !GameConstants.isEvanDragonItem(source.getItemId()) && !GameConstants.isMechanicItem(source.getItemId())) {
             c.getSession().write(CWvsContext.enableActions());
             return;
-        } else if ((dst <= -1200 || (dst >= -999 && dst < -99)) && !stats.containsKey("cash")) {
+        } else if (((dst <= -1200 && dst > -5000) || (dst >= -999 && dst < -99)) && !stats.containsKey("cash")) {
             c.getSession().write(CWvsContext.enableActions());
             return;
-        } else if (dst <= -1300 && c.getPlayer().getAndroid() == null) {
-            c.getSession().write(CWvsContext.enableActions());
-            return;
-        }
-        if (!ii.canEquip(stats, source.getItemId(), chr.getLevel(), chr.getJob(), chr.getFame(), statst.getTotalStr(), statst.getTotalDex(), statst.getTotalLuk(), statst.getTotalInt(), c.getPlayer().getStat().levelBonus)) {
+        } else if ((dst <= -1300 && dst > -5000) && c.getPlayer().getAndroid() == null) {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
+        //  if (!ii.canEquip(stats, source.getItemId(), chr.getLevel(), chr.getJob(), chr.getFame(), statst.getTotalStr(), statst.getTotalDex(), statst.getTotalLuk(), statst.getTotalInt())) {
+        ////    c.getSession().write(CWvsContext.enableActions());
+        //    return;
+        // }
         if (GameConstants.isWeapon(source.getItemId()) && dst != -10 && dst != -11) {
             c.getSession().write(CWvsContext.enableActions());
             return;
@@ -712,9 +859,10 @@ public class MapleInventoryManipulator {
                 return;
             }
         }
-        if (GameConstants.isKatara(source.getItemId()) || source.getItemId() / 10000 == 135) {
+        if (GameConstants.isKatara(source.getItemId()) || source.getItemId() / 10000 == 135 || source.getItemId() == 1098000) {
             dst = (byte) -10; //shield slot
         }
+
         if (GameConstants.isEvanDragonItem(source.getItemId()) && (chr.getJob() < 2200 || chr.getJob() > 2218)) {
             c.getSession().write(CWvsContext.enableActions());
             return;
@@ -782,7 +930,7 @@ public class MapleInventoryManipulator {
                         c.getSession().write(InventoryPacket.getShowInventoryFull());
                         return;
                     }
-                } else if (weapon != null && GameConstants.isTwoHanded(weapon.getItemId())) {
+                } else if (weapon != null && GameConstants.isTwoHanded(weapon.getItemId()) && !GameConstants.isJett(chr.getJob())) {
                     if (chr.getInventory(MapleInventoryType.EQUIP).isFull()) {
                         c.getSession().write(InventoryPacket.getInventoryFull());
                         c.getSession().write(InventoryPacket.getShowInventoryFull());
@@ -794,7 +942,7 @@ public class MapleInventoryManipulator {
             }
             case -11: { // Weapon
                 Item shield = chr.getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -10);
-                if (shield != null && GameConstants.isTwoHanded(source.getItemId())) {
+                if (shield != null && GameConstants.isTwoHanded(source.getItemId()) && !GameConstants.isJett(chr.getJob())) {
                     if (chr.getInventory(MapleInventoryType.EQUIP).isFull()) {
                         c.getSession().write(InventoryPacket.getInventoryFull());
                         c.getSession().write(InventoryPacket.getShowInventoryFull());
@@ -819,7 +967,13 @@ public class MapleInventoryManipulator {
                 c.getSession().write(InventoryPacket.updateSpecialItemUse_(source, MapleInventoryType.EQUIP.getType(), c.getPlayer()));
             }
         }
-        if (source.getItemId() / 10000 == 166) {
+        if (source.getItemId() / 10000 == 166) { //佩戴机器人
+            Equip target2 = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -54);
+            if(target2 == null) {
+                c.getPlayer().dropMessage(1, "The Android is not powered. Please insert a Mechanical Heart.");
+                c.getSession().write(CWvsContext.enableActions());
+                return;
+            }
             if (source.getAndroid() == null) {
                 final int uid = MapleInventoryIdentifier.getInstance();
                 source.setUniqueId(uid);
@@ -863,14 +1017,6 @@ public class MapleInventoryManipulator {
         if (source.getItemId() / 10000 == 190 || source.getItemId() / 10000 == 191) {
             c.getPlayer().cancelEffectFromBuffStat(MapleBuffStat.MONSTER_RIDING);
             c.getPlayer().cancelEffectFromBuffStat(MapleBuffStat.MECH_CHANGE);
-        } else if (GameConstants.isReverseItem(source.getItemId())) {
-            // chr.finishAchievement(9);
-        } else if (GameConstants.isTimelessItem(source.getItemId())) {
-            //chr.finishAchievement(10);
-        } else if (stats.containsKey("reqLevel") && stats.get("reqLevel") >= 140) {
-            // chr.finishAchievement(41);
-        } else if (stats.containsKey("reqLevel") && stats.get("reqLevel") >= 130) {
-            //chr.finishAchievement(40);
         } else if (source.getItemId() == 1122017) {
             chr.startFairySchedule(true, true);
         }
@@ -904,6 +1050,9 @@ public class MapleInventoryManipulator {
         chr.equipChanged();
     }
 
+    /*
+    取下裝備設定
+    */
     public static void unequip(final MapleClient c, final short src, final short dst) {
         Equip source = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem(src);
         Equip target = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIP).getItem(dst);
@@ -914,13 +1063,6 @@ public class MapleInventoryManipulator {
         if (target != null && src <= 0) { // do not allow switching with equip
             c.getSession().write(InventoryPacket.getInventoryFull());
             return;
-        }
-        if (MapConstants.isStorylineMap(c.getPlayer().getMapId())) {
-            if (TutorialConstants.isBeginnerEquip(source.getItemId())) {
-                c.getPlayer().dropMessage(5, TutorialConstants.getEquipBlockedMsg());
-                c.getSession().write(CWvsContext.enableActions());
-                return;
-            }
         }
         c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).removeSlot(src);
         if (target != null) {
@@ -993,16 +1135,22 @@ public class MapleInventoryManipulator {
             return false;
         }
         final Item source = c.getPlayer().getInventory(type).getItem(src);
+        int[] blocked = {4000038, 4001116};
+        for (int i = 0; i < blocked.length; i++) {
+            if (source.getItemId() == blocked[i]) {
+                c.getPlayer().dropMessage(1, "You may not drop this item! They can only be traded.");
+                c.getSession().write(CWvsContext.enableActions());
+                return false;
+            }
+        }
         if (quantity < 0 || source == null || (GameConstants.GMS && src == -55) || (!npcInduced && GameConstants.isPet(source.getItemId())) || (quantity == 0 && !GameConstants.isRechargable(source.getItemId())) || c.getPlayer().inPVP()) {
             c.getSession().write(CWvsContext.enableActions());
             return false;
         }
-        if (MapConstants.isStorylineMap(c.getPlayer().getMapId())) {
-            if (TutorialConstants.isBeginnerEquip(source.getItemId()) || source.getItemId() == ServerConstants.CURRENCY) {
-                c.getPlayer().dropMessage(5, TutorialConstants.getDropBlockedMsg());
-                c.getSession().write(CWvsContext.enableActions());
-                return false;
-            }
+
+        if (src > 100) {//防止從礦物背包內丟道具出來閃退
+            c.getSession().write(CWvsContext.enableActions());
+            return false;
         }
 
         final short flag = source.getFlag();
@@ -1015,14 +1163,14 @@ public class MapleInventoryManipulator {
             return false;
         }
         final Point dropPos = new Point(c.getPlayer().getPosition());
-        c.getPlayer().getCheatTracker().checkDrop();
+        //  c.getPlayer().getCheatTracker().checkDrop();
         if (quantity < source.getQuantity() && !GameConstants.isRechargable(source.getItemId())) {
             final Item target = source.copy();
             target.setQuantity(quantity);
             source.setQuantity((short) (source.getQuantity() - quantity));
             c.getSession().write(InventoryPacket.dropInventoryItemUpdate(type, source));
 
-            if (ii.isDropRestricted(target.getItemId()) || ii.isAccountShared(target.getItemId())) {
+            if (ii.isAccountShared(target.getItemId())) {
                 if (ItemFlag.KARMA_EQ.check(flag)) {
                     target.setFlag((byte) (flag - ItemFlag.KARMA_EQ.getValue()));
                     c.getPlayer().getMap().spawnItemDrop(c.getPlayer(), c.getPlayer(), target, dropPos, true, true);
@@ -1048,7 +1196,7 @@ public class MapleInventoryManipulator {
             if (src < 0) {
                 c.getPlayer().equipChanged();
             }
-            if (ii.isDropRestricted(source.getItemId()) || ii.isAccountShared(source.getItemId())) {
+            if (ii.isAccountShared(source.getItemId())) {
                 if (ItemFlag.KARMA_EQ.check(flag)) {
                     source.setFlag((byte) (flag - ItemFlag.KARMA_EQ.getValue()));
                     c.getPlayer().getMap().spawnItemDrop(c.getPlayer(), c.getPlayer(), source, dropPos, true, true);

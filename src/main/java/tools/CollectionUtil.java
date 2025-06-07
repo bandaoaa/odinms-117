@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -31,7 +25,7 @@ import java.util.List;
 
 /**
  * Provides utilities for manipulating collections of objects.
- *
+ * 
  * @author Frz
  * @version 1.0
  * @since Revision 701
@@ -48,14 +42,13 @@ public class CollectionUtil {
 
     /**
      * Copies <code>count</code> items off of list, starting from the beginning.
-     *
-     * @param <T>   The type of the list.
-     * @param list  The list to copy from.
+     * @param <T> The type of the list.
+     * @param list The list to copy from.
      * @param count The number of items to copy.
      * @return The copied list.
      */
     public static <T> List<T> copyFirst(List<T> list, int count) {
-        List<T> ret = new ArrayList<T>(list.size() < count ? list.size() : count);
+        List<T> ret = new ArrayList<>(list.size() < count ? list.size() : count);
         int i = 0;
         for (T elem : list) {
             ret.add(elem);

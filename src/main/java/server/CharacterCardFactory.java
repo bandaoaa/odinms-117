@@ -1,35 +1,25 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This file is part of the OdinMS MapleStory Private Server
+ * Copyright (C) 2011 Patrick Huy and Matthias Butz
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server;
 
 import client.CardData;
 import constants.GameConstants;
 import database.DatabaseConnection;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,7 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -50,7 +39,8 @@ import tools.Pair;
 import tools.Triple;
 
 /**
- * @author Burblish
+ *
+ * @author AlphaEta
  */
 public class CharacterCardFactory {
 
@@ -64,7 +54,6 @@ public class CharacterCardFactory {
     }
 
     public void initialize() {
-        /*
         final MapleData b = data.getData("CharacterCard.img");
         for (MapleData c : b.getChildByPath("Card")) {
             int skillId = MapleDataTool.getIntConvert("skillID", c, 0);
@@ -84,7 +73,7 @@ public class CharacterCardFactory {
                     uniqueEffects.put(skillId, ids);
                 }
             }
-        }*/
+        }
         //System.out.println("Loaded " + (cardEffects.size() + uniqueEffects.size()) + " card effects");
     }
 

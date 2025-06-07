@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.channel.handler;
 
 import constants.GameConstants;
-
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +34,7 @@ public class MovementParse {
 
     //1 = player, 2 = mob, 3 = pet, 4 = summon, 5 = dragon
     public static List<LifeMovementFragment> parseMovement(final LittleEndianAccessor lea, final int kind) {
-        final List<LifeMovementFragment> res = new ArrayList<>();
+        final List<LifeMovementFragment> res = new ArrayList<LifeMovementFragment>();
         final byte numCommands = lea.readByte();
 
         for (byte i = 0; i < numCommands; i++) {
@@ -103,9 +96,9 @@ public class MovementParse {
                     res.add(rlm);
                     break;
                 }
-                case 17: // special?...final charge aran
+		case 17: // special?...final charge aran
                 case 22: // idk
-                case 23:
+		case 23:
                 case 24:
                 case 25:
                 case 26:

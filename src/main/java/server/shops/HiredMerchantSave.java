@@ -1,39 +1,17 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package server.shops;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Burblish
+ *
+ * @author Emy
  */
 public class HiredMerchantSave {
 
@@ -45,7 +23,6 @@ public class HiredMerchantSave {
             Threads[i] = new TimingThread(new HiredMerchantSaveRunnable());
         }
     }
-
     private static final AtomicInteger Distribute = new AtomicInteger(0);
 
     public static void QueueShopForSave(HiredMerchant hm) {
@@ -69,16 +46,14 @@ public class HiredMerchantSave {
         private long TimeTaken = 0;
         private int ShopsSaved = 0;
         private Object ToNotify;
-        private ArrayBlockingQueue<HiredMerchant> Queue = new ArrayBlockingQueue<HiredMerchant>(500); //500 Start Capacity (Should be plenty)
+        private ArrayBlockingQueue<HiredMerchant> Queue = new ArrayBlockingQueue<>(500); //500 Start Capacity (Should be plenty)
 
+        @Override
         public void run() {
             try {
                 while (!Queue.isEmpty()) {
                     HiredMerchant next = Queue.take();
                     long Start = System.currentTimeMillis();
-                    if (next.getMCOwner() != null && next.getMCOwner().getPlayerShop() == next) {
-                        next.getMCOwner().setPlayerShop(null);
-                    }
                     next.closeShop(true, false);
                     TimeTaken += (System.currentTimeMillis() - Start);
                     ShopsSaved++;

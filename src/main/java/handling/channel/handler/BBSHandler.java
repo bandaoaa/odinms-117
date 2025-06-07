@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -29,22 +23,20 @@ package handling.channel.handler;
 import client.MapleClient;
 import handling.world.World;
 import handling.world.guild.MapleBBSThread;
-
 import java.util.List;
-
 import tools.data.LittleEndianAccessor;
 import tools.packet.CWvsContext.GuildPacket;
 
 public class BBSHandler {
 
-    private static final String correctLength(final String in, final int maxSize) {
+    private static String correctLength(final String in, final int maxSize) {
         if (in.length() > maxSize) {
             return in.substring(0, maxSize);
         }
         return in;
     }
 
-    public static final void BBSOperation(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void BBSOperation(final LittleEndianAccessor slea, final MapleClient c) {
         if (c.getPlayer().getGuildId() <= 0) {
             return; // expelled while viewing bbs or hax
         }
@@ -52,10 +44,6 @@ public class BBSHandler {
         final byte action = slea.readByte();
         switch (action) {
             case 0: // start a new post
-                if (!c.getPlayer().getCheatTracker().canBBS()) {
-                    c.getPlayer().dropMessage(1, "You may only start a new thread every 60 seconds.");
-                    return;
-                }
                 final boolean bEdit = slea.readByte() > 0;
                 if (bEdit) {
                     localthreadid = slea.readInt();
@@ -90,10 +78,6 @@ public class BBSHandler {
                 displayThread(c, localthreadid);
                 break;
             case 4: // reply
-                if (!c.getPlayer().getCheatTracker().canBBS()) {
-                    c.getPlayer().dropMessage(1, "You may only start a new reply every 60 seconds.");
-                    return;
-                }
                 localthreadid = slea.readInt();
                 text = correctLength(slea.readMapleAsciiString(), 25);
                 newBBSReply(c, localthreadid, text);
@@ -113,7 +97,7 @@ public class BBSHandler {
         c.getSession().write(GuildPacket.BBSThreadList(World.Guild.getBBS(c.getPlayer().getGuildId()), start));
     }
 
-    private static final void newBBSReply(final MapleClient c, final int localthreadid, final String text) {
+    private static void newBBSReply(final MapleClient c, final int localthreadid, final String text) {
         if (c.getPlayer().getGuildId() <= 0) {
             return;
         }
@@ -121,7 +105,7 @@ public class BBSHandler {
         displayThread(c, localthreadid);
     }
 
-    private static final void editBBSThread(final MapleClient c, final String title, final String text, final int icon, final int localthreadid) {
+    private static void editBBSThread(final MapleClient c, final String title, final String text, final int icon, final int localthreadid) {
         if (c.getPlayer().getGuildId() <= 0) {
             return; // expelled while viewing?
         }
@@ -129,22 +113,22 @@ public class BBSHandler {
         displayThread(c, localthreadid);
     }
 
-    private static final void newBBSThread(final MapleClient c, final String title, final String text, final int icon, final boolean bNotice) {
+    private static void newBBSThread(final MapleClient c, final String title, final String text, final int icon, final boolean bNotice) {
         if (c.getPlayer().getGuildId() <= 0) {
             return; // expelled while viewing?
         }
         displayThread(c, World.Guild.addBBSThread(c.getPlayer().getGuildId(), title, text, icon, bNotice, c.getPlayer().getId()));
-        listBBSThreads(c, 0);
+	listBBSThreads(c, 0);
     }
 
-    private static final void deleteBBSThread(final MapleClient c, final int localthreadid) {
+    private static void deleteBBSThread(final MapleClient c, final int localthreadid) {
         if (c.getPlayer().getGuildId() <= 0) {
             return;
         }
         World.Guild.deleteBBSThread(c.getPlayer().getGuildId(), localthreadid, c.getPlayer().getId(), (int) c.getPlayer().getGuildRank());
     }
 
-    private static final void deleteBBSReply(final MapleClient c, final int localthreadid, final int replyid) {
+    private static void deleteBBSReply(final MapleClient c, final int localthreadid, final int replyid) {
         if (c.getPlayer().getGuildId() <= 0) {
             return;
         }
@@ -153,7 +137,7 @@ public class BBSHandler {
         displayThread(c, localthreadid);
     }
 
-    private static final void displayThread(final MapleClient c, final int localthreadid) {
+    private static void displayThread(final MapleClient c, final int localthreadid) {
         if (c.getPlayer().getGuildId() <= 0) {
             return;
         }

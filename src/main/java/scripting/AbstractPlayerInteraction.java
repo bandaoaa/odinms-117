@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,61 +20,57 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package scripting;
 
-import java.awt.Point;
-import java.util.List;
-
-import client.inventory.Equip;
-import client.SkillFactory;
-import constants.GameConstants;
-import client.Skill;
-import client.MapleCharacter;
-import client.MapleClient;
-import client.inventory.MapleInventoryType;
-import client.inventory.MaplePet;
-import client.MapleQuestStatus;
 import client.MapleTrait.MapleTraitType;
-import client.inventory.MapleInventory;
+import client.*;
+import client.inventory.*;
+import constants.GameConstants;
 import handling.channel.ChannelServer;
 import handling.world.MapleParty;
 import handling.world.MaplePartyCharacter;
-import handling.world.guild.MapleGuild;
-import server.Randomizer;
-import server.MapleInventoryManipulator;
-import server.MapleItemInformationProvider;
-import server.maps.MapleMap;
-import server.maps.MapleReactor;
-import server.maps.MapleMapObject;
-import server.maps.SavedLocationType;
-import server.maps.Event_DojoAgent;
-import server.life.MapleMonster;
-import server.life.MapleLifeFactory;
-import server.quest.MapleQuest;
-import tools.packet.CField;
-import tools.packet.PetPacket;
-import client.inventory.MapleInventoryIdentifier;
 import handling.world.World;
+import handling.world.guild.MapleGuild;
+import java.awt.Point;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import server.MapleInventoryManipulator;
+import server.MapleItemInformationProvider;
+import server.Randomizer;
 import server.events.MapleEvent;
 import server.events.MapleEventType;
+import server.life.MapleLifeFactory;
+import server.life.MapleMonster;
 import server.life.MapleNPC;
+import server.maps.*;
+import server.quest.MapleQuest;
 import tools.FileoutputUtil;
 import tools.Pair;
+import tools.packet.CField;
 import tools.packet.CField.EffectPacket;
 import tools.packet.CField.NPCPacket;
 import tools.packet.CField.UIPacket;
 import tools.packet.CWvsContext;
 import tools.packet.CWvsContext.InfoPacket;
+import tools.packet.CWvsContext.InventoryPacket;
+import tools.packet.PetPacket;
 
 public abstract class AbstractPlayerInteraction {
 
     protected MapleClient c;
     protected int id, id2;
     private static final Map<Pair, MapleNPC> npcs = new WeakHashMap<>();
+    protected MapleNPC npcob;
 
     public AbstractPlayerInteraction(final MapleClient c, final int id, final int id2) {
         this.c = c;
         this.id = id;
+        this.id2 = id2;
+    }
+
+    public AbstractPlayerInteraction(final MapleClient c, final int id, final MapleNPC npcob, final int id2) {
+        this.c = c;
+        this.id = id;
+        this.npcob = npcob;
         this.id2 = id2;
     }
 
@@ -110,6 +100,10 @@ public abstract class AbstractPlayerInteraction {
 
     public final EventInstanceManager getEventInstance() {
         return c.getPlayer().getEventInstance();
+    }
+
+    public MapleNPC getNpcob() { //讀取NPC Oid
+        return this.npcob;
     }
 
     public final void warp(final int map) {
@@ -186,10 +180,10 @@ public abstract class AbstractPlayerInteraction {
     }
 
     public final void playPortalSE() {
-        c.getSession().write(EffectPacket.showOwnBuffEffect(0, 7, 1, 1));
+        c.getSession().write(EffectPacket.showOwnBuffEffect(0, 10, 1, 1));
     }
 
-    private final MapleMap getWarpMap(final int map) {
+    private MapleMap getWarpMap(final int map) {
         return ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(map);
     }
 
@@ -223,10 +217,21 @@ public abstract class AbstractPlayerInteraction {
         spawnMob(id, 1, new Point(x, y));
     }
 
-    private final void spawnMob(final int id, final int qty, final Point pos) {
+    private void spawnMob(final int id, final int qty, final Point pos) {
         for (int i = 0; i < qty; i++) {
             c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(id), pos);
         }
+    }
+
+    /*
+    召喚專屬權怪物
+    */
+    public final void spawnLinkMob(final int id, final int x, final int y) {
+        MapleMonster m = MapleLifeFactory.getMonster(id);
+        m.setHp((long) (m.getStats().getHp()));
+        m.getStats().setHp((long) (m.getStats().getHp()));
+        m.setOwner(c.getPlayer().getId());
+        c.getPlayer().getMap().spawnMonsterOnGroundBelow(m, new Point(x, y));
     }
 
     public final void killMob(int ids) {
@@ -242,44 +247,45 @@ public abstract class AbstractPlayerInteraction {
     }
 
     public final int getPlayerStat(final String type) {
-        if (type.equals("LVL")) {
-            return c.getPlayer().getLevel();
-        } else if (type.equals("STR")) {
-            return c.getPlayer().getStat().getStr();
-        } else if (type.equals("DEX")) {
-            return c.getPlayer().getStat().getDex();
-        } else if (type.equals("INT")) {
-            return c.getPlayer().getStat().getInt();
-        } else if (type.equals("LUK")) {
-            return c.getPlayer().getStat().getLuk();
-        } else if (type.equals("HP")) {
-            return c.getPlayer().getStat().getHp();
-        } else if (type.equals("MP")) {
-            return c.getPlayer().getStat().getMp();
-        } else if (type.equals("MAXHP")) {
-            return c.getPlayer().getStat().getMaxHp();
-        } else if (type.equals("MAXMP")) {
-            return c.getPlayer().getStat().getMaxMp();
-        } else if (type.equals("RAP")) {
-            return c.getPlayer().getRemainingAp();
-        } else if (type.equals("RSP")) {
-            return c.getPlayer().getRemainingSp();
-        } else if (type.equals("GID")) {
-            return c.getPlayer().getGuildId();
-        } else if (type.equals("GRANK")) {
-            return c.getPlayer().getGuildRank();
-        } else if (type.equals("ARANK")) {
-            return c.getPlayer().getAllianceRank();
-        } else if (type.equals("GM")) {
-            return c.getPlayer().isGM() ? 1 : 0;
-        } else if (type.equals("ADMIN")) {
-            return c.getPlayer().isAdmin() ? 1 : 0;
-        } else if (type.equals("GENDER")) {
-            return c.getPlayer().getGender();
-        } else if (type.equals("FACE")) {
-            return c.getPlayer().getFace();
-        } else if (type.equals("HAIR")) {
-            return c.getPlayer().getHair();
+        switch (type) {
+            case "LVL":
+                return c.getPlayer().getLevel();
+            case "STR":
+                return c.getPlayer().getStat().getStr();
+            case "DEX":
+                return c.getPlayer().getStat().getDex();
+            case "INT":
+                return c.getPlayer().getStat().getInt();
+            case "LUK":
+                return c.getPlayer().getStat().getLuk();
+            case "HP":
+                return c.getPlayer().getStat().getHp();
+            case "MP":
+                return c.getPlayer().getStat().getMp();
+            case "MAXHP":
+                return c.getPlayer().getStat().getMaxHp();
+            case "MAXMP":
+                return c.getPlayer().getStat().getMaxMp();
+            case "RAP":
+                return c.getPlayer().getRemainingAp();
+            case "RSP":
+                return c.getPlayer().getRemainingSp();
+            case "GID":
+                return c.getPlayer().getGuildId();
+            case "GRANK":
+                return c.getPlayer().getGuildRank();
+            case "ARANK":
+                return c.getPlayer().getAllianceRank();
+            case "GM":
+                return c.getPlayer().isGM() ? 1 : 0;
+            case "ADMIN":
+                return c.getPlayer().isAdmin() ? 1 : 0;
+            case "GENDER":
+                return c.getPlayer().getGender();
+            case "FACE":
+                return c.getPlayer().getFace();
+            case "HAIR":
+                return c.getPlayer().getHair();
         }
         return -1;
     }
@@ -366,6 +372,10 @@ public abstract class AbstractPlayerInteraction {
         MapleQuest.getInstance(id).forceComplete(getPlayer(), 0);
     }
 
+    public final void startportalScript(final String portalId) {  
+        NPCScriptManager.getInstance().startportalScript(c, 9010000, portalId);
+    }
+
     public void spawnNpc(final int npcId) {
         c.getPlayer().getMap().spawnNpc(npcId, c.getPlayer().getPosition());
     }
@@ -381,11 +391,14 @@ public abstract class AbstractPlayerInteraction {
     public final void removeNpc(final int mapid, final int npcId) {
         c.getChannelServer().getMapFactory().getMap(mapid).removeNpc(npcId);
     }
-    
+
     public final void removeNpc(final int npcId) {
         c.getPlayer().getMap().removeNpc(npcId);
     }
 
+    /*
+    召喚可控制的NPC
+    */
     public void spawnNPCRequestController(int npcid, int x, int y) {
         this.spawnNPCRequestController(npcid, x, y, 0);
     }
@@ -406,9 +419,12 @@ public abstract class AbstractPlayerInteraction {
         npc.setCustom(true);
         npc.setObjectId(npcid);
         npcs.put(new Pair<>(npcid, c), npc);
-        getClient().getSession().write(NPCPacket.spawnNPCRequestController(npc, true));
+        getClient().announce(NPCPacket.spawnNPCRequestController(npc, true));
     }
 
+    /*
+    控制已有NPC狀態
+    */
     public void showNpcSpecialEffect(int npcid, String str) {
         MapleMap map = getPlayer().getMap();
         for (MapleNPC obj : map.getAllNPCs()) {
@@ -418,12 +434,15 @@ public abstract class AbstractPlayerInteraction {
         }
     }
 
+    /*
+    在NPC身上使用特效
+    */
     public void getNPCDirectionEffect(int npcid, String data, int value, int x, int y) {
         if (!npcs.containsKey(new Pair<>(npcid, this.c))) {
             return;
         }
         MapleNPC npc = npcs.get(new Pair<>(npcid, c));
-        getClient().getSession().write(UIPacket.getDirectionEffect(data, value, x, y, npc.getObjectId()));
+        getClient().announce(UIPacket.getDirectionEffect(data, value, x, y, npc.getObjectId()));
     }
 
     public final void forceStartReactor(final int mapid, final int id) {
@@ -470,7 +489,7 @@ public abstract class AbstractPlayerInteraction {
     }
 
     public final void gainNX(final int amount) {
-        c.getPlayer().modifyCSPoints(4, amount, true); //theremk you can change it to prepaid yae since cspoiint is xncredit so make it prepaid
+        c.getPlayer().modifyCSPoints(1, amount, true);
     }
 
     public final void gainItemPeriod(final int id, final short quantity, final int period) { //period is in days
@@ -513,7 +532,6 @@ public abstract class AbstractPlayerInteraction {
         gainItem(id, quantity, randomStats, period, slots, owner, cg, true);
     }
 
-
     public final void gainItem(final int id, final short quantity, final boolean randomStats, final long period, final int slots, final String owner, final MapleClient cg, final boolean show) {
         if (quantity >= 0) {
             final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
@@ -534,12 +552,7 @@ public abstract class AbstractPlayerInteraction {
                     item.setOwner(owner);
                 }
                 item.setGMLog("Received from interaction " + this.id + " (" + id2 + ") on " + FileoutputUtil.CurrentReadable_Time());
-                final String name = ii.getName(id);
-                if (id / 10000 == 114 && name != null && name.length() > 0) { //medal
-                    final String msg = "You have attained title <" + name + ">";
-                    cg.getPlayer().dropMessage(-1, msg);
-                    cg.getPlayer().dropMessage(5, msg);
-                }
+
                 MapleInventoryManipulator.addbyItem(cg, item.copy());
             } else {
                 MapleInventoryManipulator.addById(cg, id, quantity, owner == null ? "" : owner, null, period, "Received from interaction " + this.id + " (" + id2 + ") on " + FileoutputUtil.CurrentReadable_Date());
@@ -558,6 +571,19 @@ public abstract class AbstractPlayerInteraction {
             return true;
         }
         return false;
+    }
+
+    public final void gainEquip(final int itemid, int type) { //給予穿戴的裝備
+        final MapleItemInformationProvider li = MapleItemInformationProvider.getInstance();
+        Equip equip;
+        equip = (Equip) li.getEquipById(itemid);
+        if (equip != null) {
+            equip.setPosition((short) type);
+            equip.setQuantity((short) 1);
+            c.getPlayer().forceReAddItem_NoUpdate(equip, MapleInventoryType.EQUIPPED);
+            c.getPlayer().getClient().getSession().write(InventoryPacket.updateEquippedItem(c.getPlayer(), equip, (short) type));
+            c.getPlayer().equipChanged();
+        }
     }
 
     public final void changeMusic(final String songName) {
@@ -816,6 +842,25 @@ public abstract class AbstractPlayerInteraction {
         }
     }
 
+    public final void givePartyNX(final int amount, final List<MapleCharacter> party) {
+        for (final MapleCharacter chr : party) {
+            chr.modifyCSPoints(1, amount, true);
+        }
+    }
+
+    public final void givePartyNX(final int amount) {
+        if (getPlayer().getParty() == null || getPlayer().getParty().getMembers().size() == 1) {
+            gainNX(amount);
+            return;
+        }
+        final int cMap = getPlayer().getMapId();
+        for (final MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
+            final MapleCharacter curChar = getChannelServer().getPlayerStorage().getCharacterById(chr.getId());
+            if (curChar != null && (curChar.getMapId() == cMap || curChar.getEventInstance() == getPlayer().getEventInstance())) {
+                curChar.modifyCSPoints(1, amount, true);
+            }
+        }
+    }
 
     public final void endPartyQuest(final int amount, final List<MapleCharacter> party) {
         for (final MapleCharacter chr : party) {
@@ -898,12 +943,12 @@ public abstract class AbstractPlayerInteraction {
 
     public final void openNpc(final int id) {
         getClient().removeClickedNPC();
-        NPCScriptManager.getInstance().start(getClient(), id);
+        NPCScriptManager.getInstance().start(getClient(), id, null);
     }
 
     public final void openNpc(final MapleClient cg, final int id) {
         cg.removeClickedNPC();
-        NPCScriptManager.getInstance().start(cg, id);
+        NPCScriptManager.getInstance().start(cg, id, null);
     }
 
     public final int getMapId() {
@@ -944,40 +989,12 @@ public abstract class AbstractPlayerInteraction {
         return c.getChannelServer().getMapFactory().getMap(mapid).getCharactersSize();
     }
 
-    public final void dojo_getUp() {
-        c.getSession().write(InfoPacket.updateInfoQuest(1207, "pt=1;min=4;belt=1;tuto=1")); //todo
-        c.getSession().write(EffectPacket.Mulung_DojoUp2());
-        c.getSession().write(CField.instantMapWarp((byte) 6));
-    }
-
-    public final boolean dojoAgent_NextMap(final boolean dojo, final boolean fromresting) {
-        if (dojo) {
-            return Event_DojoAgent.warpNextMap(c.getPlayer(), fromresting, c.getPlayer().getMap());
-        }
-        return Event_DojoAgent.warpNextMap_Agent(c.getPlayer(), fromresting);
-    }
-
-    public final boolean dojoAgent_NextMap(final boolean dojo, final boolean fromresting, final int mapid) {
-        if (dojo) {
-            return Event_DojoAgent.warpNextMap(c.getPlayer(), fromresting, getMap(mapid));
-        }
-        return Event_DojoAgent.warpNextMap_Agent(c.getPlayer(), fromresting);
-    }
-
-    public final int dojo_getPts() {
-        return c.getPlayer().getIntNoRecord(GameConstants.DOJO);
-    }
-
     public final MapleEvent getEvent(final String loc) {
         return c.getChannelServer().getEvent(MapleEventType.valueOf(loc));
     }
 
     public final int getSavedLocation(final String loc) {
-        final Integer ret = c.getPlayer().getSavedLocation(SavedLocationType.fromString(loc));
-        if (ret == null || ret == -1) {
-            return 100000000;
-        }
-        return ret;
+        return c.getPlayer().getSavedLocation(SavedLocationType.fromString(loc));
     }
 
     public final void saveLocation(final String loc) {
@@ -1077,7 +1094,7 @@ public abstract class AbstractPlayerInteraction {
     }
 
     public void gainPet(int id, String name, int level, int closeness, int fullness, long period, short flags) {
-        if (id > 5000200 || id < 5000000) {
+        if (id > 5000300 || id < 5000000) {
             id = 5000000;
         }
         if (level > 30) {
@@ -1092,7 +1109,6 @@ public abstract class AbstractPlayerInteraction {
         try {
             MapleInventoryManipulator.addById(c, id, (short) 1, "", MaplePet.createPet(id, name, level, closeness, fullness, MapleInventoryIdentifier.getInstance(), id == 5000054 ? (int) period : 0, flags), 45, "Pet from interaction " + id + " (" + id2 + ")" + " on " + FileoutputUtil.CurrentReadable_Date());
         } catch (NullPointerException ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -1204,18 +1220,6 @@ public abstract class AbstractPlayerInteraction {
 
     public final MapleInventory getInventory(int type) {
         return c.getPlayer().getInventory(MapleInventoryType.getByType((byte) type));
-    }
-
-    public final void prepareAswanMob(int mapid, EventManager eim) {
-        MapleMap map = eim.getMapFactory().getMap(mapid);
-        if (c.getPlayer().getParty() != null) {
-            map.setChangeableMobOrigin(ChannelServer.getInstance(c.getChannel()).getPlayerStorage().getCharacterById(c.getPlayer().getParty().getLeader().getId()));
-        } else {
-            map.setChangeableMobOrigin(c.getPlayer());
-        }
-//        map.setChangeableMobUsing(true);
-        map.killAllMonsters(false);
-        map.respawn(true);
     }
 
     public boolean isGMS() {

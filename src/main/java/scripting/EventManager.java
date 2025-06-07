@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -17,7 +11,7 @@ or distribute this program under any other version of the
 GNU Affero General Public License.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; w"ithout even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
@@ -26,40 +20,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package scripting;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.WeakHashMap;
-import java.util.Properties;
-import java.util.concurrent.ScheduledFuture;
-import javax.script.Invocable;
-import javax.script.ScriptException;
-
 import client.MapleCharacter;
-import constants.ServerConstants;
 import handling.channel.ChannelServer;
 import handling.world.MapleParty;
 import handling.world.MaplePartyCharacter;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import server.maps.MapleReactor;
+import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import javax.script.Invocable;
+import javax.script.ScriptException;
 import server.MapleSquad;
 import server.Randomizer;
 import server.Timer.EventTimer;
 import server.events.MapleEvent;
 import server.events.MapleEventType;
-import server.life.MapleMonster;
 import server.life.MapleLifeFactory;
+import server.life.MapleMonster;
 import server.life.OverrideMonsterStats;
-import server.maps.MapleMap;
-import server.maps.MapleMapObject;
-import server.maps.MapleMapFactory;
-import server.maps.MapleReactorFactory;
+import server.maps.*;
 import tools.FileoutputUtil;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
@@ -69,17 +46,9 @@ public class EventManager {
     private static int[] eventChannel = new int[2];
     private Invocable iv;
     private int channel;
-    private Map<String, EventInstanceManager> instances = new WeakHashMap<String, EventInstanceManager>();
+    private Map<String, EventInstanceManager> instances = new WeakHashMap<>();
     private Properties props = new Properties();
     private String name;
-    private final ReentrantReadWriteLock mutex = new ReentrantReadWriteLock();
-    private final Lock rL = mutex.readLock(), wL = mutex.writeLock();
-    private long timeStarted = 0;
-    private long eventTime = 0;
-    private List<MapleCharacter> chars = new LinkedList<MapleCharacter>(); //too lazy to change
-    private EventManager em;
-    private ScheduledFuture<?> eventTimer;
-    private boolean disposed = false;
 
     public EventManager(ChannelServer cserv, Invocable iv, String name) {
         this.iv = iv;
@@ -90,7 +59,7 @@ public class EventManager {
     public void cancel() {
         try {
             iv.invokeFunction("cancelSchedule", (Object) null);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : cancelSchedule:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : cancelSchedule:\n" + ex);
         }
@@ -99,10 +68,11 @@ public class EventManager {
     public ScheduledFuture<?> schedule(final String methodName, long delay) {
         return EventTimer.getInstance().schedule(new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     iv.invokeFunction(methodName, (Object) null);
-                } catch (Exception ex) {
+                } catch (ScriptException | NoSuchMethodException ex) {
                     System.out.println("Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
                     FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
                 }
@@ -113,10 +83,11 @@ public class EventManager {
     public ScheduledFuture<?> schedule(final String methodName, long delay, final EventInstanceManager eim) {
         return EventTimer.getInstance().schedule(new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     iv.invokeFunction(methodName, eim);
-                } catch (Exception ex) {
+                } catch (ScriptException | NoSuchMethodException ex) {
                     System.out.println("Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
                     FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
                 }
@@ -127,12 +98,11 @@ public class EventManager {
     public ScheduledFuture<?> scheduleAtTimestamp(final String methodName, long timestamp) {
         return EventTimer.getInstance().scheduleAtTimestamp(new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     iv.invokeFunction(methodName, (Object) null);
-                } catch (ScriptException ex) {
-                    System.out.println("Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
-                } catch (NoSuchMethodException ex) {
+                } catch (        ScriptException | NoSuchMethodException ex) {
                     System.out.println("Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
                 }
             }
@@ -161,24 +131,12 @@ public class EventManager {
         return ret;
     }
 
-    public EventInstanceManager readyInstance() {
-        try {
-            EventInstanceManager eim = (EventInstanceManager) (iv.invokeFunction("setup", (Object) null));
-            return eim;
-        } catch (ScriptException ex) {
-            if (!ServerConstants.release) ex.printStackTrace();
-        } catch (NoSuchMethodException ex) {
-            if (!ServerConstants.release) ex.printStackTrace();
-        }
-        return null;
-    }
-
     public void disposeInstance(String name) {
         instances.remove(name);
-        if (getProperty("state") != null && instances.size() == 0) {
+        if (getProperty("state") != null && instances.isEmpty()) {
             setProperty("state", "0");
         }
-        if (getProperty("leader") != null && instances.size() == 0 && getProperty("leader").equals("false")) {
+        if (getProperty("leader") != null && instances.isEmpty() && getProperty("leader").equals("false")) {
             setProperty("leader", "true");
         }
         if (this.name.equals("CWKPQ")) { //hard code it because i said so
@@ -198,10 +156,6 @@ public class EventManager {
         props.setProperty(key, value);
     }
 
-    public void setPropertyAswan(String key, String value) { // because I can
-        props.setProperty(key, value);
-    }
-
     public String getProperty(String key) {
         return props.getProperty(key);
     }
@@ -217,18 +171,16 @@ public class EventManager {
     public void startInstance() {
         try {
             iv.invokeFunction("setup", (Object) null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (ScriptException | NoSuchMethodException ex) {
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup:\n" + ex);
         }
     }
-
+	
     public void startInstance_Solo(String mapid, MapleCharacter chr) {
         try {
             EventInstanceManager eim = (EventInstanceManager) iv.invokeFunction("setup", (Object) mapid);
             eim.registerPlayer(chr);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (ScriptException | NoSuchMethodException ex) {
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup:\n" + ex);
         }
     }
@@ -237,8 +189,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) iv.invokeFunction("setup", (Object) mapid);
             eim.registerCarnivalParty(chr, chr.getMap(), (byte) 0);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (ScriptException | NoSuchMethodException ex) {
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup:\n" + ex);
         }
     }
@@ -247,8 +198,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) iv.invokeFunction("setup", (Object) mapid);
             eim.registerParty(chr.getParty(), chr.getMap());
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (ScriptException | NoSuchMethodException ex) {
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup:\n" + ex);
         }
     }
@@ -261,7 +211,7 @@ public class EventManager {
             eim.setProperty("leader", leader);
             eim.setProperty("guildid", String.valueOf(character.getGuildId()));
             setProperty("guildid", String.valueOf(character.getGuildId()));
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-Guild:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-Guild:\n" + ex);
         }
@@ -271,7 +221,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) (iv.invokeFunction("setup", character.getId()));
             eim.registerPlayer(character);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-CharID:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-CharID:\n" + ex);
         }
@@ -281,7 +231,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) (iv.invokeFunction("setup", character.getId(), character.getMapId()));
             eim.registerPlayer(character);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-CharID:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-CharID:\n" + ex);
         }
@@ -291,7 +241,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) (iv.invokeFunction("setup", (Object) null));
             eim.registerPlayer(character);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-character:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-character:\n" + ex);
         }
@@ -334,7 +284,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) (iv.invokeFunction("setup", (Object) null));
             eim.registerParty(party, map);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-party:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-party:\n" + ex + "\n" + (old == null ? "no old exception" : old));
         }
@@ -345,7 +295,7 @@ public class EventManager {
         try {
             iv.invokeFunction("setup", eim);
             eim.setProperty("leader", leader);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-leader:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-leader:\n" + ex);
         }
@@ -372,7 +322,7 @@ public class EventManager {
         try {
             EventInstanceManager eim = (EventInstanceManager) (iv.invokeFunction("setup", squad.getLeaderName()));
             eim.registerSquad(squad, map, questID);
-        } catch (Exception ex) {
+        } catch (ScriptException | NoSuchMethodException ex) {
             System.out.println("Event name : " + name + ", method Name : setup-squad:\n" + ex);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup-squad:\n" + ex);
         }
@@ -398,7 +348,7 @@ public class EventManager {
     }
 
     public List<MapleCharacter> newCharList() {
-        return new ArrayList<MapleCharacter>();
+        return new ArrayList<>();
     }
 
     public MapleMonster getMonster(final int id) {
@@ -458,6 +408,7 @@ public class EventManager {
         }
         EventTimer.getInstance().schedule(new Runnable() {
 
+            @Override
             public void run() {
                 if (cs.getEvent() >= 0) {
                     MapleEvent.setEvent(cs, true);
@@ -467,80 +418,9 @@ public class EventManager {
         return true;
     }
 
-    public void timeOut(final long delay, final EventManager eim) {
-        if (disposed || eim == null) {
-            return;
-        }
-        eventTimer = EventTimer.getInstance().schedule(new Runnable() {
-
-            public void run() {
-                if (disposed || eim == null || em == null) {
-                    return;
-                }
-                try {
-                    em.getIv().invokeFunction("scheduledTimeout", eim);
-                } catch (Exception ex) {
-                    FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name" + em.getName() + ", Instance name : " + name + ", method Name : scheduledTimeout:\n" + ex);
-                    System.out.println("Event name" + em.getName() + ", Instance name : " + name + ", method Name : scheduledTimeout:\n" + ex);
-                }
-            }
-        }, delay);
-    }
-
-    public void startEventTimer(long time) {
-        try {
-            if (disposed) {
-                return;
-            }
-            timeStarted = System.currentTimeMillis();
-            eventTime = time;
-            if (eventTimer != null) {
-                eventTimer.cancel(false);
-            }
-            eventTimer = null;
-            final int timesend = (int) time / 1000;
-
-            for (MapleCharacter chr : getPlayers()) {
-                chr.getClient().getSession().write(CField.getClock(timesend));
-            }
-            timeOut(time, this);
-
-        } catch (Exception ex) {
-            FileoutputUtil.outputFileError(FileoutputUtil.ScriptEx_Log, ex);
-            System.out.println("Event name" + em.getName() + ", Instance name : " + name + ", method Name : restartEventTimer:\n");
-            ex.printStackTrace();
-        }
-    }
-	/*timeStarted = System.currentTimeMillis();
-	eventTime = time;
-	final int timesend = (int) time / 1000;
-        
-	mutex.lock();
-	try {
-	     for (MapleCharacter chr : getPlayers()) {
-		chr.getClient().getSession().write(CField.getClock(timesend));
-	    }
-	} finally {
-	    mutex.unlock();
-	}
-	timeOut(time, this);
-    }*/
-
-    public List<MapleCharacter> getPlayers() {
-        if (disposed) {
-            return Collections.emptyList();
-        }
-        rL.lock();
-        try {
-            return new LinkedList<MapleCharacter>(chars);
-        } finally {
-            rL.unlock();
-        }
-    }
-
     public void setWorldEvent() {
         for (int i = 0; i < eventChannel.length; i++) {
-            eventChannel[i] = Randomizer.nextInt(ChannelServer.getAllInstances().size() - 4) + 2 + i; //2-13
+            eventChannel[i] = Randomizer.nextInt(ChannelServer.getAllInstances().size()) + i; //2-13
         }
     }
 }

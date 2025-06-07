@@ -1,59 +1,13 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package handling.world;
 
-import client.BuddyList;
 import client.BuddyList.BuddyAddResult;
 import client.BuddyList.BuddyOperation;
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import client.BuddylistEntry;
-
-import client.MapleBuffStat;
-import client.MapleCharacter;
-
-import client.MapleCoolDownValueHolder;
-import client.MapleDiseaseValueHolder;
+import client.*;
 import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import client.inventory.PetDataFactory;
 import client.status.MonsterStatusEffect;
 import database.DatabaseConnection;
-
 import handling.cashshop.CashShopServer;
 import handling.channel.ChannelServer;
 import handling.channel.PlayerStorage;
@@ -67,17 +21,15 @@ import handling.world.guild.MapleBBSThread;
 import handling.world.guild.MapleGuild;
 import handling.world.guild.MapleGuildAlliance;
 import handling.world.guild.MapleGuildCharacter;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.EnumMap;
-
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import server.Timer.WorldTimer;
 import server.life.MapleMonster;
 import server.maps.MapleMap;
 import server.maps.MapleMapItem;
-import tools.CollectionUtil;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
 import tools.packet.CWvsContext.AlliancePacket;
@@ -88,7 +40,6 @@ import tools.packet.CWvsContext.PartyPacket;
 import tools.packet.PetPacket;
 
 public class World {
-    public static int mostPlayers = 0;
 
     //Touch everything...
     public static void init() {
@@ -96,40 +47,6 @@ public class World {
         World.Alliance.lock.toString();
         World.Messenger.getMessenger(0);
         World.Party.getParty(0);
-    }
-
-    public static void updateMostPlayers() {
-        mostPlayers = World.getConnected().get(0);
-    }
-
-    public static int getMostPlayers() {
-        return mostPlayers;
-    }
-
-    public static void mostPlayersLoader() {
-        Connection con = DatabaseConnection.getConnection();
-        try {
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM mostPlayers");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                World.mostPlayers = rs.getInt("mostPlayers");
-            }
-            System.out.println("Most players ever online loaded: " + mostPlayers);
-            ps.executeQuery();
-        } catch (SQLException e) {
-            //nah wont happen!
-        }
-    }
-
-    public static void savePlayersOnline() {
-        Connection con = DatabaseConnection.getConnection();
-        try {
-            PreparedStatement ps = con.prepareStatement("UPDATE mostplayers SET mostPlayers = ?");
-            ps.setInt(1, mostPlayers);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            //WONT HAPPEN BITCH STOP ASKING FOR IT
-        }
     }
 
     public static String getStatus() {
@@ -151,7 +68,7 @@ public class World {
     }
 
     public static Map<Integer, Integer> getConnected() {
-        Map<Integer, Integer> ret = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> ret = new HashMap<>();
         int total = 0;
         for (ChannelServer cs : ChannelServer.getAllInstances()) {
             int curConnected = cs.getConnectedClients();
@@ -162,23 +79,7 @@ public class World {
         return ret;
     }
 
-    public static List<CheaterData> getCheaters() {
-        List<CheaterData> allCheaters = new ArrayList<CheaterData>();
-        for (ChannelServer cs : ChannelServer.getAllInstances()) {
-            allCheaters.addAll(cs.getCheaters());
-        }
-        Collections.sort(allCheaters);
-        return CollectionUtil.copyFirst(allCheaters, 20);
-    }
 
-    public static List<CheaterData> getReports() {
-        List<CheaterData> allCheaters = new ArrayList<CheaterData>();
-        for (ChannelServer cs : ChannelServer.getAllInstances()) {
-            allCheaters.addAll(cs.getReports());
-        }
-        Collections.sort(allCheaters);
-        return CollectionUtil.copyFirst(allCheaters, 20);
-    }
 
     public static boolean isConnected(String charName) {
         return Find.findChannel(charName) > 0;
@@ -196,7 +97,7 @@ public class World {
 
     public static boolean isCharacterListConnected(List<String> charName) {
         for (ChannelServer cs : ChannelServer.getAllInstances()) {
-            for (final String c : charName) {
+            for (String c : charName) {
                 if (cs.getPlayerStorage().getCharacterByName(c) != null) {
                     return true;
                 }
@@ -238,20 +139,28 @@ public class World {
         return ChannelServer.getInstance(ch).getPlayerStorage().getConnectedClients() < (ch == 1 ? 600 : 400);
     }
 
+    public static boolean isCSConnected(List<String> charName) {
+        for (String c : charName) {
+            if (CashShopServer.getPlayerStorage().getCharacterByName(c) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static class Party {
 
-        private static Map<Integer, MapleParty> parties = new HashMap<Integer, MapleParty>();
-        private static Map<Integer, MapleExpedition> expeds = new HashMap<Integer, MapleExpedition>();
-        private static Map<PartySearchType, List<PartySearch>> searches = new EnumMap<PartySearchType, List<PartySearch>>(PartySearchType.class);
+        private static Map<Integer, MapleParty> parties = new HashMap<>();
+        private static Map<Integer, MapleExpedition> expeds = new HashMap<>();
+        private static Map<PartySearchType, List<PartySearch>> searches = new EnumMap<>(PartySearchType.class);
         private static final AtomicInteger runningPartyId = new AtomicInteger(1), runningExpedId = new AtomicInteger(1);
 
         static {
             try {
-                PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("UPDATE characters SET party = -1, fatigue = 0");
-                ps.executeUpdate();
-                ps.close();
+                try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("UPDATE characters SET party = -1, fatigue = 0")) {
+                    ps.executeUpdate();
+                }
             } catch (SQLException e) {
-                e.printStackTrace();
             }
             for (PartySearchType pst : PartySearchType.values()) {
                 searches.put(pst, new ArrayList<PartySearch>()); //according to client, max 10, even though theres page numbers ?!
@@ -311,9 +220,6 @@ public class World {
                     MapleCharacter chr = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(partychar.getName());
                     if (chr != null && !chr.getName().equalsIgnoreCase(namefrom)) { //Extra check just in case
                         chr.getClient().getSession().write(CField.multiChat(namefrom, chattext, mode));
-                        if (chr.getClient().isMonitored()) {
-                            World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, "[GM Message] " + namefrom + " said to " + chr.getName() + " (Party): " + chattext));
-                        }
                     }
                 }
             }
@@ -593,9 +499,6 @@ public class World {
                     MapleCharacter chr = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterById(characterId);
                     if (chr != null && chr.getBuddylist().containsVisible(cidFrom)) {
                         chr.getClient().getSession().write(CField.multiChat(nameFrom, chattext, 0));
-                        if (chr.getClient().isMonitored()) {
-                            World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, "[GM Message] " + nameFrom + " said to " + chr.getName() + " (Buddy): " + chattext));
-                        }
                     }
                 }
             }
@@ -680,7 +583,7 @@ public class World {
 
     public static class Messenger {
 
-        private static Map<Integer, MapleMessenger> messengers = new HashMap<Integer, MapleMessenger>();
+        private static Map<Integer, MapleMessenger> messengers = new HashMap<>();
         private static final AtomicInteger runningMessengerId = new AtomicInteger();
 
         static {
@@ -841,7 +744,7 @@ public class World {
 
     public static class Guild {
 
-        private static final Map<Integer, MapleGuild> guilds = new LinkedHashMap<Integer, MapleGuild>();
+        private static final Map<Integer, MapleGuild> guilds = new LinkedHashMap<>();
         private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
         public static void addLoadedGuild(MapleGuild f) {
@@ -1004,6 +907,7 @@ public class World {
             }
         }
 
+        //解散公會
         public static void disbandGuild(int gid) {
             MapleGuild g = getGuild(gid);
             lock.writeLock().lock();
@@ -1124,28 +1028,28 @@ public class World {
             return -1;
         }
 
-        public static final void editBBSThread(final int guildid, final int localthreadid, final String title, final String text, final int icon, final int posterID, final int guildRank) {
+        public static void editBBSThread(final int guildid, final int localthreadid, final String title, final String text, final int icon, final int posterID, final int guildRank) {
             final MapleGuild g = getGuild(guildid);
             if (g != null) {
                 g.editBBSThread(localthreadid, title, text, icon, posterID, guildRank);
             }
         }
 
-        public static final void deleteBBSThread(final int guildid, final int localthreadid, final int posterID, final int guildRank) {
+        public static void deleteBBSThread(final int guildid, final int localthreadid, final int posterID, final int guildRank) {
             final MapleGuild g = getGuild(guildid);
             if (g != null) {
                 g.deleteBBSThread(localthreadid, posterID, guildRank);
             }
         }
 
-        public static final void addBBSReply(final int guildid, final int localthreadid, final String text, final int posterID) {
+        public static void addBBSReply(final int guildid, final int localthreadid, final String text, final int posterID) {
             final MapleGuild g = getGuild(guildid);
             if (g != null) {
                 g.addBBSReply(localthreadid, text, posterID);
             }
         }
 
-        public static final void deleteBBSReply(final int guildid, final int localthreadid, final int replyid, final int posterID, final int guildRank) {
+        public static void deleteBBSReply(final int guildid, final int localthreadid, final int replyid, final int posterID, final int guildRank) {
             final MapleGuild g = getGuild(guildid);
             if (g != null) {
                 g.deleteBBSReply(localthreadid, replyid, posterID, guildRank);
@@ -1154,7 +1058,7 @@ public class World {
 
         public static void changeEmblem(int gid, int affectedPlayers, MapleGuild mgs) {
             Broadcast.sendGuildPacket(affectedPlayers, GuildPacket.guildEmblemChange(gid, (short) mgs.getLogoBG(), (byte) mgs.getLogoBGColor(), (short) mgs.getLogo(), (byte) mgs.getLogoColor()), -1, gid);
-            setGuildAndRank(affectedPlayers, -1, -1, -1, -1);    //respawn player
+            setGuildAndRank(affectedPlayers, -1, -1, -1, -1);	//respawn player
         }
 
         public static void setGuildAndRank(int cid, int guildid, int rank, int contribution, int alliancerank) {
@@ -1180,7 +1084,7 @@ public class World {
             }
             if (bDifferentGuild && ch > 0) {
                 mc.getMap().broadcastMessage(mc, CField.loadGuildName(mc), false);
-                mc.getMap().broadcastMessage(mc, CField.loadGuildIcon(mc), false);
+				mc.getMap().broadcastMessage(mc, CField.loadGuildIcon(mc), false);
             }
         }
     }
@@ -1265,8 +1169,8 @@ public class World {
     public static class Find {
 
         private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-        private static HashMap<Integer, Integer> idToChannel = new HashMap<Integer, Integer>();
-        private static HashMap<String, Integer> nameToChannel = new HashMap<String, Integer>();
+        private static HashMap<Integer, Integer> idToChannel = new HashMap<>();
+        private static HashMap<String, Integer> nameToChannel = new HashMap<>();
 
         public static void register(int id, String name, int channel) {
             lock.writeLock().lock();
@@ -1347,7 +1251,7 @@ public class World {
         }
 
         public static CharacterIdChannelPair[] multiBuddyFind(int charIdFrom, int[] characterIds) {
-            List<CharacterIdChannelPair> foundsChars = new ArrayList<CharacterIdChannelPair>(characterIds.length);
+            List<CharacterIdChannelPair> foundsChars = new ArrayList<>(characterIds.length);
             for (int i : characterIds) {
                 int channel = findChannel(i);
                 if (channel > 0) {
@@ -1361,7 +1265,7 @@ public class World {
 
     public static class Alliance {
 
-        private static final Map<Integer, MapleGuildAlliance> alliances = new LinkedHashMap<Integer, MapleGuildAlliance>();
+        private static final Map<Integer, MapleGuildAlliance> alliances = new LinkedHashMap<>();
         private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
         static {
@@ -1558,6 +1462,9 @@ public class World {
             }
         }
 
+        /*
+        公會聯盟操作設定
+        */
         public static void setOldAlliance(final int gid, final boolean expelled, final int allianceid) {
             final MapleGuildAlliance alliance = getAlliance(allianceid);
             final MapleGuild g_ = Guild.getGuild(gid);
@@ -1577,12 +1484,12 @@ public class World {
                     } else if (g_ != null) {
                         guild.broadcast(CWvsContext.serverNotice(5, "[" + g_.getName() + "] Guild has left the alliance."));
                         guild.broadcast(AlliancePacket.changeGuildInAlliance(alliance, g_, false));
-                        guild.broadcast(AlliancePacket.removeGuildFromAlliance(alliance, g_, expelled));
                     }
-
+                }
+                if (g_ != null) { //防止解散聯盟為空值
+                    alliance.broadcast(AlliancePacket.removeGuildFromAlliance(alliance, g_, expelled)); //退出和驅逐聯盟重繪
                 }
             }
-
             if (gid == -1) {
                 lock.writeLock().lock();
                 try {
@@ -1594,7 +1501,7 @@ public class World {
         }
 
         public static List<byte[]> getAllianceInfo(final int allianceid, final boolean start) {
-            List<byte[]> ret = new ArrayList<byte[]>();
+            List<byte[]> ret = new ArrayList<>();
             final MapleGuildAlliance alliance = getAlliance(allianceid);
             if (alliance != null) {
                 if (start) {
@@ -1621,7 +1528,7 @@ public class World {
 
     public static class Family {
 
-        private static final Map<Integer, MapleFamily> families = new LinkedHashMap<Integer, MapleFamily>();
+        private static final Map<Integer, MapleFamily> families = new LinkedHashMap<>();
         private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
         public static void addLoadedFamily(MapleFamily f) {
@@ -1726,7 +1633,6 @@ public class World {
             }
         }
     }
-
     private final static int CHANNELS_PER_THREAD = 3;
 
     public static void registerRespawn() {
@@ -1741,14 +1647,15 @@ public class World {
     public static class Respawn implements Runnable { //is putting it here a good idea?
 
         private int numTimes = 0;
-        private final List<ChannelServer> cservs = new ArrayList<ChannelServer>(CHANNELS_PER_THREAD);
+        private final List<ChannelServer> cservs = new ArrayList<>(CHANNELS_PER_THREAD);
 
         public Respawn(Integer[] chs, int c) {
+            StringBuilder s = new StringBuilder("[Respawn Worker] Registered for channels ");
             for (int i = 1; i <= CHANNELS_PER_THREAD && chs.length >= (c + i); i++) {
                 cservs.add(ChannelServer.getInstance(c + i));
-                // s.append(c + i).append(" ");
+                s.append(c + i).append(" ");
             }
-            //System.out.println(s.toString());
+            System.out.println(s.toString());
         }
 
         @Override
@@ -1787,8 +1694,6 @@ public class World {
                 for (MapleMonster mons : map.getAllMonstersThreadsafe()) {
                     if (mons.isAlive() && mons.shouldKill(now)) {
                         map.killMonster(mons);
-                    } else if (mons.isAlive() && mons.shouldDrop(now)) {
-                        mons.doDropItem(now);
                     } else if (mons.isAlive() && mons.getStatiSize() > 0) {
                         for (MonsterStatusEffect mse : mons.getAllBuffs()) {
                             if (mse.shouldCancel(now)) {
@@ -1801,6 +1706,9 @@ public class World {
         }
     }
 
+    /*
+    迴回類狀態設定
+    */
     public static void handleCooldowns(final MapleCharacter chr, final int numTimes, final boolean hurt, final long now) { //is putting it here a good idea? expensive?
         if (chr.getCooldownSize() > 0) {
             for (MapleCoolDownValueHolder m : chr.getCooldowns()) {
@@ -1812,11 +1720,6 @@ public class World {
             }
         }
         if (chr.isAlive()) {
-            if (chr.getJob() == 131 || chr.getJob() == 132) {
-                if (chr.canBlood(now)) {
-                    chr.doDragonBlood();
-                }
-            }
             if (chr.canRecover(now)) {
                 chr.doRecovery();
             }
@@ -1825,6 +1728,7 @@ public class World {
             }
             if (chr.canMPRecover(now)) {
                 chr.addMP((int) chr.getStat().getHealMP());
+                chr.handleForceGain(0, 31110009, chr.getTotalSkillLevel(31110009) * 2); //強化惡魔之力
             }
             if (chr.canFairy(now)) {
                 chr.doFairy();
@@ -1834,6 +1738,10 @@ public class World {
             }
             if (chr.canDOT(now)) {
                 chr.doDOT();
+            }
+            if (chr.canExpiration(now)) {
+                chr.expirationTask(false, false);
+                chr.expirationTask(true, false);
             }
         }
 
@@ -1849,7 +1757,7 @@ public class World {
         }
         if (numTimes % 13 == 0) { //we're parsing through the characters anyway (:
             chr.doFamiliarSchedule(now);
-            for (MaplePet pet : chr.getSummonedPets()) {
+      /*      for (MaplePet pet : chr.getSummonedPets()) {
                 if (pet.getPetItemId() == 5000054 && pet.getSecondsLeft() > 0) {
                     pet.setSecondsLeft(pet.getSecondsLeft() - 1);
                     if (pet.getSecondsLeft() <= 0) {
@@ -1865,7 +1773,7 @@ public class World {
                     pet.setFullness(newFullness);
                     chr.getClient().getSession().write(PetPacket.updatePet(pet, chr.getInventory(MapleInventoryType.CASH).getItem(pet.getInventoryPosition()), true));
                 }
-            }
+            }*/
         }
         if (hurt && chr.isAlive()) {
             if (chr.getInventory(MapleInventoryType.EQUIPPED).findById(chr.getMap().getHPDecProtect()) == null) {

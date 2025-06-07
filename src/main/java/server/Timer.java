@@ -1,139 +1,112 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 import tools.FileoutputUtil;
 
 public abstract class Timer {
 
     public static class WorldTimer extends Timer {
         private static WorldTimer instance = new WorldTimer();
+	
+	private WorldTimer() {
+	    name = "Worldtimer";
+	}
 
-        private WorldTimer() {
-            name = "Worldtimer";
-        }
+	public static WorldTimer getInstance() {
+	    return instance;
+	}
+    }
+    
+        public static class PokeTimer extends Timer {
+        private static PokeTimer instance = new PokeTimer();
+	
+	private PokeTimer() {
+	    name = "PokeTimer";
+	}
 
-        public static WorldTimer getInstance() {
-            return instance;
-        }
+	public static PokeTimer getInstance() {
+	    return instance;
+	}
     }
 
+    
 
     public static class MapTimer extends Timer {
         private static MapTimer instance = new MapTimer();
+	
+	private MapTimer() {
+	    name = "Maptimer";
+	}
 
-        private MapTimer() {
-            name = "Maptimer";
-        }
-
-        public static MapTimer getInstance() {
-            return instance;
-        }
+	public static MapTimer getInstance() {
+	    return instance;
+	}
     }
 
     public static class BuffTimer extends Timer {
         private static BuffTimer instance = new BuffTimer();
+	
+	private BuffTimer() {
+	    name = "Bufftimer";
+	}
 
-        private BuffTimer() {
-            name = "Bufftimer";
-        }
-
-        public static BuffTimer getInstance() {
-            return instance;
-        }
+	public static BuffTimer getInstance() {
+	    return instance;
+	}
     }
 
     public static class EventTimer extends Timer {
         private static EventTimer instance = new EventTimer();
+	
+	private EventTimer() {
+	    name = "Eventtimer";
+	}
 
-        private EventTimer() {
-            name = "Eventtimer";
-        }
-
-        public static EventTimer getInstance() {
-            return instance;
-        }
+	public static EventTimer getInstance() {
+	    return instance;
+	}
     }
 
-    public static class CloneTimer extends Timer {
-        private static CloneTimer instance = new CloneTimer();
 
-        private CloneTimer() {
-            name = "Clonetimer";
-        }
-
-        public static CloneTimer getInstance() {
-            return instance;
-        }
-    }
 
     public static class EtcTimer extends Timer {
         private static EtcTimer instance = new EtcTimer();
+	
+	private EtcTimer() {
+	    name = "Etctimer";
+	}
 
-        private EtcTimer() {
-            name = "Etctimer";
-        }
-
-        public static EtcTimer getInstance() {
-            return instance;
-        }
+	public static EtcTimer getInstance() {
+	    return instance;
+	}
     }
 
     public static class CheatTimer extends Timer {
         private static CheatTimer instance = new CheatTimer();
+	
+	private CheatTimer() {
+	    name = "Cheattimer";
+	}
 
-        private CheatTimer() {
-            name = "Cheattimer";
-        }
-
-        public static CheatTimer getInstance() {
-            return instance;
-        }
+	public static CheatTimer getInstance() {
+	    return instance;
+	}
     }
 
     public static class PingTimer extends Timer {
         private static PingTimer instance = new PingTimer();
+	
+	private PingTimer() {
+	    name = "Pingtimer";
+	}
 
-        private PingTimer() {
-            name = "Pingtimer";
-        }
-
-        public static PingTimer getInstance() {
-            return instance;
-        }
+	public static PingTimer getInstance() {
+	    return instance;
+	}
     }
 
     private ScheduledThreadPoolExecutor ses;
@@ -144,7 +117,7 @@ public abstract class Timer {
         if (ses != null && !ses.isShutdown() && !ses.isTerminated()) {
             return;
         }
-        file = "" + name + " Error.txt";
+	file = "Log_" + name + "_Except.rtf";
         ses = new ScheduledThreadPoolExecutor(5, new RejectedThreadFactory());
         ses.setKeepAliveTime(10, TimeUnit.MINUTES);
         ses.allowCoreThreadTimeOut(true);
@@ -154,36 +127,27 @@ public abstract class Timer {
     }
 
     public ScheduledThreadPoolExecutor getSES() {
-        return ses;
+	return ses;
     }
 
     public void stop() {
-        if (ses != null) {
-            ses.shutdown();
-        }
+	if (ses != null) {
+	    ses.shutdown();
+	}
     }
 
     public ScheduledFuture<?> register(Runnable r, long repeatTime, long delay) {
-        if (ses == null) {
-            return null;
-        }
-        return ses.scheduleAtFixedRate(new LoggingSaveRunnable(r, file), delay, repeatTime, TimeUnit.MILLISECONDS);
+	if (ses == null) {
+	    return null;
+	}
+	    return ses.scheduleAtFixedRate(new LoggingSaveRunnable(r, file), delay, repeatTime, TimeUnit.MILLISECONDS);
     }
-
     public ScheduledFuture<?> register(Runnable r, long repeatTime) {
-        if (ses == null) {
-            return null;
-        }
-        return ses.scheduleAtFixedRate(new LoggingSaveRunnable(r, file), 0, repeatTime, TimeUnit.MILLISECONDS);
-    }
+	if (ses == null) {	    return null;	}	return ses.scheduleAtFixedRate(new LoggingSaveRunnable(r, file), 0, repeatTime, TimeUnit.MILLISECONDS);    }
 
 
     public ScheduledFuture<?> schedule(Runnable r, long delay) {
-        if (ses == null) {
-            return null;
-        }
-        return ses.schedule(new LoggingSaveRunnable(r, file), delay, TimeUnit.MILLISECONDS);
-    }
+	if (ses == null) {	    return null;	}	return ses.schedule(new LoggingSaveRunnable(r, file), delay, TimeUnit.MILLISECONDS);    }
 
     public ScheduledFuture<?> scheduleAtTimestamp(Runnable r, long timestamp) {
         return schedule(r, timestamp - System.currentTimeMillis());
@@ -191,33 +155,32 @@ public abstract class Timer {
 
     private static class LoggingSaveRunnable implements Runnable {
 
-        Runnable r;
+	Runnable r;
         String file;
-
-        public LoggingSaveRunnable(final Runnable r, final String file) {
-            this.r = r;
+	public LoggingSaveRunnable(final Runnable r, final String file) {
+	    this.r = r;
             this.file = file;
-        }
+	}
 
-        @Override
-        public void run() {
-            try {
-                r.run();
-            } catch (Throwable t) {
-                FileoutputUtil.outputFileError(file, t);
-                //t.printStackTrace(); //mostly this gives un-needed errors... that take up a lot of space
-            }
-        }
+	@Override
+	public void run() {
+	    try {
+		r.run();
+	    } catch (Throwable t) {
+		FileoutputUtil.outputFileError(file, t);
+		//t.printStackTrace(); //mostly this gives un-needed errors... that take up a lot of space
+	    }
+	}
     }
 
     private class RejectedThreadFactory implements ThreadFactory {
-
+        
         private final AtomicInteger threadNumber2 = new AtomicInteger(1);
-        private final String tname;
+	private final String tname;
 
-        public RejectedThreadFactory() {
-            tname = name + Randomizer.nextInt();
-        }
+	public RejectedThreadFactory() {
+	    tname = name + Randomizer.nextInt();
+	}
 
 
         @Override

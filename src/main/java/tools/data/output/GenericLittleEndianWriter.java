@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package tools.data.output;
 
-import java.awt.*;
+import java.awt.Point;
 import java.nio.charset.Charset;
 
 /**
  * Provides a generic writer of a little-endian sequence of bytes.
- *
+ * 
  * @author Frz
  * @version 1.0
  * @since Revision 323
@@ -39,7 +33,7 @@ import java.nio.charset.Charset;
 public class GenericLittleEndianWriter implements LittleEndianWriter {
 
     // See http://java.sun.com/j2se/1.4.2/docs/api/java/nio/charset/Charset.html
-    public static final Charset ASCII = Charset.forName("GBK"); // ISO-8859-1, UTF-8
+    private static final Charset ASCII = Charset.forName("US-ASCII"); // ISO-8859-1, UTF-8
     private ByteOutputStream bos;
 
     /**
@@ -148,19 +142,12 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
 
     @Override
     public final void writeAsciiString(String s, final int max) {
-//        if (s.length() > max) {
-//            s = s.substring(0, max);
-//        }
-//        write(s.getBytes(ASCII));
-//        for (int i = s.length(); i < max; i++) {
-//            write(0);
-//        }
-        if (s.getBytes(ASCII).length > max) {
+        if (s.length() > max) {
             s = s.substring(0, max);
         }
         write(s.getBytes(ASCII));
-        for (int i = s.getBytes(ASCII).length; i < max; i++) {
-            write((byte) 0);
+        for (int i = s.length(); i < max; i++) {
+            write(0);
         }
     }
 
@@ -171,7 +158,7 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
      */
     @Override
     public final void writeMapleAsciiString(final String s) {
-        writeShort((short) s.getBytes(ASCII).length);
+        writeShort((short) s.length());
         writeAsciiString(s);
     }
 
@@ -188,7 +175,6 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
 
     /**
      * Write a long integer to the stream.
-     *
      * @param l The long integer to write.
      */
     @Override

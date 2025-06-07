@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import constants.GameConstants;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,10 +32,8 @@ import java.util.Map;
 
 import client.inventory.MapleInventoryType;
 import database.DatabaseConnection;
-
 import java.io.File;
 import java.util.Map.Entry;
-
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -78,13 +69,13 @@ public class MapleMonsterInformationProvider {
             while (rs.next()) {
                 globaldrops.add(
                         new MonsterGlobalDropEntry(
-                                rs.getInt("itemid"),
-                                rs.getInt("chance"),
-                                rs.getInt("continent"),
-                                rs.getByte("dropType"),
-                                rs.getInt("minimum_quantity"),
-                                rs.getInt("maximum_quantity"),
-                                rs.getInt("questid")));
+                        rs.getInt("itemid"),
+                        rs.getInt("chance"),
+                        rs.getInt("continent"),
+                        rs.getByte("dropType"),
+                        rs.getInt("minimum_quantity"),
+                        rs.getInt("maximum_quantity"),
+                        rs.getInt("questid")));
             }
             rs.close();
             ps.close();
@@ -117,6 +108,9 @@ public class MapleMonsterInformationProvider {
         return drops.get(Integer.valueOf(monsterId));
     }
 
+    /*
+    加載資料庫掉寶數據
+    */
     private void loadDrop(final int monsterId) {
         final ArrayList<MonsterDropEntry> ret = new ArrayList<MonsterDropEntry>();
 
@@ -136,9 +130,7 @@ public class MapleMonsterInformationProvider {
             while (rs.next()) {
                 itemid = rs.getInt("itemid");
                 chance = rs.getInt("chance");
-                if (GameConstants.getInventoryType(itemid) == MapleInventoryType.EQUIP) {
-                    chance *= 10; //in GMS/SEA it was raised
-                }
+
                 ret.add(new MonsterDropEntry(
                         itemid,
                         chance,
@@ -170,6 +162,9 @@ public class MapleMonsterInformationProvider {
         drops.put(Integer.valueOf(monsterId), ret);
     }
 
+    /*
+    掉寶相關設定
+    */
     public void addExtra() {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         for (Entry<Integer, ArrayList<MonsterDropEntry>> e : drops.entrySet()) {
@@ -181,21 +176,21 @@ public class MapleMonsterInformationProvider {
             final MapleMonsterStats mons = MapleLifeFactory.getMonsterStats(e.getKey());
             Integer item = ii.getItemIdByMob(e.getKey());
             if (item != null && item.intValue() > 0) {
-                e.getValue().add(new MonsterDropEntry(item.intValue(), mons.isBoss() ? 1000000 : 10000, 1, 1, 0));
+                e.getValue().add(new MonsterDropEntry(item.intValue(), mons.isBoss() ? 100000 : 1000, 1, 1, 0)); //怪物書卡片
             }
             StructFamiliar f = ii.getFamiliarByMob(e.getKey().intValue());
             if (f != null) {
-                e.getValue().add(new MonsterDropEntry(f.itemid, mons.isBoss() ? 10000 : 100, 1, 1, 0));
+                e.getValue().add(new MonsterDropEntry(f.itemid, mons.isBoss() ? 10000 : 1000, 1, 1, 0)); //怪物寶寶卡
             }
         }
         for (Entry<Integer, Integer> i : ii.getMonsterBook().entrySet()) {
             if (!drops.containsKey(i.getKey())) {
                 final MapleMonsterStats mons = MapleLifeFactory.getMonsterStats(i.getKey());
                 ArrayList<MonsterDropEntry> e = new ArrayList<MonsterDropEntry>();
-                e.add(new MonsterDropEntry(i.getValue().intValue(), mons.isBoss() ? 1000000 : 10000, 1, 1, 0));
+                e.add(new MonsterDropEntry(i.getValue().intValue(), mons.isBoss() ? 100000 : 1000, 1, 1, 0));
                 StructFamiliar f = ii.getFamiliarByMob(i.getKey().intValue());
                 if (f != null) {
-                    e.add(new MonsterDropEntry(f.itemid, mons.isBoss() ? 10000 : 100, 1, 1, 0));
+                    e.add(new MonsterDropEntry(f.itemid, mons.isBoss() ? 10000 : 1000, 1, 1, 0));
                 }
                 addMeso(mons, e);
 
@@ -217,6 +212,8 @@ public class MapleMonsterInformationProvider {
                     for (MapleData d : mobStringData.getChildByPath(e.getKey() + "/reward")) {
                         final int toAdd = MapleDataTool.getInt(d, 0);
                         if (toAdd > 0 && !contains(e.getValue(), toAdd) && ii.itemExists(toAdd)) {
+
+                            //取消讀取怪物書掉落
                             //e.getValue().add(new MonsterDropEntry(toAdd, chanceLogic(toAdd), 1, 1, 0));
                         }
                     }
@@ -225,11 +222,14 @@ public class MapleMonsterInformationProvider {
         }
     }
 
+    /*
+    楓幣掉落設定
+    */
     public void addMeso(MapleMonsterStats mons, ArrayList<MonsterDropEntry> ret) {
         final double divided = (mons.getLevel() < 100 ? (mons.getLevel() < 10 ? (double) mons.getLevel() : 10.0) : (mons.getLevel() / 10.0));
         final int max = mons.isBoss() && !mons.isPartyBonus() ? (mons.getLevel() * mons.getLevel()) : (mons.getLevel() * (int) Math.ceil(mons.getLevel() / divided));
         for (int i = 0; i < mons.dropsMeso(); i++) {
-            ret.add(new MonsterDropEntry(0, mons.isBoss() && !mons.isPartyBonus() ? 1000000 : (mons.isPartyBonus() ? 100000 : 200000), (int) Math.floor(0.66 * max), max, 0));
+            ret.add(new MonsterDropEntry(0, mons.isBoss() && !mons.isPartyBonus() ? 1000000 : (mons.isPartyBonus() ? 100000 : 600000), (int) Math.floor(0.66 * max), max, 0));
         }
     }
 

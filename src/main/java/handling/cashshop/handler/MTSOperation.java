@@ -1,40 +1,11 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package handling.cashshop.handler;
 
-import client.inventory.Equip;
-import constants.GameConstants;
-import client.inventory.Item;
 import client.MapleClient;
+import client.inventory.Equip;
+import client.inventory.Item;
 import client.inventory.MapleInventoryType;
+import constants.GameConstants;
 import constants.ServerConstants;
-
-import java.util.Calendar;
-
 import server.MTSCart;
 import server.MTSStorage;
 import server.MTSStorage.MTSItemInfo;
@@ -68,7 +39,7 @@ public class MTSOperation {
             }
             slea.skip(12); //expiration, -1, don't matter
             short stars = 1, quantity = 1;
-            byte slot = 0;
+            byte slot;
             if (invType == 1) {
                 slea.skip(32);
             } else {
@@ -97,7 +68,7 @@ public class MTSOperation {
             final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
             final MapleInventoryType type = GameConstants.getInventoryType(itemid);
             final Item item = c.getPlayer().getInventory(type).getItem(slot).copy();
-            if (ii.isCash(itemid) || quantity <= 0 || item == null || item.getQuantity() <= 0 || item.getItemId() != itemid || item.getUniqueId() > 0 || item.getQuantity() < quantity || price < ServerConstants.MIN_MTS || c.getPlayer().getMeso() < ServerConstants.MTS_MESO || cart.getNotYetSold().size() >= 10 || ii.isDropRestricted(itemid) || ii.isAccountShared(itemid) || item.getExpiration() > -1 || item.getFlag() > 0) {
+            if (ii.isCash(itemid) || quantity <= 0 || item == null || item.getQuantity() <= 0 || item.getItemId() != itemid || item.getUniqueId() > 0 || item.getQuantity() < quantity || price < ServerConstants.MIN_MTS || c.getPlayer().getMeso() < ServerConstants.MTS_MESO || cart.getNotYetSold().size() >= 10 || ii.isAccountShared(itemid) || item.getExpiration() > -1 || item.getFlag() > 0) {
                 c.getSession().write(MTSCSPacket.getMTSFailSell());
                 doMTSPackets(cart, c);
                 return;
@@ -110,9 +81,6 @@ public class MTSOperation {
                     return;
                 }
             }
-            if (quantity >= 50 && item.getItemId() == 2340000) {
-                c.setMonitored(true); //hack check
-            }
             final long expiration = (System.currentTimeMillis() + (7L * 24 * 60 * 60 * 1000));
             item.setQuantity(quantity);
             MTSStorage.getInstance().addToBuyNow(cart, item, price, c.getPlayer().getId(), c.getPlayer().getName(), expiration);
@@ -121,10 +89,10 @@ public class MTSOperation {
             c.getSession().write(MTSCSPacket.getMTSConfirmSell());
         } else if (op == 5) { //change page/tab
             cart.changeInfo(slea.readInt(), slea.readInt(), slea.readInt());
-        } else if (op == 6) { //search
-            cart.changeInfo(slea.readInt(), slea.readInt(), 0);
-            slea.readInt(); //always 0?
-            cart.changeCurrentView(MTSStorage.getInstance().getSearch(slea.readInt() > 0, slea.readMapleAsciiString(), cart.getType(), cart.getTab()));
+	} else if (op == 6) { //search
+	    cart.changeInfo(slea.readInt(), slea.readInt(), 0);
+	    slea.readInt(); //always 0?
+	    cart.changeCurrentView(MTSStorage.getInstance().getSearch(slea.readInt() > 0, slea.readMapleAsciiString(), cart.getType(), cart.getTab()));
         } else if (op == 7) { //cancel sale
             if (!MTSStorage.getInstance().removeFromBuyNow(slea.readInt(), c.getPlayer().getId(), true)) {
                 c.getSession().write(MTSCSPacket.getMTSFailCancel());
@@ -203,7 +171,7 @@ public class MTSOperation {
     }
 
     public static void MTSUpdate(final MTSCart cart, final MapleClient c) {
-        final int a = MTSStorage.getInstance().getCart(c.getPlayer().getId()).getSetOwedNX();
+		final int a = MTSStorage.getInstance().getCart(c.getPlayer().getId()).getSetOwedNX();
         c.getPlayer().modifyCSPoints(1, GameConstants.GMS ? (a * 2) : a, false);
         c.getSession().write(MTSCSPacket.getMTSWantedListingOver(0, 0));
         doMTSPackets(cart, c);

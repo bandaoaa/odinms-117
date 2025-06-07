@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -31,11 +25,11 @@ import java.io.IOException;
 /**
  * Provides an abstract accessor to a generic Little Endian byte stream. This
  * accessor is seekable.
- *
+ * 
  * @author Frz
  * @version 1.0
- * @see net.sf.odinms.tools.data.input.GenericLittleEndianAccessor
  * @since Revision 323
+ * @see net.sf.odinms.tools.data.input.GenericLittleEndianAccessor
  */
 public class GenericSeekableLittleEndianAccessor extends GenericLittleEndianAccessor implements SeekableLittleEndianAccessor {
 
@@ -51,7 +45,6 @@ public class GenericSeekableLittleEndianAccessor extends GenericLittleEndianAcce
         super(bs);
         this.bs = bs;
     }
-
 
     /**
      * Seek the pointer to <code>offset</code>

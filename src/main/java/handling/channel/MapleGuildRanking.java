@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,19 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel;
 
-import java.util.List;
-import java.util.LinkedList;
+import database.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import database.DatabaseConnection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MapleGuildRanking {
 
     private static MapleGuildRanking instance = new MapleGuildRanking();
-    private List<GuildRankingInfo> ranks = new LinkedList<GuildRankingInfo>();
+    private List<GuildRankingInfo> ranks = new LinkedList<>();
 
     public static MapleGuildRanking getInstance() {
         return instance;
@@ -58,25 +51,24 @@ public class MapleGuildRanking {
         ranks.clear();
         try {
             Connection con = DatabaseConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM guilds ORDER BY `GP` DESC LIMIT 50");
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs;
+            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM guilds ORDER BY `GP` DESC LIMIT 50")) {
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    final GuildRankingInfo rank = new GuildRankingInfo(
+                            rs.getString("name"),
+                            rs.getInt("GP"),
+                            rs.getInt("logo"),
+                            rs.getInt("logoColor"),
+                            rs.getInt("logoBG"),
+                            rs.getInt("logoBGColor"));
 
-            while (rs.next()) {
-                final GuildRankingInfo rank = new GuildRankingInfo(
-                        rs.getString("name"),
-                        rs.getInt("GP"),
-                        rs.getInt("logo"),
-                        rs.getInt("logoColor"),
-                        rs.getInt("logoBG"),
-                        rs.getInt("logoBGColor"));
-
-                ranks.add(rank);
+                    ranks.add(rank);
+                }
             }
-            ps.close();
             rs.close();
         } catch (SQLException e) {
             System.err.println("Error handling guildRanking");
-            e.printStackTrace();
         }
     }
 

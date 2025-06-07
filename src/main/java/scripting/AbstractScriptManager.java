@@ -20,20 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package scripting;
 
+import client.MapleClient;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import client.MapleClient;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
+import javax.script.ScriptException;
 import tools.FileoutputUtil;
 
 /**
+ *
  * @author Matze
  */
 public abstract class AbstractScriptManager {
@@ -45,7 +44,7 @@ public abstract class AbstractScriptManager {
     }
 
     protected Invocable getInvocable(String path, MapleClient c, boolean npc) {
-        InputStream in = null;
+        FileReader fr = null;
         try {
             path = "scripts/" + path;
             ScriptEngine engine = null;
@@ -62,22 +61,20 @@ public abstract class AbstractScriptManager {
                 if (c != null) {
                     c.setScriptEngine(path, engine);
                 }
-                in = new FileInputStream(scriptFile);
-                BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(scriptFile), "UTF-8"));
-                String lines = "load('nashorn:mozilla_compat.js');" + bf.lines().collect(Collectors.joining(System.lineSeparator()));
-                engine.eval(lines);
+                fr = new FileReader(scriptFile);
+                engine.eval(fr);
             } else if (c != null && npc) {
-                //c.getPlayer().dropMessage(-1, "You already are talking to this NPC. Use @ea if this is not intended.");
+                c.getPlayer().dropMessage(-1, "You already are talking to this NPC. Use @dispose if this is not intended.");
             }
             return (Invocable) engine;
-        } catch (Exception e) {
+        } catch (FileNotFoundException | ScriptException e) {
             System.err.println("Error executing script. Path: " + path + "\nException " + e);
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Error executing script. Path: " + path + "\nException " + e);
             return null;
         } finally {
             try {
-                if (in != null) {
-                    in.close();
+                if (fr != null) {
+                    fr.close();
                 }
             } catch (IOException ignore) {
             }

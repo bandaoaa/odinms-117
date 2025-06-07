@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,21 +21,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client.inventory;
 
 import constants.GameConstants;
-
 import java.io.Serializable;
 import java.util.*;
 
 public class MapleInventory implements Iterable<Item>, Serializable {
 
     private Map<Short, Item> inventory;
-    private byte slotLimit = 0;
+    private byte slotLimit = 96;
     private MapleInventoryType type;
 
-    /**
-     * Creates a new instance of MapleInventory
-     */
+    /** Creates a new instance of MapleInventory */
     public MapleInventory(MapleInventoryType type) {
-        this.inventory = new LinkedHashMap<Short, Item>();
+        this.inventory = new LinkedHashMap<>();
         this.type = type;
     }
 
@@ -64,9 +55,7 @@ public class MapleInventory implements Iterable<Item>, Serializable {
         slotLimit = slot;
     }
 
-    /**
-     * Returns the item with its slot id if it exists within the inventory, otherwise null is returned
-     */
+    /** Returns the item with its slot id if it exists within the inventory, otherwise null is returned */
     public Item findById(int itemId) {
         for (Item item : inventory.values()) {
             if (item.getItemId() == itemId) {
@@ -85,6 +74,16 @@ public class MapleInventory implements Iterable<Item>, Serializable {
         return null;
     }
 
+    //裝備合成相關內容
+    public Item findByUniqueId(long itemId) {
+        for (Item item : inventory.values()) {
+            if (item.getUniqueId() == itemId) {
+                return item;
+            }
+        }
+        return null;
+    }
+	
     public Item findByInventoryId(long itemId, int itemI) {
         for (Item item : inventory.values()) {
             if (item.getInventoryId() == itemId && item.getItemId() == itemI) {
@@ -93,7 +92,7 @@ public class MapleInventory implements Iterable<Item>, Serializable {
         }
         return findById(itemI);
     }
-
+	
     public Item findByInventoryIdOnly(long itemId, int itemI) {
         for (Item item : inventory.values()) {
             if (item.getInventoryId() == itemId && item.getItemId() == itemI) {
@@ -114,7 +113,7 @@ public class MapleInventory implements Iterable<Item>, Serializable {
     }
 
     public List<Item> listById(int itemId) {
-        List<Item> ret = new ArrayList<Item>();
+        List<Item> ret = new ArrayList<>();
         for (Item item : inventory.values()) {
             if (item.getItemId() == itemId) {
                 ret.add(item);
@@ -134,18 +133,18 @@ public class MapleInventory implements Iterable<Item>, Serializable {
     }
 
     public List<Item> newList() {
-        if (inventory.size() <= 0) {
-            return Collections.emptyList();
-        }
-        return new LinkedList<Item>(inventory.values());
+	if (inventory.size() <= 0) {
+	    return Collections.emptyList();
+	}
+        return new LinkedList<>(inventory.values());
     }
 
     public List<Integer> listIds() {
-        List<Integer> ret = new ArrayList<Integer>();
+        List<Integer> ret = new ArrayList<>();
         for (Item item : inventory.values()) {
-            if (!ret.contains(Integer.valueOf(item.getItemId()))) {
+	    if (!ret.contains(Integer.valueOf(item.getItemId()))) {
                 ret.add(Integer.valueOf(item.getItemId()));
-            }
+	    }
         }
         if (ret.size() > 1) {
             Collections.sort(ret);
@@ -154,9 +153,7 @@ public class MapleInventory implements Iterable<Item>, Serializable {
     }
 
 
-    /**
-     * Adds the item to the inventory and returns the assigned slot id
-     */
+    /** Adds the item to the inventory and returns the assigned slot id */
     public short addItem(Item item) {
         short slotId = getNextFreeSlot();
         if (slotId < 0) {
@@ -249,16 +246,26 @@ public class MapleInventory implements Iterable<Item>, Serializable {
     }
 
     public boolean isFull() {
-        return inventory.size() >= slotLimit;
+        short a = 0;
+        for (short i : inventory.keySet()) { //使用小背包時
+            if (i > 100) {
+                a += 1;
+            }
+        }
+        return inventory.size() - a >= slotLimit;
     }
 
     public boolean isFull(int margin) {
-        return inventory.size() + margin >= slotLimit;
+        short a = 0;
+        for (short i : inventory.keySet()) { //使用小背包時
+            if (i > 100) {
+                a += 1;
+            }
+        }
+        return inventory.size() - a + margin >= slotLimit;
     }
 
-    /**
-     * Returns the next empty slot id, -1 if the inventory is full
-     */
+    /** Returns the next empty slot id, -1 if the inventory is full */
     public short getNextFreeSlot() {
         if (isFull()) {
             return -1;

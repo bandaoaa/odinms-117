@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -28,27 +22,15 @@ package server.maps;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.PreparedStatement;
-import constants.BattleConstants;
-
+import constants.GameConstants;
+import database.DatabaseConnection;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.io.File;
-
-import constants.GameConstants;
-
-import database.DatabaseConnection;
-import database.DatabaseException;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -69,72 +51,43 @@ public class MapleMapFactory {
 
     private final MapleDataProvider source = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/Map.wz"));
     private final MapleData nameData = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/String.wz")).getData("Map.img");
-    private final HashMap<Integer, MapleMap> maps = new HashMap<Integer, MapleMap>();
-    private final HashMap<Integer, MapleMap> instanceMap = new HashMap<Integer, MapleMap>();
+    private final HashMap<Integer, MapleMap> maps = new HashMap<>();
+    private final HashMap<Integer, MapleMap> instanceMap = new HashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
-    private static final Map<Integer, List<AbstractLoadedMapleLife>> customLife = new HashMap<>();
     private int channel;
-
-    public static int loadCustomLife() {
-        customLife.clear(); // init
-        try {
-            Connection con = (Connection) DatabaseConnection.getConnection();
-            java.sql.PreparedStatement ps = con.prepareStatement("SELECT * FROM `wz_customlife`");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                final int mapid = rs.getInt("mid");
-                final AbstractLoadedMapleLife myLife = loadLife(rs.getInt("dataid"), rs.getInt("f"), rs.getByte("hide") > 0, rs.getInt("fh"), rs.getInt("cy"), rs.getInt("rx0"), rs.getInt("rx1"), rs.getInt("x"), rs.getInt("y"), rs.getString("type"), rs.getInt("mobtime"));
-                if (myLife == null) {
-                    continue;
-                }
-                final List<AbstractLoadedMapleLife> entries = customLife.get(mapid);
-                final List<AbstractLoadedMapleLife> collections = new ArrayList<>();
-                if (entries == null) {
-                    collections.add(myLife);
-                    customLife.put(mapid, collections);
-                } else {
-                    collections.addAll(entries); //re-add
-                    collections.add(myLife);
-                    customLife.put(mapid, collections);
-                }
-            }
-            rs.close();
-            ps.close();
-            return customLife.size();
-            //System.out.println("Successfully loaded " + customLife.size() + " maps with custom life.");
-        } catch (SQLException e) {
-            System.out.println("Error loading custom life..." + e);
-        }
-        return -1;
-    }
 
     public MapleMapFactory(int channel) {
         this.channel = channel;
     }
 
-
     public final MapleMap getMap(final int mapid) {
         return getMap(mapid, true, true, true);
     }
 
-    private static AbstractLoadedMapleLife loadLife(int id, int f, boolean hide, int fh, int cy, int rx0, int rx1, int x, int y, String type, int mtime) {
-        final AbstractLoadedMapleLife myLife = MapleLifeFactory.getLife(id, type);
-        if (myLife == null) {
-            System.out.println("Custom npc " + id + " is null...");
-            return null;
-        }
-        myLife.setCy(cy);
-        myLife.setF(f);
-        myLife.setFh(fh);
-        myLife.setRx0(rx0);
-        myLife.setRx1(rx1);
-        myLife.setPosition(new Point(x, y));
-        myLife.setHide(hide);
-        myLife.setMTime(mtime);
-        myLife.setCType(type);
-        return myLife;
-    }
+    
+    private static final List<Integer> clearedLifeMaps = new ArrayList<>();
 
+public static void loadClearedMaps() {
+        try {
+            Connection con = (Connection) DatabaseConnection.getConnection();
+            PreparedStatement ps = (PreparedStatement) con.prepareStatement("SELECT * FROM wz_clearedlife");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                clearedLifeMaps.add(rs.getInt("mapid"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public static boolean isMapCleared(final int mapid) {
+        return clearedLifeMaps.contains(mapid);
+    }
+    
+    public static void addClearedMap(final int mapid) {
+        clearedLifeMaps.add(mapid);
+    }  
+    
     //backwards-compatible
     public final MapleMap getMap(final int mapid, final boolean respawns, final boolean npcs) {
         return getMap(mapid, respawns, npcs, true);
@@ -150,7 +103,7 @@ public class MapleMapFactory {
                 if (map != null) {
                     return map;
                 }
-                MapleData mapData = null;
+                MapleData mapData;
                 try {
                     mapData = source.getData(getMapName(mapid));
                 } catch (Exception e) {
@@ -178,7 +131,7 @@ public class MapleMapFactory {
                 map.setLeft(MapleDataTool.getInt(mapData.getChildByPath("info/VRLeft"), 0));
                 map.setBottom(MapleDataTool.getInt(mapData.getChildByPath("info/VRBottom"), 0));
                 map.setRight(MapleDataTool.getInt(mapData.getChildByPath("info/VRRight"), 0));
-                List<MapleFoothold> allFootholds = new LinkedList<MapleFoothold>();
+                List<MapleFoothold> allFootholds = new LinkedList<>();
                 Point lBound = new Point();
                 Point uBound = new Point();
                 MapleFoothold fh;
@@ -233,7 +186,7 @@ public class MapleMapFactory {
                 }
 
                 // load life data (npc, monsters)
-                List<Point> herbRocks = new ArrayList<Point>();
+                List<Point> herbRocks = new ArrayList<>();
                 int lowestLevel = 200, highestLevel = 0;
                 String type, limited;
                 AbstractLoadedMapleLife myLife;
@@ -244,7 +197,7 @@ public class MapleMapFactory {
                     if ((npcs || !type.equals("n")) && !limited.equals("Stage0")) { //alien pq stuff
                         myLife = loadLife(life, MapleDataTool.getString(life.getChildByPath("id")), type);
 
-                        if (myLife instanceof MapleMonster && !BattleConstants.isBattleMap(mapid) && !GameConstants.isNoSpawn(mapid)) {
+                        if (myLife instanceof MapleMonster && !GameConstants.isNoSpawn(mapid) && !clearedLifeMaps.contains(mapid)) {
                             final MapleMonster mob = (MapleMonster) myLife;
 
                             herbRocks.add(map.addMonsterSpawn(mob,
@@ -261,29 +214,18 @@ public class MapleMapFactory {
                             map.addMapObject(myLife);
                         }
                     }
-                    final List<AbstractLoadedMapleLife> custom = customLife.get(mapid);
-                    if (custom != null) {
-                        for (AbstractLoadedMapleLife n : custom) {
-                            if (n.getCType().equals("n")) {
-                                map.addMapObject(n);
-                            } else if (n.getCType().equals("m")) {
-                                final MapleMonster monster = (MapleMonster) n;
-                                map.addMonsterSpawn(monster, n.getMTime(), (byte) -1, null);
-                            }
-                        }
-                    }
-
                 }
                 addAreaBossSpawn(map);
                 map.setCreateMobInterval((short) MapleDataTool.getInt(mapData.getChildByPath("info/createMobInterval"), 9000));
                 map.setFixedMob(MapleDataTool.getInt(mapData.getChildByPath("info/fixedMobCapacity"), 0));
                 map.setPartyBonusRate(GameConstants.getPartyPlay(mapid, MapleDataTool.getInt(mapData.getChildByPath("info/partyBonusR"), 0)));
+
                 map.loadMonsterRate(true);
                 map.setNodes(loadNodes(mapid, mapData));
 
                 //load reactor data
                 String id;
-                if (reactors && mapData.getChildByPath("reactor") != null && !BattleConstants.isBattleMap(mapid)) {
+                if (reactors && mapData.getChildByPath("reactor") != null) {
                     for (MapleData reactor : mapData.getChildByPath("reactor")) {
                         id = MapleDataTool.getString(reactor.getChildByPath("id"));
                         if (id != null) {
@@ -294,7 +236,7 @@ public class MapleMapFactory {
                 map.setFirstUserEnter(MapleDataTool.getString(mapData.getChildByPath("info/onFirstUserEnter"), ""));
                 map.setUserEnter(mapid == GameConstants.JAIL ? "jail" : MapleDataTool.getString(mapData.getChildByPath("info/onUserEnter"), ""));
                 if (reactors && herbRocks.size() > 0 && highestLevel >= 30 && map.getFirstUserEnter().equals("") && map.getUserEnter().equals("")) {
-                    final List<Integer> allowedSpawn = new ArrayList<Integer>(24);
+                    final List<Integer> allowedSpawn = new ArrayList<>(24);
                     allowedSpawn.add(100011);
                     allowedSpawn.add(200011);
                     if (highestLevel >= 100) {
@@ -393,7 +335,7 @@ public class MapleMapFactory {
         } finally {
             lock.unlock();
         }
-        MapleData mapData = null;
+        MapleData mapData;
         try {
             mapData = source.getData(getMapName(mapid));
         } catch (Exception e) {
@@ -420,7 +362,7 @@ public class MapleMapFactory {
         map.setLeft(MapleDataTool.getInt(mapData.getChildByPath("info/VRLeft"), 0));
         map.setBottom(MapleDataTool.getInt(mapData.getChildByPath("info/VRBottom"), 0));
         map.setRight(MapleDataTool.getInt(mapData.getChildByPath("info/VRRight"), 0));
-        List<MapleFoothold> allFootholds = new LinkedList<MapleFoothold>();
+        List<MapleFoothold> allFootholds = new LinkedList<>();
         Point lBound = new Point();
         Point uBound = new Point();
         for (MapleData footRoot : mapData.getChildByPath("foothold")) {
@@ -482,7 +424,7 @@ public class MapleMapFactory {
             if ((npcs || !type.equals("n")) && limited.equals("")) {
                 myLife = loadLife(life, MapleDataTool.getString(life.getChildByPath("id")), type);
 
-                if (myLife instanceof MapleMonster && !BattleConstants.isBattleMap(mapid) && !GameConstants.isNoSpawn(mapid)) {
+                if (myLife instanceof MapleMonster && !GameConstants.isNoSpawn(mapid) && !clearedLifeMaps.contains(mapid)) {
                     final MapleMonster mob = (MapleMonster) myLife;
 
                     map.addMonsterSpawn(mob,
@@ -504,7 +446,7 @@ public class MapleMapFactory {
 
         //load reactor data
         String id;
-        if (reactors && mapData.getChildByPath("reactor") != null && !BattleConstants.isBattleMap(mapid)) {
+        if (reactors && mapData.getChildByPath("reactor") != null) {
             for (MapleData reactor : mapData.getChildByPath("reactor")) {
                 id = MapleDataTool.getString(reactor.getChildByPath("id"));
                 if (id != null) {
@@ -566,7 +508,7 @@ public class MapleMapFactory {
     }
 
     public List<MapleMap> getAllLoadedMaps() {
-        List<MapleMap> ret = new ArrayList<MapleMap>();
+        List<MapleMap> ret = new ArrayList<>();
         lock.lock();
         try {
             ret.addAll(maps.values());
@@ -604,7 +546,7 @@ public class MapleMapFactory {
         return myLife;
     }
 
-    private final MapleReactor loadReactor(final MapleData reactor, final String id, final byte FacingDirection) {
+    private MapleReactor loadReactor(final MapleData reactor, final String id, final byte FacingDirection) {
         final MapleReactor myReactor = new MapleReactor(MapleReactorFactory.getReactor(Integer.parseInt(id)), Integer.parseInt(id));
 
         myReactor.setFacingDirection(FacingDirection);
@@ -682,6 +624,9 @@ public class MapleMapFactory {
         this.channel = channel;
     }
 
+    /*
+    加載野外BOSS設定
+    */
     private void addAreaBossSpawn(final MapleMap map) {
         int monsterid = -1;
         int mobtime = -1;
@@ -1060,6 +1005,9 @@ public class MapleMapFactory {
         }
     }
 
+    /*
+    加載地圖顯示的特效
+    */
     private MapleNodes loadNodes(final int mapid, final MapleData mapData) {
         MapleNodes nodeInfo = new MapleNodes(mapid);
         if (mapData.getChildByPath("nodeInfo") != null) {
@@ -1069,7 +1017,7 @@ public class MapleMapFactory {
                         nodeInfo.setNodeStart(MapleDataTool.getInt(node, 0));
                         continue;
                     }
-                    List<Integer> edges = new ArrayList<Integer>();
+                    List<Integer> edges = new ArrayList<>();
                     if (node.getChildByPath("edge") != null) {
                         for (MapleData edge : node.getChildByPath("edge")) {
                             edges.add(MapleDataTool.getInt(edge, -1));
@@ -1097,21 +1045,22 @@ public class MapleMapFactory {
                         if (sn_count <= 0 || speed <= 0 || name.equals("")) {
                             continue;
                         }
-                        final List<Integer> SN = new ArrayList<Integer>();
+                        final List<Integer> SN = new ArrayList<>();
                         for (int x = 0; x < sn_count; x++) {
                             SN.add(MapleDataTool.getIntConvert("SN" + x, node, 0));
                         }
                         final MaplePlatform mni = new MaplePlatform(
-                                name, MapleDataTool.getIntConvert("start", node, 2), speed,
-                                MapleDataTool.getIntConvert("x1", node, 0),
-                                MapleDataTool.getIntConvert("y1", node, 0),
-                                MapleDataTool.getIntConvert("x2", node, 0),
-                                MapleDataTool.getIntConvert("y2", node, 0),
-                                MapleDataTool.getIntConvert("r", node, 0), SN);
-                        nodeInfo.addPlatform(mni);
-                    } else if (node.getChildByPath("tags") != null) {
+                            name, MapleDataTool.getIntConvert("start", node, 2), speed,
+                            MapleDataTool.getIntConvert("x1", node, 0),
+                            MapleDataTool.getIntConvert("y1", node, 0),
+                            MapleDataTool.getIntConvert("x2", node, 0),
+                            MapleDataTool.getIntConvert("y2", node, 0),
+                            MapleDataTool.getIntConvert("r", node, 0), SN);
+                            nodeInfo.addPlatform(mni);
+                    } else if (node.getChildByPath("tags") != null) { //匠人街製作道具顯示
                         String name = MapleDataTool.getString("tags", node, "");
-                        nodeInfo.addFlag(new Pair<String, Integer>(name, name.endsWith("3") ? 1 : 0)); //idk, no indication in wz
+                        //nodeInfo.addFlag(new Pair<>(name, name.endsWith("3") ? 1 : 0)); //idk, no indication in wz
+                        nodeInfo.addFlag(new Pair<String, Integer>(name, name.endsWith("0") || name.endsWith("3") ? 1 : 0)); //idk, no indication in wz
                     }
                 }
             }
@@ -1142,9 +1091,9 @@ public class MapleMapFactory {
                 final MapleData mc2 = area.getChildByPath("eventQ");
                 if (mc2 != null) {
                     for (MapleData event : mc2) {
-                        di.eventQ.add(MapleDataTool.getString(event));
-                    }
-                }
+			di.eventQ.add(MapleDataTool.getString(event));
+		    }
+		}
                 nodeInfo.addDirection(Integer.parseInt(area.getName()), di);
             }
         }
@@ -1153,10 +1102,10 @@ public class MapleMapFactory {
             if (mc.getChildByPath("mobGenPos") != null) {
                 for (MapleData area : mc.getChildByPath("mobGenPos")) {
                     nodeInfo.addMonsterPoint(MapleDataTool.getInt(area.getChildByPath("x")),
-                            MapleDataTool.getInt(area.getChildByPath("y")),
-                            MapleDataTool.getInt(area.getChildByPath("fh")),
-                            MapleDataTool.getInt(area.getChildByPath("cy")),
-                            MapleDataTool.getInt("team", area, -1));
+                    MapleDataTool.getInt(area.getChildByPath("y")),
+                    MapleDataTool.getInt(area.getChildByPath("fh")),
+                    MapleDataTool.getInt(area.getChildByPath("cy")),
+                    MapleDataTool.getInt("team", area, -1));
                 }
             }
             if (mc.getChildByPath("mob") != null) {

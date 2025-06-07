@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,49 +20,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.login;
 
-import client.MapleCharacter;
 import constants.GameConstants;
+import handling.MapleServerHandler;
+import handling.netty.ServerConnection;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.Map;
-
-import handling.MapleServerHandler;
-import handling.cashshop.CashShopServer;
-import handling.cashshop.handler.CashShopOperation;
-import handling.channel.ChannelServer;
-import handling.netty.ServerConnection;
-
-import handling.world.CharacterTransfer;
-
 import java.util.HashSet;
+import java.util.Map;
 
 import server.ServerProperties;
 import tools.Pair;
-import tools.Triple;
 
 public class LoginServer {
 
     public static final int PORT = 8484;
+    public static String TIMEZONE; //時區設定
     private static InetSocketAddress InetSocketadd;
     private static ServerConnection acceptor;
-    private static Map<Integer, Integer> load = new HashMap<Integer, Integer>();
+    private static Map<Integer, Integer> load = new HashMap<>();
     private static String serverName, eventMessage;
     private static byte flag;
     private static int maxCharacters, userLimit, usersOn = 0;
-    private static boolean finishedShutdown = true, adminOnly = false, LogIP = false;
+    private static boolean finishedShutdown = true, adminOnly = false;
+    private static HashMap<Integer, Pair<String, String>> loginAuth = new HashMap<>();
+    private static HashSet<String> loginIPAuth = new HashSet<>();
 
-    private static HashMap<Integer, Triple<String, String, Integer>> loginAuth = new HashMap<Integer, Triple<String, String, Integer>>();
-    private static HashSet<String> loginIPAuth = new HashSet<String>();
-    private static int serverID;
-
-    public static void putLoginAuth(int chrid, String ip, String tempIP, int channel) {
-        loginAuth.put(chrid, new Triple<String, String, Integer>(ip, tempIP, channel));
+    public static void putLoginAuth(int chrid, String ip, String tempIP) {
+        loginAuth.put(chrid, new Pair<>(ip, tempIP));
         loginIPAuth.add(ip);
     }
 
-    public static Triple<String, String, Integer> getLoginAuth(int chrid) {
+    public static Pair<String, String> getLoginAuth(int chrid) {
         return loginAuth.remove(chrid);
     }
 
@@ -84,23 +68,22 @@ public class LoginServer {
         loginIPAuth.add(ip);
     }
 
-    public static final void addChannel(final int channel) {
+    public static void addChannel(final int channel) {
         load.put(channel, 0);
     }
 
-    public static final void removeChannel(final int channel) {
+    public static void removeChannel(final int channel) {
         load.remove(channel);
     }
 
-    public static final void run_startup_configurations() {
+    public static void run_startup_configurations() {
         userLimit = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.login.userlimit"));
-        serverID = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.login.serverID"));
         serverName = ServerProperties.getProperty("net.sf.odinms.login.serverName");
         eventMessage = ServerProperties.getProperty("net.sf.odinms.login.eventMessage");
         flag = Byte.parseByte(ServerProperties.getProperty("net.sf.odinms.login.flag"));
         adminOnly = Boolean.parseBoolean(ServerProperties.getProperty("net.sf.odinms.world.admin", "false"));
-        LogIP = Boolean.parseBoolean(ServerProperties.getProperty("net.sf.odinms.world.LogIP", "false"));
         maxCharacters = Integer.parseInt(ServerProperties.getProperty("net.sf.odinms.login.maxCharacters"));
+        TIMEZONE = ServerProperties.getProperty("net.sf.odinms.world.TIMEZONE", "GMT+8"); //時區設定
 
         try {
             acceptor = new ServerConnection(PORT, 0, -1, false);
@@ -111,7 +94,7 @@ public class LoginServer {
         }
     }
 
-    public static final void shutdown() {
+    public static void shutdown() {
         if (finishedShutdown) {
             return;
         }
@@ -120,35 +103,27 @@ public class LoginServer {
         finishedShutdown = true; //nothing. lol
     }
 
-    public static final int getServerID() {
-        return serverID;
-    }
-
-    public static final void setServerID(final int sID) {
-        serverID = sID;
-    }
-
-    public static final String getServerName() {
+    public static String getServerName() {
         return serverName;
     }
 
-    public static final String getTrueServerName() {
+    public static String getTrueServerName() {
         return serverName.substring(0, serverName.length() - (GameConstants.GMS ? 2 : 3));
     }
 
-    public static final String getEventMessage() {
+    public static String getEventMessage() {
         return eventMessage;
     }
 
-    public static final byte getFlag() {
+    public static byte getFlag() {
         return flag;
     }
 
-    public static final int getMaxCharacters() {
+    public static int getMaxCharacters() {
         return maxCharacters;
     }
 
-    public static final Map<Integer, Integer> getLoad() {
+    public static Map<Integer, Integer> getLoad() {
         return load;
     }
 
@@ -157,39 +132,35 @@ public class LoginServer {
         usersOn = usersOn_;
     }
 
-    public static final void setEventMessage(final String newMessage) {
+    public static void setEventMessage(final String newMessage) {
         eventMessage = newMessage;
     }
 
-    public static final void setFlag(final byte newflag) {
+    public static void setFlag(final byte newflag) {
         flag = newflag;
     }
 
-    public static final int getUserLimit() {
+    public static int getUserLimit() {
         return userLimit;
     }
 
-    public static final int getUsersOn() {
+    public static int getUsersOn() {
         return usersOn;
     }
 
-    public static final void setUserLimit(final int newLimit) {
+    public static void setUserLimit(final int newLimit) {
         userLimit = newLimit;
     }
 
-    public static final boolean isAdminOnly() {
+    public static boolean isAdminOnly() {
         return adminOnly;
     }
 
-    public static final boolean isLogIP() {
-        return LogIP;
-    }
-
-    public static final boolean isShutdown() {
+    public static boolean isShutdown() {
         return finishedShutdown;
     }
 
-    public static final void setOn() {
+    public static void setOn() {
         finishedShutdown = false;
     }
 }

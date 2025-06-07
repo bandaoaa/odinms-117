@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,13 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.maps;
 
-import java.awt.Rectangle;
-
 import client.MapleClient;
+import java.awt.Rectangle;
 import scripting.ReactorScriptManager;
 import server.Timer.MapTimer;
-import tools.packet.CField;
 import tools.Pair;
+import tools.packet.CField;
 
 public class MapleReactor extends MapleMapObject {
 
@@ -48,11 +41,11 @@ public class MapleReactor extends MapleMapObject {
         this.stats = stats;
         this.rid = rid;
     }
-
+	
     public void setCustom(boolean c) {
         this.custom = c;
     }
-
+	
     public boolean isCustom() {
         return custom;
     }
@@ -109,7 +102,7 @@ public class MapleReactor extends MapleMapObject {
     public int getReactorType() {
         return stats.getType(state);
     }
-
+	
     public byte getTouch() {
         return stats.canTouch(state);
     }
@@ -165,7 +158,13 @@ public class MapleReactor extends MapleMapObject {
         }, delay);
     }
 
+    /*
+    攻擊反應堆設定
+    */
     public void hitReactor(int charPos, short stance, MapleClient c) {
+        if (c.getPlayer().isGM()) {
+                c.getPlayer().dropMessage(6, "Reactor ID" + rid + "");
+        }
         if (stats.getType(state) < 999 && stats.getType(state) != -1) {
             //type 2 = only hit from right (kerning swamp plants), 00 is air left 02 is ground left
             final byte oldState = state;
@@ -179,12 +178,12 @@ public class MapleReactor extends MapleMapObject {
                         map.broadcastMessage(CField.triggerReactor(this, stance));
                     }
                     //if (rid > 200011) {
-                    ReactorScriptManager.getInstance().act(c, this);
+                        ReactorScriptManager.getInstance().act(c, this);
                     //}
                 } else { //reactor not broken yet
                     boolean done = false;
                     map.broadcastMessage(CField.triggerReactor(this, stance)); //magatia is weird cause full beaker can be activated by gm hat o.o
-                    if (state == stats.getNextState(state) || rid == 2618000 || rid == 2309000) { //current state = next state, looping reactor
+                    if (state == stats.getNextState(state) || rid == 2618000 || rid == 2309000 || rid == 2008007) { //current state = next state, looping reactor
                         if (rid > 200011) {
                             ReactorScriptManager.getInstance().act(c, this);
                         }

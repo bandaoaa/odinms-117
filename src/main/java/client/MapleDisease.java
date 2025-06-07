@@ -1,17 +1,11 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
 
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
+it under the terms of the GU Affero General Public License version 3
 as published by the Free Software Foundation. You may not use, modify
 or distribute this program under any other version of the
 GNU Affero General Public License.
@@ -27,9 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import handling.Buffstat;
-
 import java.io.Serializable;
-
 import server.Randomizer;
 
 public enum MapleDisease implements Serializable, Buffstat {
@@ -68,10 +60,12 @@ public enum MapleDisease implements Serializable, Buffstat {
         this.disease = disease;
     }
 
+    @Override
     public int getPosition() {
         return first;
     }
 
+    @Override
     public int getValue() {
         return i;
     }
@@ -80,7 +74,7 @@ public enum MapleDisease implements Serializable, Buffstat {
         return disease;
     }
 
-    public static final MapleDisease getRandom() {
+    public static MapleDisease getRandom() {
         while (true) {
             for (MapleDisease dis : MapleDisease.values()) {
                 if (Randomizer.nextInt(MapleDisease.values().length) == 0) {
@@ -90,7 +84,7 @@ public enum MapleDisease implements Serializable, Buffstat {
         }
     }
 
-    public static final MapleDisease getBySkill(final int skill) {
+    public static MapleDisease getBySkill(final int skill) {
         for (MapleDisease d : MapleDisease.values()) {
             if (d.getDisease() == skill) {
                 return d;

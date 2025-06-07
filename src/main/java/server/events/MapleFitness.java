@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,9 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.events;
 
-import java.util.concurrent.ScheduledFuture;
-
 import client.MapleCharacter;
+import java.util.concurrent.ScheduledFuture;
 import server.Timer.EventTimer;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
@@ -41,18 +35,17 @@ public class MapleFitness extends MapleEvent {
     private ScheduledFuture<?> fitnessSchedule, msgSchedule;
 
     public MapleFitness(final int channel, final MapleEventType type) {
-        super(channel, type);
+	super(channel,type);
     }
 
     @Override
     public void finished(final MapleCharacter chr) {
         givePrize(chr);
-        //chr.finishAchievement(20);
     }
 
     @Override
     public void onMapLoad(MapleCharacter chr) {
-        super.onMapLoad(chr);
+	super.onMapLoad(chr);
         if (isTimerStarted()) {
             chr.getClient().getSession().write(CField.getClock((int) (getTimeLeft() / 1000)));
         }

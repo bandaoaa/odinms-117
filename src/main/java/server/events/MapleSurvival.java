@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,9 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.events;
 
-import java.util.concurrent.ScheduledFuture;
-
 import client.MapleCharacter;
+import java.util.concurrent.ScheduledFuture;
 import server.Timer.EventTimer;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
@@ -40,18 +34,17 @@ public class MapleSurvival extends MapleEvent {
     protected ScheduledFuture<?> olaSchedule;
 
     public MapleSurvival(final int channel, final MapleEventType type) {
-        super(channel, type);
+	super(channel,type);
     }
 
     @Override
     public void finished(final MapleCharacter chr) {
         givePrize(chr);
-        /// chr.finishAchievement(25);
     }
 
     @Override
     public void onMapLoad(MapleCharacter chr) {
-        super.onMapLoad(chr);
+	super.onMapLoad(chr);
         if (isTimerStarted()) {
             chr.getClient().getSession().write(CField.getClock((int) (getTimeLeft() / 1000)));
         }
@@ -78,7 +71,7 @@ public class MapleSurvival extends MapleEvent {
         }, this.time);
 
         broadcast(CWvsContext.serverNotice(0, "The portal has now opened. Press the up arrow key at the portal to enter."));
-        broadcast(CWvsContext.serverNotice(0, "Fall down once, and never get back up again! Get to the top without falling down!"));
+	broadcast(CWvsContext.serverNotice(0, "Fall down once, and never get back up again! Get to the top without falling down!"));
     }
 
     public boolean isTimerStarted() {

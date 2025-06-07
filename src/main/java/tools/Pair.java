@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -30,12 +24,13 @@ import java.io.Serializable;
 
 /**
  * Represents a pair of values.
- *
+ * 
+ * @author Frz
+ * @since Revision 333
+ * @version 1.0
+ * 
  * @param <E> The type of the left value.
  * @param <F> The type of the right value.
- * @author Frz
- * @version 1.0
- * @since Revision 333
  */
 public class Pair<E, F> implements Serializable {
 
@@ -46,7 +41,7 @@ public class Pair<E, F> implements Serializable {
     /**
      * Class constructor - pairs two objects together.
      *
-     * @param left  The left object.
+     * @param left The left object.
      * @param right The right object.
      */
     public Pair(E left, F right) {

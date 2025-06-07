@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -31,7 +25,7 @@ import java.io.IOException;
 /**
  * Provides an abstract interface to a stream of bytes. This stream can be
  * seeked.
- *
+ * 
  * @author Frz
  * @version 1.0
  * @since 299
@@ -41,7 +35,8 @@ public interface SeekableInputStreamBytestream extends ByteInputStream {
     /**
      * Seeks the stream by the specified offset.
      *
-     * @param offset Number of bytes to seek.
+     * @param offset
+     *            Number of bytes to seek.
      * @throws IOException
      */
     void seek(long offset) throws IOException;
@@ -54,5 +49,6 @@ public interface SeekableInputStreamBytestream extends ByteInputStream {
      */
     long getPosition() throws IOException;
 
+    @Override
     String toString(final boolean b);
 }

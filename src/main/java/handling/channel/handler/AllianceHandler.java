@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -28,7 +23,6 @@ package handling.channel.handler;
 
 import client.MapleCharacter;
 import client.MapleClient;
-
 import handling.world.World;
 import handling.world.guild.MapleGuild;
 import tools.data.LittleEndianAccessor;
@@ -37,7 +31,7 @@ import tools.packet.CWvsContext.AlliancePacket;
 
 public class AllianceHandler {
 
-    public static final void HandleAlliance(final LittleEndianAccessor slea, final MapleClient c, boolean denied) {
+    public static void HandleAlliance(final LittleEndianAccessor slea, final MapleClient c, boolean denied) {
         if (c.getPlayer().getGuildId() <= 0) {
             c.getSession().write(CWvsContext.enableActions());
             return;
@@ -90,11 +84,11 @@ public class AllianceHandler {
                         chr.getClient().getSession().write(AlliancePacket.sendAllianceInvite(World.Alliance.getAlliance(gs.getAllianceId()).getName(), c.getPlayer()));
                         World.Guild.setInvitedId(chr.getGuildId(), gs.getAllianceId());
                     } else {
-                        c.getPlayer().dropMessage(1, "Make sure the leader of the guild is online and in your channel.");
-                    }
+		        c.getPlayer().dropMessage(1, "Make sure the leader of the guild is online and in your channel.");
+		    }
                 } else {
-                    c.getPlayer().dropMessage(1, "That Guild was not found. Please enter the correct Guild Name. (Not the player name)");
-                }
+		    c.getPlayer().dropMessage(1, "That Guild was not found. Please enter the correct Guild Name. (Not the player name)");
+		}
                 break;
             case 4: //accept invite... guildid that invited(int, a/b check) -> guildname that was invited? but we dont care about that
                 inviteid = World.Guild.getInvitedId(c.getPlayer().getGuildId());
@@ -161,7 +155,7 @@ public class AllianceHandler {
         //c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void DenyInvite(MapleClient c, final MapleGuild gs) { //playername that invited -> guildname that was invited but we also don't care
+    public static void DenyInvite(MapleClient c, final MapleGuild gs) { //playername that invited -> guildname that was invited but we also don't care
         final int inviteid = World.Guild.getInvitedId(c.getPlayer().getGuildId());
         if (inviteid > 0) {
             final int newAlliance = World.Alliance.getAllianceLeader(inviteid);

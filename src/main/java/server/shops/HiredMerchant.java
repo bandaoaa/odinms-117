@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,18 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.shops;
 
-import java.util.concurrent.ScheduledFuture;
-
+import client.MapleCharacter;
+import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.ItemFlag;
 import constants.GameConstants;
-import client.MapleCharacter;
-import client.MapleClient;
 import handling.channel.ChannelServer;
-
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.concurrent.ScheduledFuture;
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.Timer.EtcTimer;
@@ -55,7 +46,7 @@ public class HiredMerchant extends AbstractPlayerStore {
     public HiredMerchant(MapleCharacter owner, int itemId, String desc) {
         super(owner, itemId, desc, "", 6);
         start = System.currentTimeMillis();
-        blacklist = new LinkedList<String>();
+        blacklist = new LinkedList<>();
         this.schedule = EtcTimer.getInstance().schedule(new Runnable() {
 
             @Override
@@ -69,6 +60,7 @@ public class HiredMerchant extends AbstractPlayerStore {
         }, 1000 * 60 * 60 * 24);
     }
 
+    @Override
     public byte getShopType() {
         return IMaplePlayerShop.HIRED_MERCHANT;
     }
@@ -78,7 +70,7 @@ public class HiredMerchant extends AbstractPlayerStore {
     }
 
     public List<MaplePlayerShopItem> searchItem(final int itemSearch) {
-        final List<MaplePlayerShopItem> itemz = new LinkedList<MaplePlayerShopItem>();
+        final List<MaplePlayerShopItem> itemz = new LinkedList<>();
         for (MaplePlayerShopItem item : items) {
             if (item.item.getItemId() == itemSearch && item.bundles > 0) {
                 itemz.add(item);

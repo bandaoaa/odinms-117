@@ -1,51 +1,20 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server.quest;
 
-import client.Skill;
-
-import java.util.Calendar;
-import java.util.List;
-import java.util.LinkedList;
-import java.io.Serializable;
-
-import client.inventory.Item;
-import client.SkillFactory;
-import constants.GameConstants;
 import client.MapleCharacter;
-import client.inventory.MaplePet;
-import client.inventory.MapleInventoryType;
 import client.MapleQuestStatus;
-
 import client.MapleTrait.MapleTraitType;
-
+import client.Skill;
+import client.SkillFactory;
+import client.inventory.Item;
+import client.inventory.MapleInventoryType;
+import client.inventory.MaplePet;
+import constants.GameConstants;
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 import tools.Pair;
 
 public class MapleQuestRequirement implements Serializable {
@@ -57,9 +26,7 @@ public class MapleQuestRequirement implements Serializable {
     private String stringStore;
     private List<Pair<Integer, Integer>> dataStore;
 
-    /**
-     * Creates a new instance of MapleQuestRequirement
-     */
+    /** Creates a new instance of MapleQuestRequirement */
     public MapleQuestRequirement(MapleQuest quest, MapleQuestRequirementType type, ResultSet rse) throws SQLException {
         this.type = type;
         this.quest = quest;
@@ -72,15 +39,15 @@ public class MapleQuestRequirement implements Serializable {
             case quest:
             case skill:
             case job: {
-                dataStore = new LinkedList<Pair<Integer, Integer>>();
+                dataStore = new LinkedList<>();
                 String[] first = rse.getString("intStoresFirst").split(", ");
                 String[] second = rse.getString("intStoresSecond").split(", ");
                 if (first.length <= 0 && rse.getString("intStoresFirst").length() > 0) {
-                    dataStore.add(new Pair<Integer, Integer>(Integer.parseInt(rse.getString("intStoresFirst")), Integer.parseInt(rse.getString("intStoresSecond"))));
+                    dataStore.add(new Pair<>(Integer.parseInt(rse.getString("intStoresFirst")), Integer.parseInt(rse.getString("intStoresSecond"))));
                 }
                 for (int i = 0; i < first.length; i++) {
                     if (first[i].length() > 0 && second[i].length() > 0) {
-                        dataStore.add(new Pair<Integer, Integer>(Integer.parseInt(first[i]), Integer.parseInt(second[i])));
+                        dataStore.add(new Pair<>(Integer.parseInt(first[i]), Integer.parseInt(second[i])));
                     }
                 }
                 break;

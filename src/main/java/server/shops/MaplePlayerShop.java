@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,21 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.shops;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import client.inventory.Item;
-import client.inventory.ItemFlag;
 import client.MapleCharacter;
 import client.MapleClient;
+import client.inventory.Item;
+import client.inventory.ItemFlag;
+import java.util.ArrayList;
+import java.util.List;
 import server.MapleInventoryManipulator;
-import server.maps.MapleMapObjectType;
 import tools.packet.PlayerShopPacket;
 
 public class MaplePlayerShop extends AbstractPlayerStore {
 
     private int boughtnumber = 0;
-    private List<String> bannedList = new ArrayList<String>();
+    private List<String> bannedList = new ArrayList<>();
 
     public MaplePlayerShop(MapleCharacter owner, int itemId, String desc) {
         super(owner, itemId, desc, "", 3);
@@ -95,12 +87,12 @@ public class MaplePlayerShop extends AbstractPlayerStore {
         removeAllVisitors(10, 1);
         getMap().removeMapObject(this);
 
-        for (MaplePlayerShopItem items : getItems()) {
-            if (items.bundles > 0) {
-                Item newItem = items.item.copy();
-                newItem.setQuantity((short) (items.bundles * newItem.getQuantity()));
+        for (MaplePlayerShopItem itemsse : getItems()) {
+            if (itemsse.bundles > 0) {
+                Item newItem = itemsse.item.copy();
+                newItem.setQuantity((short) (itemsse.bundles * newItem.getQuantity()));
                 if (MapleInventoryManipulator.addFromDrop(owner.getClient(), newItem, false)) {
-                    items.bundles = 0;
+                    itemsse.bundles = 0;
                 } else {
                     saveItems(); //O_o
                     break;

@@ -1,39 +1,16 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package server;
 
+import client.MapleCharacter;
+import handling.world.MaplePartyCharacter;
 import java.lang.ref.WeakReference;
 
-import client.MapleCharacter;
-import constants.GameConstants;
-import handling.world.MaplePartyCharacter;
-
 /**
- * @author Burblish
+ * TODO : Make this a function for NPC instead.. cleaner
+ * @author Rob
  */
 public class MapleCarnivalChallenge {
 
@@ -41,7 +18,7 @@ public class MapleCarnivalChallenge {
     String challengeinfo = "";
 
     public MapleCarnivalChallenge(MapleCharacter challenger) {
-        this.challenger = new WeakReference<MapleCharacter>(challenger);
+        this.challenger = new WeakReference<>(challenger);
         challengeinfo += "#b";
         for (MaplePartyCharacter pc : challenger.getParty().getMembers()) {
             MapleCharacter c = challenger.getMap().getCharacterById(pc.getId());
@@ -63,6 +40,7 @@ public class MapleCarnivalChallenge {
     public static final String getJobNameById(int job) {
         switch (job) {
             case 0:
+	    case 1:
                 return "Beginner";
             case 1000:
                 return "Nobless";
@@ -72,8 +50,9 @@ public class MapleCarnivalChallenge {
                 return "Evan";
             case 3000:
                 return "Citizen";
+
             case 100:
-                return "Warrior";
+                return "Warrior";// Warrior
             case 110:
                 return "Fighter";
             case 111:
@@ -92,6 +71,7 @@ public class MapleCarnivalChallenge {
                 return "Dragon Knight";
             case 132:
                 return "Dark Knight";
+
             case 200:
                 return "Magician";
             case 210:
@@ -112,6 +92,7 @@ public class MapleCarnivalChallenge {
                 return "Priest";
             case 232:
                 return "Bishop";
+
             case 300:
                 return "Archer";
             case 310:
@@ -126,6 +107,7 @@ public class MapleCarnivalChallenge {
                 return "Sniper";
             case 322:
                 return "Crossbow Master";
+
             case 400:
                 return "Rogue";
             case 410:
@@ -150,6 +132,7 @@ public class MapleCarnivalChallenge {
                 return "Blade Lord";
             case 434:
                 return "Blade Master";
+
             case 500:
                 return "Pirate";
             case 510:
@@ -172,36 +155,43 @@ public class MapleCarnivalChallenge {
                 return "Cannon Blaster";
             case 532:
                 return "Cannon Master";
+
             case 1100:
             case 1110:
             case 1111:
             case 1112:
                 return "Soul Master";
+
             case 1200:
             case 1210:
             case 1211:
             case 1212:
                 return "Flame Wizard";
+
             case 1300:
             case 1310:
             case 1311:
             case 1312:
                 return "Wind Breaker";
+
             case 1400:
             case 1410:
             case 1411:
             case 1412:
                 return "Night Walker";
+
             case 1500:
             case 1510:
             case 1511:
             case 1512:
                 return "Striker";
+
             case 2100:
             case 2110:
             case 2111:
             case 2112:
                 return "Aran";
+
             case 2200:
             case 2210:
             case 2211:
@@ -213,56 +203,65 @@ public class MapleCarnivalChallenge {
             case 2217:
             case 2218:
                 return "Evan";
+
             case 2002:
-            case 2300:
-            case 2310:
-            case 2311:
-            case 2312:
+	    case 2300:
+	    case 2310:
+	    case 2311:
+	    case 2312:
                 return "Mercedes";
+
             case 3001:
-            case 3100:
-            case 3110:
-            case 3111:
-            case 3112:
+	    case 3100:
+	    case 3110:
+	    case 3111:
+	    case 3112:
                 return "Demon Slayer";
+
+
             case 3200:
             case 3210:
             case 3211:
             case 3212:
                 return "Battle Mage";
+
             case 3300:
             case 3310:
             case 3311:
             case 3312:
                 return "Wild Hunter";
+
             case 3500:
             case 3510:
             case 3511:
             case 3512:
                 return "Mechanic";
-            case 2003:
-                return "Miser"; // Phantom beginner
+				
             case 2400:
             case 2410:
             case 2411:
             case 2412:
-                return "Phantom";
+                return "Phantom";	
             case 508:
             case 570:
             case 571:
             case 572:
                 return "Jett";
+
+            case 5000:
             case 5100:
             case 5110:
             case 5111:
             case 5112:
-                return "Mihile";
+                return "Mihile";			
+				
             case 900:
                 return "GM";
             case 910:
                 return "SuperGM";
             case 800:
                 return "Manager";
+
             default:
                 return "";
         }
@@ -271,18 +270,19 @@ public class MapleCarnivalChallenge {
     public static final String getJobBasicNameById(int job) {
         switch (job) {
             case 0:
+	    case 1:
             case 1000:
             case 2000:
             case 2001:
-            case 2002:
-            case 2003:
+	    case 2002:
             case 3000:
-            case 3001:
+	    case 3001:
                 return "Beginner";
-            case 3100:
-            case 3110:
-            case 3111:
-            case 3112:
+
+	    case 3100:
+	    case 3110:
+	    case 3111:
+	    case 3112:
             case 2100:
             case 2110:
             case 2111:
@@ -302,6 +302,7 @@ public class MapleCarnivalChallenge {
             case 131:
             case 132:
                 return "Warrior";
+
             case 2200:
             case 2210:
             case 2211:
@@ -331,14 +332,16 @@ public class MapleCarnivalChallenge {
             case 231:
             case 232:
                 return "Magician";
+
+
             case 3300:
             case 3310:
             case 3311:
             case 3312:
-            case 2300:
-            case 2310:
-            case 2311:
-            case 2312:
+	    case 2300:
+	    case 2310:
+	    case 2311:
+	    case 2312:
             case 1300:
             case 1310:
             case 1311:
@@ -351,10 +354,7 @@ public class MapleCarnivalChallenge {
             case 321:
             case 322:
                 return "Bowman";
-            case 2400:
-            case 2410:
-            case 2411:
-            case 2412:
+
             case 1400:
             case 1410:
             case 1411:
@@ -372,10 +372,7 @@ public class MapleCarnivalChallenge {
             case 433:
             case 434:
                 return "Thief";
-            case 508:
-            case 570:
-            case 571:
-            case 572:
+
             case 3500:
             case 3510:
             case 3511:
@@ -385,7 +382,7 @@ public class MapleCarnivalChallenge {
             case 1511:
             case 1512:
             case 500:
-            case 501:
+	    case 501:
             case 510:
             case 511:
             case 512:
@@ -396,8 +393,10 @@ public class MapleCarnivalChallenge {
             case 531:
             case 532:
                 return "Pirate";
+
             default:
                 return "";
         }
     }
 }
+

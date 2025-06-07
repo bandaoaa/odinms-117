@@ -1,50 +1,16 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
-
-import java.util.LinkedList;
-import java.util.List;
 
 import client.MapleCharacter;
 import handling.channel.ChannelServer;
 import handling.world.World;
-
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
-
 import server.Timer.EtcTimer;
 import server.maps.MapleMap;
-import tools.packet.CField;
 import tools.Pair;
+import tools.packet.CField;
 import tools.packet.CWvsContext;
 
 public class MapleSquad {
@@ -52,19 +18,18 @@ public class MapleSquad {
     public static enum MapleSquadType {
         bossbalrog(2), zak(2), chaoszak(3), horntail(2), chaosht(3), pinkbean(3), nmm_squad(2), vergamot(2), dunas(2), nibergen_squad(2), dunas2(2), core_blaze(2), aufheben(2), cwkpq(10), tokyo_2095(2), vonleon(3), scartar(2), cygnus(3);
 
-        private MapleSquadType(int i) {
-            this.i = i;
-        }
-
-        public int i;
-        public HashMap<Integer, ArrayList<Pair<String, String>>> queuedPlayers = new HashMap<Integer, ArrayList<Pair<String, String>>>();
-        public HashMap<Integer, ArrayList<Pair<String, Long>>> queue = new HashMap<Integer, ArrayList<Pair<String, Long>>>();
+	private MapleSquadType(int i) {
+	    this.i = i;
+	}
+	public int i;
+        public HashMap<Integer, ArrayList<Pair<String, String>>> queuedPlayers = new HashMap<>();
+        public HashMap<Integer, ArrayList<Pair<String, Long>>> queue = new HashMap<>();
     }
 
     private WeakReference<MapleCharacter> leader;
     private final String leaderName, toSay;
-    private final Map<String, String> members = new LinkedHashMap<String, String>();
-    private final Map<String, String> bannedMembers = new LinkedHashMap<String, String>();
+    private final Map<String, String> members = new LinkedHashMap<>();
+    private final Map<String, String> bannedMembers = new LinkedHashMap<>();
     private final int ch;
     private final long startTime;
     private final int expiration;
@@ -74,60 +39,60 @@ public class MapleSquad {
     private ScheduledFuture<?> removal;
 
     public MapleSquad(final int ch, final String type, final MapleCharacter leader, final int expiration, final String toSay) {
-        this.leader = new WeakReference<MapleCharacter>(leader);
+        this.leader = new WeakReference<>(leader);
         this.members.put(leader.getName(), MapleCarnivalChallenge.getJobBasicNameById(leader.getJob()));
         this.leaderName = leader.getName();
         this.ch = ch;
-        this.toSay = toSay;
+	this.toSay = toSay;
         this.type = MapleSquadType.valueOf(type.toLowerCase());
         this.status = 1;
         this.beginMapId = leader.getMapId();
         leader.getMap().setSquad(this.type);
-        if (this.type.queue.get(ch) == null) {
-            this.type.queue.put(ch, new ArrayList<Pair<String, Long>>());
-            this.type.queuedPlayers.put(ch, new ArrayList<Pair<String, String>>());
-        }
+	if (this.type.queue.get(ch) == null) {
+	    this.type.queue.put(ch, new ArrayList<Pair<String, Long>>());
+	    this.type.queuedPlayers.put(ch, new ArrayList<Pair<String, String>>());
+	}
         this.startTime = System.currentTimeMillis();
         this.expiration = expiration;
     }
 
     public void copy() {
-        while (type.queue.get(ch).size() > 0 && ChannelServer.getInstance(ch).getMapleSquad(type) == null) {
-            int index = 0;
-            long lowest = 0;
-            for (int i = 0; i < type.queue.get(ch).size(); i++) {
-                if (lowest == 0 || type.queue.get(ch).get(i).right < lowest) {
-                    index = i;
-                    lowest = type.queue.get(ch).get(i).right;
-                }
-            }
-            final String nextPlayerId = type.queue.get(ch).remove(index).left;
-            final int theirCh = World.Find.findChannel(nextPlayerId);
-            if (theirCh > 0) {
-                final MapleCharacter lead = ChannelServer.getInstance(theirCh).getPlayerStorage().getCharacterByName(nextPlayerId);
-                if (lead != null && lead.getMapId() == beginMapId && lead.getClient().getChannel() == ch) {
-                    final MapleSquad squad = new MapleSquad(ch, type.name(), lead, expiration, toSay);
-                    if (ChannelServer.getInstance(ch).addMapleSquad(squad, type.name())) {
-                        getBeginMap().broadcastMessage(CField.getClock(expiration / 1000));
-                        getBeginMap().broadcastMessage(CWvsContext.serverNotice(6, nextPlayerId + toSay));
-                        type.queuedPlayers.get(ch).add(new Pair<String, String>(nextPlayerId, "Success"));
-                    } else {
-                        squad.clear();
-                        type.queuedPlayers.get(ch).add(new Pair<String, String>(nextPlayerId, "Skipped"));
-                    }
-                    break;
-                } else {
-                    if (lead != null) {
-                        lead.dropMessage(6, "Your squad has been skipped due to you not being in the right channel and map.");
-                    }
-                    getBeginMap().broadcastMessage(CWvsContext.serverNotice(6, nextPlayerId + "'s squad has been skipped due to the player not being in the right channel and map."));
-                    type.queuedPlayers.get(ch).add(new Pair<String, String>(nextPlayerId, "Not in map"));
-                }
-            } else {
-                getBeginMap().broadcastMessage(CWvsContext.serverNotice(6, nextPlayerId + "'s squad has been skipped due to the player not being online."));
-                type.queuedPlayers.get(ch).add(new Pair<String, String>(nextPlayerId, "Not online"));
-            }
-        }
+	while (type.queue.get(ch).size() > 0 && ChannelServer.getInstance(ch).getMapleSquad(type) == null) {
+	    int index = 0;
+	    long lowest = 0;
+	    for (int i = 0; i < type.queue.get(ch).size(); i++) {
+		if (lowest == 0 || type.queue.get(ch).get(i).right < lowest) {
+		    index = i;
+		    lowest = type.queue.get(ch).get(i).right;
+		}
+	    }
+	    final String nextPlayerId = type.queue.get(ch).remove(index).left;
+	    final int theirCh = World.Find.findChannel(nextPlayerId);
+	    if (theirCh > 0) {
+	        final MapleCharacter lead = ChannelServer.getInstance(theirCh).getPlayerStorage().getCharacterByName(nextPlayerId);
+	        if (lead != null && lead.getMapId() == beginMapId && lead.getClient().getChannel() == ch) {
+	            final MapleSquad squad = new MapleSquad(ch, type.name(), lead, expiration, toSay);
+	            if (ChannelServer.getInstance(ch).addMapleSquad(squad, type.name())) {
+		        getBeginMap().broadcastMessage(CField.getClock(expiration / 1000));
+		        getBeginMap().broadcastMessage(CWvsContext.serverNotice(6, nextPlayerId + toSay));
+			type.queuedPlayers.get(ch).add(new Pair<>(nextPlayerId, "Success"));
+	            } else {
+		        squad.clear();
+			type.queuedPlayers.get(ch).add(new Pair<>(nextPlayerId, "Skipped"));
+	            }
+	            break;
+		} else {
+		    if (lead != null) {
+			lead.dropMessage(6, "Your squad has been skipped due to you not being in the right channel and map.");
+		    }
+		    getBeginMap().broadcastMessage(CWvsContext.serverNotice(6, nextPlayerId + "'s squad has been skipped due to the player not being in the right channel and map."));
+		    type.queuedPlayers.get(ch).add(new Pair<>(nextPlayerId, "Not in map"));
+		}
+	    } else {
+		getBeginMap().broadcastMessage(CWvsContext.serverNotice(6, nextPlayerId + "'s squad has been skipped due to the player not being online."));
+		type.queuedPlayers.get(ch).add(new Pair<>(nextPlayerId, "Not online"));
+	    }
+	}
     }
 
     public MapleMap getBeginMap() {
@@ -162,7 +127,7 @@ public class MapleSquad {
             public void run() {
                 if (status != 0 && leader != null && (getLeader() == null || status == 1)) { //leader itself = null means we're already cleared
                     clear();
-                    copy();
+		    copy();
                 }
             }
         }, expiration);
@@ -173,7 +138,7 @@ public class MapleSquad {
     }
 
     public List<Pair<String, Long>> getAllNextPlayer() {
-        return type.queue.get(ch);
+	return type.queue.get(ch);
     }
 
     public String getNextPlayer() {
@@ -185,36 +150,36 @@ public class MapleSquad {
             sb.append(i).append(" : ").append(chr.left);
             sb.append(" \n\r ");
         }
-        sb.append("Would you like to #ebe next#n in the queue, or #ebe removed#n from the queue if you are in it?");
+	sb.append("Would you like to #ebe next#n in the queue, or #ebe removed#n from the queue if you are in it?");
         return sb.toString();
     }
 
     public void setNextPlayer(String i) {
-        Pair<String, Long> toRemove = null;
-        for (Pair<String, Long> s : type.queue.get(ch)) {
-            if (s.left.equals(i)) {
-                toRemove = s;
-                break;
-            }
-        }
-        if (toRemove != null) {
-            type.queue.get(ch).remove(toRemove);
-            return;
-        }
-        for (ArrayList<Pair<String, Long>> v : type.queue.values()) {
-            for (Pair<String, Long> s : v) {
-                if (s.left.equals(i)) {
-                    return;
-                }
-            }
-        }
-        type.queue.get(ch).add(new Pair<String, Long>(i, System.currentTimeMillis()));
+	Pair<String, Long> toRemove = null;
+	for (Pair<String, Long> s : type.queue.get(ch)) {
+	    if (s.left.equals(i)) {
+	        toRemove = s;
+	        break;
+	    }
+	}
+	if (toRemove != null) {
+	    type.queue.get(ch).remove(toRemove);
+	    return;
+	}
+	for (ArrayList<Pair<String, Long>> v : type.queue.values()) {
+	    for (Pair<String, Long> s : v) {
+		if (s.left.equals(i)) {
+		    return;
+		}
+	    }
+	}
+	type.queue.get(ch).add(new Pair<>(i, System.currentTimeMillis()));
     }
 
     public MapleCharacter getLeader() {
         if (leader == null || leader.get() == null) {
             if (members.size() > 0 && getChar(leaderName) != null) {
-                leader = new WeakReference<MapleCharacter>(getChar(leaderName));
+                leader = new WeakReference<>(getChar(leaderName));
             } else {
                 if (status != 0) {
                     clear();
@@ -235,11 +200,11 @@ public class MapleSquad {
     }
 
     public List<String> getMembers() {
-        return new LinkedList<String>(members.keySet());
+        return new LinkedList<>(members.keySet());
     }
 
     public List<String> getBannedMembers() {
-        return new LinkedList<String>(bannedMembers.keySet());
+        return new LinkedList<>(bannedMembers.keySet());
     }
 
     public int getSquadSize() {
@@ -251,9 +216,9 @@ public class MapleSquad {
     }
 
     public int addMember(MapleCharacter member, boolean join) {
-        if (getLeader() == null) {
-            return -1;
-        }
+	if (getLeader() == null) {
+	    return -1;
+	}
         final String job = MapleCarnivalChallenge.getJobBasicNameById(member.getJob());
         if (join) {
             if (!containsMember(member) && !getAllNextPlayer().contains(member.getName())) {
@@ -317,7 +282,7 @@ public class MapleSquad {
             members.remove(toban);
 
             getChar(toban).dropMessage(5, getLeaderName() + " has removed you from the squad.");
-        }
+	}
     }
 
     public void setStatus(byte status) {
@@ -410,7 +375,7 @@ public class MapleSquad {
     }
 
     public final Map<String, Integer> getJobs() {
-        final Map<String, Integer> jobs = new LinkedHashMap<String, Integer>();
+        final Map<String, Integer> jobs = new LinkedHashMap<>();
         for (Entry<String, String> chr : members.entrySet()) {
             if (jobs.containsKey(chr.getValue())) {
                 jobs.put(chr.getValue(), jobs.get(chr.getValue()) + 1);

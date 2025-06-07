@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -44,7 +38,7 @@ public class IPAddressTool {
      * @return The IP as a long integer.
      * @throws RuntimeException
      */
-    public static final long dottedQuadToLong(final String dottedQuad) throws RuntimeException {
+    public static long dottedQuadToLong(final String dottedQuad) throws RuntimeException {
         final String[] quads = dottedQuad.split("\\.");
         if (quads.length != 4) {
             throw new RuntimeException("Invalid IP Address format.");
@@ -63,7 +57,7 @@ public class IPAddressTool {
      * @return The IP as a dotted-quad string.
      * @throws RuntimeException
      */
-    public static final String longToDottedQuad(long longIP) throws RuntimeException {
+    public static String longToDottedQuad(long longIP) throws RuntimeException {
         StringBuilder ipAddress = new StringBuilder();
 
         for (int i = 0; i < 4; i++) {

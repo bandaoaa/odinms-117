@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -28,7 +23,6 @@ package server.events;
 
 import client.MapleCharacter;
 import constants.GameConstants;
-
 import handling.channel.ChannelServer;
 import handling.world.World;
 import server.MapleInventoryManipulator;
@@ -39,8 +33,8 @@ import server.maps.FieldLimitType;
 import server.maps.MapleMap;
 import server.maps.SavedLocationType;
 import tools.FileoutputUtil;
-import tools.packet.CField;
 import tools.StringUtil;
+import tools.packet.CField;
 import tools.packet.CWvsContext;
 
 public abstract class MapleEvent {
@@ -54,14 +48,14 @@ public abstract class MapleEvent {
     }
 
     public void incrementPlayerCount() {
-        playerCount++;
-        if (playerCount == 250) {
-            setEvent(ChannelServer.getInstance(channel), true);
-        }
+	playerCount++;
+	if (playerCount == 250) {
+	    setEvent(ChannelServer.getInstance(channel), true);
+	}
     }
 
     public MapleEventType getType() {
-        return type;
+	return type;
     }
 
     public boolean isRunning() {
@@ -98,8 +92,8 @@ public abstract class MapleEvent {
         } else if (reward == 3) {
             chr.addFame(10);
             chr.dropMessage(5, "You gained 10 Fame.");
-        } else if (reward == 4) {
-            chr.dropMessage(5, "There was no reward.");
+	} else if (reward == 4) {
+	    chr.dropMessage(5, "There was no reward.");
         } else {
             int max_quantity = 1;
             switch (reward) {
@@ -136,9 +130,9 @@ public abstract class MapleEvent {
     public abstract void startEvent();
 
     public void onMapLoad(MapleCharacter chr) { //most dont do shit here
-        if (GameConstants.isEventMap(chr.getMapId()) && FieldLimitType.Event.check(chr.getMap().getFieldLimit()) && FieldLimitType.Event2.check(chr.getMap().getFieldLimit())) {
-            chr.getClient().getSession().write(CField.showEventInstructions());
-        }
+	if (GameConstants.isEventMap(chr.getMapId()) && FieldLimitType.Event.check(chr.getMap().getFieldLimit()) && FieldLimitType.Event2.check(chr.getMap().getFieldLimit())) {
+	    chr.getClient().getSession().write(CField.showEventInstructions());
+	}
     }
 
     public void warpBack(MapleCharacter chr) {
@@ -152,26 +146,27 @@ public abstract class MapleEvent {
 
     public void reset() {
         isRunning = true;
-        playerCount = 0;
+	playerCount = 0;
     }
 
     public void unreset() {
         isRunning = false;
-        playerCount = 0;
+	playerCount = 0;
     }
 
-    public static final void setEvent(final ChannelServer cserv, final boolean auto) {
+    public static void setEvent(final ChannelServer cserv, final boolean auto) {
         if (auto && cserv.getEvent() > -1) {
             for (MapleEventType t : MapleEventType.values()) {
                 final MapleEvent e = cserv.getEvent(t);
                 if (e.isRunning) {
                     for (int i : e.type.mapids) {
                         if (cserv.getEvent() == i) {
-                            World.Broadcast.broadcastMessage(CWvsContext.serverNotice(0, "Entries for the event are now closed!"));
+			    World.Broadcast.broadcastMessage(CWvsContext.serverNotice(0, "Entries for the event are now closed!"));
                             e.broadcast(CWvsContext.serverNotice(0, "The event will start in 30 seconds!"));
                             e.broadcast(CField.getClock(30));
                             EventTimer.getInstance().schedule(new Runnable() {
 
+                                @Override
                                 public void run() {
                                     e.startEvent();
                                 }
@@ -185,10 +180,10 @@ public abstract class MapleEvent {
         cserv.setEvent(-1);
     }
 
-    public static final void mapLoad(final MapleCharacter chr, final int channel) {
-        if (chr == null) {
-            return;
-        } //o_o
+    public static void mapLoad(final MapleCharacter chr, final int channel) {
+	if (chr == null) {
+	    return;
+	} //o_o
         for (MapleEventType t : MapleEventType.values()) {
             final MapleEvent e = ChannelServer.getInstance(channel).getEvent(t);
             if (e.isRunning) {
@@ -198,23 +193,23 @@ public abstract class MapleEvent {
                 for (int i = 0; i < e.type.mapids.length; i++) {
                     if (chr.getMapId() == e.type.mapids[i]) {
                         e.onMapLoad(chr);
-                        if (i == 0) { //first map
-                            e.incrementPlayerCount();
-                        }
+			if (i == 0) { //first map
+			    e.incrementPlayerCount();
+			}
                     }
                 }
             }
         }
     }
 
-    public static final void onStartEvent(final MapleCharacter chr) {
+    public static void onStartEvent(final MapleCharacter chr) {
         for (MapleEventType t : MapleEventType.values()) {
             final MapleEvent e = chr.getClient().getChannelServer().getEvent(t);
             if (e.isRunning) {
                 for (int i : e.type.mapids) {
                     if (chr.getMapId() == i) {
                         e.startEvent();
-                        setEvent(chr.getClient().getChannelServer(), false);
+			setEvent(chr.getClient().getChannelServer(), false);
                         chr.dropMessage(5, String.valueOf(t) + " has been started.");
                     }
                 }
@@ -222,7 +217,7 @@ public abstract class MapleEvent {
         }
     }
 
-    public static final String scheduleEvent(final MapleEventType event, final ChannelServer cserv) {
+    public static String scheduleEvent(final MapleEventType event, final ChannelServer cserv) {
         if (cserv.getEvent() != -1 || cserv.getEvent(event) == null) {
             return "The event must not have been already scheduled.";
         }

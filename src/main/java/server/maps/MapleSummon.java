@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,13 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.maps;
 
-import java.awt.Point;
-
 import client.MapleCharacter;
 import client.MapleClient;
-import client.SkillFactory;
 import constants.GameConstants;
-import client.anticheat.CheatingOffense;
+import java.awt.Point;
 import server.MapleStatEffect;
 import tools.packet.CField.SummonPacket;
 
@@ -49,6 +40,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
     private byte Summon_tickResetCount;
     private long Server_ClientSummonTickDiff;
     private long lastAttackTime;
+    private long SpawnTime;
 
     public MapleSummon(final MapleCharacter owner, final MapleStatEffect skill, final Point pos, final SummonMovementType movementType) {
         this(owner, skill.getSourceId(), skill.getLevel(), pos, movementType);
@@ -68,7 +60,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
             lastSummonTickCount = 0;
             Summon_tickResetCount = 0;
             Server_ClientSummonTickDiff = 0;
-            lastAttackTime = 0;
+			lastAttackTime = 0;
         }
     }
 
@@ -113,87 +105,49 @@ public class MapleSummon extends AnimatedMapleMapObject {
         return movementType;
     }
 
+    public long getSpawnTime(){
+        return SpawnTime;
+    }
+
+    public void setSpawnTime(long now){
+        SpawnTime=now;
+    }
+
     public final boolean isPuppet() {
         switch (skill) {
-            case 3111002:
-            case 3211002:
-            case 3120012:
-            case 3220012:
-            case 13111004:
-            case 4341006:
-            case 33111003:
+            case 3111002: //替身術
+	    case 3120012: //精銳替身術
+            case 3211002: //替身術
+	    case 3220012: //精銳替身術
+            case 4341006: //幻影替身
+            case 13111004: //替身術
+            case 33111003: //瘋狂陷阱
                 return true;
         }
         return isAngel();
     }
-
+	
     public final boolean isAngel() {
         return GameConstants.isAngel(skill);
     }
-
-    public final boolean isMultiAttack() {
-        if (skill != 35111002 && skill != 35121003 && (isGaviota() || skill == 33101008 || skill >= 35000000) && skill != 35111009 && skill != 35111010 && skill != 35111001) {
+	
+    public final boolean isMultiAttack() { //賽特拉特 磁場 地雷(hidden 自動爆炸) 戰鬥機器 : 巨人錘
+        if (skill != 35111002 && skill != 35121003 && (skill == 33101008 || skill >= 35000000) && skill != 35111009 && skill != 35111010 && skill != 35111001) {
             return false;
         }
         return true;
     }
 
-    public final boolean isGaviota() {
-        return skill == 5211002;
+    public final boolean isBeholder() {
+        return skill == 1321007; //暗之靈魂
     }
 
-    public final boolean isBeholder() {
-        return skill == 1321007;
+    public final boolean isReaper() { //甦醒
+        return skill == 32111006; 
     }
 
     public final boolean isMultiSummon() {
-        return skill == 5211002 || skill == 5211001 || skill == 5220002 || skill == 32111006 || skill == 33101008;
-    }
-
-    public final boolean isSummon() {
-        switch (skill) {
-            case 12111004:
-            case 1321007: //beholder
-            case 2321003:
-            case 2121005:
-            case 5711001: // turret
-            case 2221005:
-            case 5211001: // Pirate octopus summon
-            case 5211002:
-            case 5220002: // wrath of the octopi
-            case 13111004:
-            case 11001004:
-            case 12001004:
-            case 13001004:
-            case 14001005:
-            case 15001004:
-            case 33111005:
-            case 35111001:
-            case 35111010:
-            case 35111009:
-            case 35111002: //pre-bb = 35111002, 35111004(amp?), 35111005(accel)
-            case 35111005:
-            case 35111011:
-            case 35121009:
-            case 35121010:
-            case 35121011:
-            case 4111007:
-            case 4211007: //dark flare
-            case 32111006:
-            case 33101008:
-            case 35121003:
-            case 3101007:
-            case 3201007:
-            case 3111005:
-            case 3211005:
-            case 5321003:
-            case 5321004:
-            case 23111008:
-            case 23111009:
-            case 23111010:
-                return true;
-        }
-        return isAngel();
+        return skill == 5211014 || skill == 33101008; //砲台章魚王 地雷(hidden 自動爆炸)
     }
 
     public final int getSkillLevel() {
@@ -203,23 +157,25 @@ public class MapleSummon extends AnimatedMapleMapObject {
     public final int getSummonType() {
         if (isAngel()) {
             return 2;
-        } else if ((skill != 33111003 && skill != 3120012 && skill != 3220012 && isPuppet()) || skill == 33101008 || skill == 35111002) {
+            
+            // 精銳替身術(弓) 精銳替身術(弩)  瘋狂陷阱 地雷(hidden 自動爆炸)  磁場
+        } else if ((skill != 3120012 && skill != 3220012 && skill != 33111003 && isPuppet()) || skill == 33101008 || skill == 35111002) {
             return 0;
         }
         switch (skill) {
-            case 1321007:
+            case 1321007: //暗之靈魂
                 return 2; //buffs and stuff
-            case 35111001: //satellite.
+            case 35111001: //賽特拉特
             case 35111009:
             case 35111010:
                 return 3; //attacks what you attack
-            case 35121009: //bots n. tots
+            case 35121009: //機器人工廠 : RM1
                 return 5; //sub summons
-            case 35121003:
+            case 35121003: //戰鬥機器 : 巨人錘
                 return 6; //charge
-            case 4111007: // test
-            case 4211007: //dark flare
-                return 7; //attacks what you get hit by
+            case 4111007: //黑暗殺
+            case 4211007: //黑暗殺
+            	return 7; //attacks what you get hit by
         }
         return 1;
     }
@@ -231,14 +187,8 @@ public class MapleSummon extends AnimatedMapleMapObject {
 
     public final void CheckSummonAttackFrequency(final MapleCharacter chr, final int tickcount) {
         final int tickdifference = (tickcount - lastSummonTickCount);
-        if (tickdifference < SkillFactory.getSummonData(skill).delay) {
-            chr.getCheatTracker().registerOffense(CheatingOffense.FAST_SUMMON_ATTACK);
-        }
         final long STime_TC = System.currentTimeMillis() - tickcount;
         final long S_C_Difference = Server_ClientSummonTickDiff - STime_TC;
-        if (S_C_Difference > 500) {
-            chr.getCheatTracker().registerOffense(CheatingOffense.FAST_SUMMON_ATTACK);
-        }
         Summon_tickResetCount++;
         if (Summon_tickResetCount > 4) {
             Summon_tickResetCount = 0;
@@ -246,12 +196,9 @@ public class MapleSummon extends AnimatedMapleMapObject {
         }
         lastSummonTickCount = tickcount;
     }
-
+	
     public final void CheckPVPSummonAttackFrequency(final MapleCharacter chr) {
         final long tickdifference = (System.currentTimeMillis() - lastAttackTime);
-        if (tickdifference < SkillFactory.getSummonData(skill).delay) {
-            chr.getCheatTracker().registerOffense(CheatingOffense.FAST_SUMMON_ATTACK);
-        }
         lastAttackTime = System.currentTimeMillis();
     }
 

@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,27 +21,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.events;
 
-import java.util.HashMap;
-import java.util.Map;
+import database.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import database.DatabaseConnection;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
-
 import server.Randomizer;
 import tools.Pair;
 
 public class MapleOxQuizFactory {
 
-    private final Map<Pair<Integer, Integer>, MapleOxQuizEntry> questionCache = new HashMap<Pair<Integer, Integer>, MapleOxQuizEntry>();
+    private final Map<Pair<Integer, Integer>, MapleOxQuizEntry> questionCache = new HashMap<>();
     private static final MapleOxQuizFactory instance = new MapleOxQuizFactory();
 
     public MapleOxQuizFactory() {
-        initialize();
+	initialize();
     }
 
     public static MapleOxQuizFactory getInstance() {
@@ -54,28 +46,26 @@ public class MapleOxQuizFactory {
     }
 
     public Entry<Pair<Integer, Integer>, MapleOxQuizEntry> grabRandomQuestion() {
-        final int size = questionCache.size();
-        while (true) {
-            for (Entry<Pair<Integer, Integer>, MapleOxQuizEntry> oxquiz : questionCache.entrySet()) {
-                if (Randomizer.nextInt(size) == 0) {
-                    return oxquiz;
-                }
-            }
-        }
+	final int size = questionCache.size();
+	while(true) {
+	    for (Entry<Pair<Integer, Integer>, MapleOxQuizEntry> oxquiz : questionCache.entrySet()) {
+		if (Randomizer.nextInt(size) == 0) {
+		    return oxquiz;
+		}
+	    }
+	}
     }
 
     private void initialize() {
         try {
             Connection con = DatabaseConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM wz_oxdata");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                questionCache.put(new Pair<Integer, Integer>(rs.getInt("questionset"), rs.getInt("questionid")), get(rs));
+            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM wz_oxdata"); 
+                    ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    questionCache.put(new Pair<>(rs.getInt("questionset"), rs.getInt("questionid")), get(rs));
+                }
             }
-            rs.close();
-            ps.close();
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,17 +20,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package tools;
 
-import tools.packet.PacketHelper;
-
 import java.util.Date;
 import java.util.SimpleTimeZone;
+import tools.packet.PacketHelper;
 
 /**
  * Provides a suite of tools for manipulating Korean Timestamps.
  *
  * @author Frz
- * @version 1.0
  * @since Revision 746
+ * @version 1.0
  */
 public class KoreanDateUtil {
 
@@ -49,7 +42,7 @@ public class KoreanDateUtil {
      * @param realTimestamp The actual timestamp in milliseconds.
      * @return A 64-bit long giving a filetime timestamp
      */
-    public static final long getTempBanTimestamp(final long realTimestamp) {
+    public static long getTempBanTimestamp(final long realTimestamp) {
         // long time = (realTimestamp / 1000);//seconds
         return ((realTimestamp * 10000) + PacketHelper.FT_UT_OFFSET);
     }
@@ -60,7 +53,7 @@ public class KoreanDateUtil {
      * @param realTimestamp The actual timestamp in milliseconds.
      * @return The Korean timestamp for the real timestamp.
      */
-    public static final int getItemTimestamp(final long realTimestamp) {
+    public static int getItemTimestamp(final long realTimestamp) {
         final int time = (int) ((realTimestamp - REAL_YEAR2000) / 1000 / 60); // convert to minutes
         return (int) (time * 35.762787) + ITEM_YEAR2000;
     }

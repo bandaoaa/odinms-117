@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -29,57 +23,56 @@ package client.inventory;
 import java.io.Serializable;
 
 public class MapleImp implements Serializable {
-    //unused for right now. not a priority
+	//unused for right now. not a priority
     public static enum ImpFlag {
-        REMOVED(0x1),
-        SUMMONED(0x2),
-        TYPE(0x4),
-        STATE(0x8),
-        FULLNESS(0x10),
-        CLOSENESS(0x20),
-        CLOSENESS_LEFT(0x40),
-        MINUTES_LEFT(0x80),
-        LEVEL(0x100),
-        FULLNESS_2(0x200),
-        UPDATE_TIME(0x400),
-        CREATE_TIME(0x800),
-        AWAKE_TIME(0x1000),//idk, i think it only writes sleep time
-        SLEEP_TIME(0x2000),
-        MAX_CLOSENESS(0x4000),
-        MAX_DELAY(0x8000),
-        MAX_FULLNESS(0x10000),
-        MAX_ALIVE(0x20000),
-        MAX_MINUTES(0x40000);
-        //probably more but idk them
+	REMOVED(0x1),
+	SUMMONED(0x2),
+	TYPE(0x4),
+	STATE(0x8),
+	FULLNESS(0x10),
+	CLOSENESS(0x20),
+	CLOSENESS_LEFT(0x40),
+	MINUTES_LEFT(0x80),
+	LEVEL(0x100),
+	FULLNESS_2(0x200),
+	UPDATE_TIME(0x400),
+	CREATE_TIME(0x800),
+	AWAKE_TIME(0x1000),//idk, i think it only writes sleep time
+	SLEEP_TIME(0x2000), 
+	MAX_CLOSENESS(0x4000),
+	MAX_DELAY(0x8000),
+	MAX_FULLNESS(0x10000),
+	MAX_ALIVE(0x20000),
+	MAX_MINUTES(0x40000);
+	//probably more but idk them
 
-        private final int i;
+	private final int i;
+	private ImpFlag(int i) {
+	    this.i = i;
+	}
 
-        private ImpFlag(int i) {
-            this.i = i;
-        }
+	public final int getValue() {
+	    return i;
+	}
 
-        public final int getValue() {
-            return i;
-        }
-
-        public final boolean check(int flag) {
-            return (flag & i) == i;
-        }
+	public final boolean check(int flag) {
+	    return (flag & i) == i;
+	}
     }
 
     private static final long serialVersionUID = 91795493413738569L;
     private int itemid;
     private short fullness = 0, closeness = 0;
-    private byte state = 1, level = 1;
+	private byte state = 1, level = 1;
 
     public MapleImp(final int itemid) {
         this.itemid = itemid;
     }
-
-    public final int getItemId() {
-        return itemid;
-    }
-
+	
+	public final int getItemId() {
+		return itemid;
+	}
+	
     public final byte getState() {
         return state;
     }
@@ -87,7 +80,7 @@ public class MapleImp implements Serializable {
     public final void setState(final int state) {
         this.state = (byte) state;
     }
-
+	
     public final byte getLevel() {
         return level;
     }
@@ -95,7 +88,7 @@ public class MapleImp implements Serializable {
     public final void setLevel(final int level) {
         this.level = (byte) level;
     }
-
+	
     public final short getCloseness() {
         return closeness;
     }

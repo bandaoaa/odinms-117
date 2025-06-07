@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,9 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client.inventory;
 
 import constants.GameConstants;
-import server.Randomizer;
-
 import java.io.Serializable;
+import server.Randomizer;
 
 public class Equip extends Item implements Serializable {
 
@@ -37,13 +30,13 @@ public class Equip extends Item implements Serializable {
 
         SUCCESS, FAIL, CURSE
     }
-
     public static final int ARMOR_RATIO = 350000;
     public static final int WEAPON_RATIO = 700000;
     //charm: -1 = has not been initialized yet, 0 = already been worn, >0 = has teh charm exp
     private byte upgradeSlots = 0, level = 0, vicioushammer = 0, enhance = 0;
     private short str = 0, dex = 0, _int = 0, luk = 0, hp = 0, mp = 0, watk = 0, matk = 0, wdef = 0, mdef = 0, acc = 0, avoid = 0, hands = 0, speed = 0, jump = 0, charmExp = 0, pvpDamage = 0;
     private int itemEXP = 0, durability = -1, incSkill = -1, potential1 = 0, potential2 = 0, potential3 = 0, potential4 = 0, potential5 = 0, socket1 = -1, socket2 = -1, socket3 = -1;
+    private int lockpot = 0, line = 0;
     private MapleRing ring = null;
     private MapleAndroid android = null;
 
@@ -54,7 +47,7 @@ public class Equip extends Item implements Serializable {
     public Equip(int id, short position, int uniqueid, short flag) {
         super(id, position, (short) 1, flag, uniqueid);
     }
-
+    
     @Override
     public Item copy() {
         Equip ret = new Equip(getItemId(), getPosition(), getUniqueId(), getFlag());
@@ -552,6 +545,12 @@ public class Equip extends Item implements Serializable {
         this.android = ring;
     }
 
+    public boolean getAndroid2() {
+        int id = (getItemId() / 10000);
+        if (id == 167) return true;
+        return false;
+    }
+
     public short getSocketState() {
         int flag = 0;
         if (socket1 != -1 || socket2 != -1 || socket3 != -1) { // Got empty sockets show msg 
@@ -600,5 +599,22 @@ public class Equip extends Item implements Serializable {
 
     public void setSocket3(int socket3) {
         this.socket3 = socket3;
+    }
+
+    //潛能膠囊鎖相關內容
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
+
+    public int getLockPot() {
+        return lockpot;
+    }
+
+    public void setLockPot(int LockPot) {
+        this.lockpot = LockPot;
     }
 }

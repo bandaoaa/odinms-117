@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -27,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client.inventory;
 
 import database.DatabaseConnection;
-
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,12 +39,12 @@ public class MapleInventoryIdentifier implements Serializable {
     }
 
     public int getNextUniqueId() {
-        if (runningUID.get() <= 0) {
-            runningUID.set(initUID());
-        } else {
-            runningUID.set(runningUID.get() + 1);
-        }
-        return runningUID.get();
+	if (runningUID.get() <= 0) {
+	    runningUID.set(initUID());
+	} else {
+            runningUID.set(runningUID.get() + 1); 
+	}
+	return runningUID.get();
     }
 
     public int initUID() {
@@ -104,7 +98,6 @@ public class MapleInventoryIdentifier implements Serializable {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return ret;
     }

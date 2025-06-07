@@ -1,133 +1,107 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
-import constants.BattleConstants;
-import constants.BattleConstants.PokemonItem;
-import constants.BattleConstants.PItem;
-import constants.BattleConstants.HoldItem;
-
-import java.util.List;
+import constants.GameConstants;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import constants.GameConstants;
+import java.util.List;
 
 public class RandomRewards {
 
-    private static List<Integer> compiledGold = null, compiledSilver = null, compiledFishing = null, compiledPeanut = null,
-            compiledEvent = null, compiledEventC = null, compiledEventB = null, compiledEventA = null, compiledPokemon = null,
-            compiledDrops = null, compiledDropsB = null, compiledDropsA = null, tenPercent = null;
+    private static List<Integer> compiledGold = null;
+    private static List<Integer> compiledSilver = null;
+    private static List<Integer> compiledFishing = null;
+    private static List<Integer> compiledPeanut = null;
+    private static List<Integer> compiledEvent = null;
+    private static List<Integer> compiledEventC = null;
+    private static List<Integer> compiledEventB = null;
+    private static List<Integer> compiledEventA = null;
+    private static List<Integer> compiledDrops = null;
+    private static List<Integer> compiledDropsB = null;
+    private static List<Integer> compiledDropsA = null;
+    private static List<Integer> tenPercent = null;
+    private static List<Integer> compiledCashSurprise = null;
+
+    private final static RandomRewards instance = new RandomRewards();
 
     static {
         // Gold Box
-        List<Integer> returnArray = new ArrayList<Integer>();
-
-        processRewards(returnArray, GameConstants.goldrewards);
+        List<Integer> returnArray = new ArrayList<>();
 
         compiledGold = returnArray;
 
         // Silver Box
-        returnArray = new ArrayList<Integer>();
-
-        processRewards(returnArray, GameConstants.silverrewards);
+        returnArray = new ArrayList<>();
 
         compiledSilver = returnArray;
 
         // Fishing Rewards
-        returnArray = new ArrayList<Integer>();
+        returnArray = new ArrayList<>();
 
         processRewards(returnArray, GameConstants.fishingReward);
 
         compiledFishing = returnArray;
 
         // Event Rewards
-        returnArray = new ArrayList<Integer>();
-
-        processRewards(returnArray, GameConstants.eventCommonReward);
+        returnArray = new ArrayList<>();
 
         compiledEventC = returnArray;
 
-        returnArray = new ArrayList<Integer>();
-
-        processRewards(returnArray, GameConstants.eventUncommonReward);
+        returnArray = new ArrayList<>();
 
         compiledEventB = returnArray;
 
-        returnArray = new ArrayList<Integer>();
+        returnArray = new ArrayList<>();
 
-        processRewards(returnArray, GameConstants.eventRareReward);
         processRewardsSimple(returnArray, GameConstants.tenPercent);
         processRewardsSimple(returnArray, GameConstants.tenPercent);//hack: chance = 2
 
         compiledEventA = returnArray;
 
-        returnArray = new ArrayList<Integer>();
-
-        processRewards(returnArray, GameConstants.eventSuperReward);
+        returnArray = new ArrayList<>();
 
         compiledEvent = returnArray;
 
-        returnArray = new ArrayList<Integer>();
-
-        processRewards(returnArray, GameConstants.peanuts);
+        returnArray = new ArrayList<>();
 
         compiledPeanut = returnArray;
 
-        returnArray = new ArrayList<Integer>();
+        returnArray = new ArrayList<>();
 
-        processPokemon(returnArray, BattleConstants.PokemonItem.values());
-        processPokemon(returnArray, BattleConstants.HoldItem.values());
+	processRewardsSimple(returnArray, GameConstants.normalDrops);
+	
+	compiledDrops = returnArray;
 
-        compiledPokemon = returnArray;
+        returnArray = new ArrayList<>();
 
-        returnArray = new ArrayList<Integer>();
+	processRewardsSimple(returnArray, GameConstants.rareDrops);
+	
+	compiledDropsB = returnArray;
 
-        processRewardsSimple(returnArray, GameConstants.normalDrops);
+        returnArray = new ArrayList<>();
 
-        compiledDrops = returnArray;
+	processRewardsSimple(returnArray, GameConstants.superDrops);
 
-        returnArray = new ArrayList<Integer>();
+	compiledDropsA = returnArray;
 
-        processRewardsSimple(returnArray, GameConstants.rareDrops);
-
-        compiledDropsB = returnArray;
-
-        returnArray = new ArrayList<Integer>();
-
-        processRewardsSimple(returnArray, GameConstants.superDrops);
-
-        compiledDropsA = returnArray;
-
-        returnArray = new ArrayList<Integer>();
-
+        returnArray = new ArrayList<>();
         processRewardsSimple(returnArray, GameConstants.tenPercent);
+	tenPercent = returnArray;
 
-        tenPercent = returnArray;
+        //神奇服飾箱相關內容
+        returnArray = new ArrayList<>();
+        processRewards(returnArray, GameConstants.cashSurpriseRewards);
+        compiledCashSurprise = returnArray;
+
+    }
+
+    //神奇服飾箱相關內容
+    public static RandomRewards getInstance() {
+        return instance;
+    }
+
+    //神奇服飾箱相關內容
+    public final int getCSSReward() {
+        return compiledCashSurprise.get(Randomizer.nextInt(compiledCashSurprise.size()));
     }
 
     private static void processRewards(final List<Integer> returnArray, final int[] list) {
@@ -151,16 +125,6 @@ public class RandomRewards {
         Collections.shuffle(returnArray);
     }
 
-    private static void processPokemon(final List<Integer> returnArray, final PItem[] list) {
-        for (int i = 0; i < list.length; i++) {
-            PItem lastitem = list[i];
-            for (int j = 0; j < lastitem.getItemChance(); j++) {
-                returnArray.add(lastitem.getId());
-            }
-        }
-        Collections.shuffle(returnArray);
-    }
-
     public static int getGoldBoxReward() {
         return compiledGold.get(Randomizer.nextInt(compiledGold.size()));
     }
@@ -175,10 +139,6 @@ public class RandomRewards {
 
     public static int getPeanutReward() {
         return compiledPeanut.get(Randomizer.nextInt(compiledPeanut.size()));
-    }
-
-    public static int getPokemonReward() {
-        return compiledPokemon.get(Randomizer.nextInt(compiledPokemon.size()));
     }
 
     public static int getEventReward() {
@@ -206,7 +166,7 @@ public class RandomRewards {
     }
 
     public static List<Integer> getTenPercent() {
-        return tenPercent;
+	return tenPercent;
     }
 
     static void load() {

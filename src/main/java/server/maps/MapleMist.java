@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,16 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.maps;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-
-import client.Skill;
 import client.MapleCharacter;
 import client.MapleClient;
+import client.Skill;
 import client.SkillFactory;
-
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.concurrent.ScheduledFuture;
-
 import server.MapleStatEffect;
 import server.life.MapleMonster;
 import server.life.MobSkill;
@@ -70,18 +61,17 @@ public class MapleMist extends MapleMapObject {
         this.skilllevel = owner.getTotalSkillLevel(SkillFactory.getSkill(source.getSourceId()));
 
         switch (source.getSourceId()) {
-            case 4221006: // Smoke Screen
-            case 32121006: //Party Shield
+	    case 4221006: //煙幕彈
+	    case 32121006: //魔法屏障
                 isPoisonMist = 2;
                 break;
-            case 14111006:
-            case 1076:
-            case 11076:
-            case 2111003: // FP mist
-            case 12111005: // Flame wizard, [Flame Gear]
+	    case 1076: //奧茲的火牢術屏障
+            case 2111003: //致命毒霧
+            case 12111005: //火牢術屏障
+            case 14111006: //毒炸彈
                 isPoisonMist = 1;
                 break;
-            case 22161003: //Recovery Aura
+            case 22161003: //聖療之光
                 isPoisonMist = 4;
                 break;
         }
@@ -92,7 +82,7 @@ public class MapleMist extends MapleMapObject {
         this.mistPosition = mistPosition;
         this.ownerId = owner.getId();
         this.source = new MapleStatEffect();
-        this.source.setSourceId(2111003);
+        this.source.setSourceId(2111003); //致命毒霧
         this.skilllevel = 30;
         isMobMist = false;
         isPoisonMist = 0;
@@ -114,19 +104,19 @@ public class MapleMist extends MapleMapObject {
     }
 
     public void setSchedule(ScheduledFuture<?> s) {
-        this.schedule = s;
+	this.schedule = s;
     }
 
     public ScheduledFuture<?> getSchedule() {
-        return schedule;
+	return schedule;
     }
 
     public void setPoisonSchedule(ScheduledFuture<?> s) {
-        this.poisonSchedule = s;
+	this.poisonSchedule = s;
     }
 
     public ScheduledFuture<?> getPoisonSchedule() {
-        return poisonSchedule;
+	return poisonSchedule;
     }
 
     public boolean isMobMist() {

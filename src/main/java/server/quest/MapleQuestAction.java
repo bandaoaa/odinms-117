@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,35 +20,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server.quest;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.io.Serializable;
-
-import client.Skill;
-import constants.GameConstants;
-import client.inventory.InventoryException;
-import client.MapleCharacter;
-import client.inventory.MapleInventoryType;
-import client.MapleQuestStatus;
-import client.MapleStat;
 import client.MapleTrait.MapleTraitType;
-import client.SkillEntry;
-import client.SkillFactory;
-
+import client.*;
+import client.inventory.InventoryException;
+import client.inventory.MapleInventoryType;
+import constants.GameConstants;
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
-import server.Randomizer;
 import server.RandomRewards;
+import server.Randomizer;
 import tools.FileoutputUtil;
-import tools.packet.CField;
 import tools.Pair;
 import tools.Triple;
+import tools.packet.CField;
 import tools.packet.CWvsContext.InfoPacket;
 
 public class MapleQuestAction implements Serializable {
@@ -63,14 +49,12 @@ public class MapleQuestAction implements Serializable {
     private MapleQuestActionType type;
     private MapleQuest quest;
     private int intStore = 0;
-    private List<Integer> applicableJobs = new ArrayList<Integer>();
+    private List<Integer> applicableJobs = new ArrayList<>();
     private List<QuestItem> items = null;
     private List<Triple<Integer, Integer, Integer>> skill = null;
     private List<Pair<Integer, Integer>> state = null;
 
-    /**
-     * Creates a new instance of MapleQuestAction
-     */
+    /** Creates a new instance of MapleQuestAction */
     public MapleQuestAction(MapleQuestActionType type, ResultSet rse, MapleQuest quest, PreparedStatement pss, PreparedStatement psq, PreparedStatement psi) throws SQLException {
         this.type = type;
         this.quest = quest;
@@ -88,7 +72,7 @@ public class MapleQuestAction implements Serializable {
         ResultSet rs;
         switch (type) {
             case item:
-                items = new ArrayList<QuestItem>();
+                items = new ArrayList<>();
                 psi.setInt(1, rse.getInt("uniqueid"));
                 rs = psi.executeQuery();
                 while (rs.next()) {
@@ -97,46 +81,40 @@ public class MapleQuestAction implements Serializable {
                 rs.close();
                 break;
             case quest:
-                state = new ArrayList<Pair<Integer, Integer>>();
+                state = new ArrayList<>();
                 psq.setInt(1, rse.getInt("uniqueid"));
                 rs = psq.executeQuery();
                 while (rs.next()) {
-                    state.add(new Pair<Integer, Integer>(rs.getInt("quest"), rs.getInt("state")));
+                    state.add(new Pair<>(rs.getInt("quest"), rs.getInt("state")));
                 }
                 rs.close();
                 break;
             case skill:
-                skill = new ArrayList<Triple<Integer, Integer, Integer>>();
+                skill = new ArrayList<>();
                 pss.setInt(1, rse.getInt("uniqueid"));
                 rs = pss.executeQuery();
                 while (rs.next()) {
-                    skill.add(new Triple<Integer, Integer, Integer>(rs.getInt("skillid"), rs.getInt("skillLevel"), rs.getInt("masterLevel")));
+                    skill.add(new Triple<>(rs.getInt("skillid"), rs.getInt("skillLevel"), rs.getInt("masterLevel")));
                 }
                 rs.close();
                 break;
         }
     }
 
+    /*
+    任務道具檢測
+    */
     private static boolean canGetItem(QuestItem item, MapleCharacter c) {
         if (item.gender != 2 && item.gender >= 0 && item.gender != c.getGender()) {
             return false;
         }
-        if (item.job > 0) {
-            final List<Integer> code = getJobBy5ByteEncoding(item.job);
+        if (item.jobEx > 0 && item.jobEx < 10) {
             boolean jobFound = false;
-            for (int codec : code) {
-                if (codec / 100 == c.getJob() / 100) {
+            final List<Integer> codeEx = getJobBySimpleEncoding(item.jobEx); //區分職業裝備
+            for (int codec : codeEx) {
+                if ((codec / 100 % 10) == (c.getJob() / 100 % 10)) {
                     jobFound = true;
                     break;
-                }
-            }
-            if (!jobFound && item.jobEx > 0) {
-                final List<Integer> codeEx = getJobBySimpleEncoding(item.jobEx);
-                for (int codec : codeEx) {
-                    if ((codec / 100 % 10) == (c.getJob() / 100 % 10)) {
-                        jobFound = true;
-                        break;
-                    }
                 }
             }
             return jobFound;
@@ -159,6 +137,9 @@ public class MapleQuestAction implements Serializable {
         return false;
     }
 
+    /*
+    任務相關內容
+    */
     public void runStart(MapleCharacter c, Integer extSelection) {
         MapleQuestStatus status;
         switch (type) {
@@ -167,11 +148,11 @@ public class MapleQuestAction implements Serializable {
                 if (status.getForfeited() > 0) {
                     break;
                 }
-                c.gainExp(intStore * GameConstants.getExpRate_Quest(c.getLevel()) * (c.getStat().questBonus) * ((c.getTrait(MapleTraitType.sense).getLevel() * 3 / 10) + 100) / 100, true, true, true);
+                c.gainExp(intStore * (c.getStat().questBonus) * ((c.getTrait(MapleTraitType.sense).getLevel() * 3 / 10) + 100) / 100, true, true, true);
                 break;
             case item:
                 // first check for randomness in item selection
-                Map<Integer, Integer> props = new HashMap<Integer, Integer>();
+                Map<Integer, Integer> props = new HashMap<>();
                 for (QuestItem item : items) {
                     if (item.prop > 0 && canGetItem(item, c)) {
                         for (int i = 0; i < item.prop; i++) {
@@ -189,6 +170,10 @@ public class MapleQuestAction implements Serializable {
                         continue;
                     }
                     final int id = item.itemid;
+                        if (id == 1112400) {
+                        System.out.println("hax sfuk323");
+                        return;
+                    }
                     if (item.prop != -2) {
                         if (item.prop == -1) {
                             if (extSelection != null && extSelection != extNum++) {
@@ -209,12 +194,7 @@ public class MapleQuestAction implements Serializable {
                         c.getClient().getSession().write(InfoPacket.getShowItemGain(id, count, true));
                     } else { // add items
                         final int period = item.period / 1440; //im guessing.
-                        final String name = MapleItemInformationProvider.getInstance().getName(id);
-                        if (id / 10000 == 114 && name != null && name.length() > 0) { //medal
-                            final String msg = "You have attained title <" + name + ">";
-                            c.dropMessage(-1, msg);
-                            c.dropMessage(5, msg);
-                        }
+
                         MapleInventoryManipulator.addById(c.getClient(), id, count, "", null, period, "Obtained from quest " + quest.getId() + " on " + FileoutputUtil.CurrentReadable_Date());
                         c.getClient().getSession().write(InfoPacket.getShowItemGain(id, count, true));
                     }
@@ -271,9 +251,9 @@ public class MapleQuestAction implements Serializable {
                 break;
             case buffItemID:
                 status = c.getQuest(quest);
-                if (status.getForfeited() > 0) {
-                    break;
-                }
+                //if (status.getForfeited() > 0) { //取消放弃任務後，無法再次獲得BUFF的設定
+                //    break;
+                //}
                 final int tobuff = intStore;
                 if (tobuff <= 0) {
                     break;
@@ -330,7 +310,7 @@ public class MapleQuestAction implements Serializable {
         switch (type) {
             case item: {
                 // first check for randomness in item selection
-                final Map<Integer, Integer> props = new HashMap<Integer, Integer>();
+                final Map<Integer, Integer> props = new HashMap<>();
 
                 for (QuestItem item : items) {
                     if (item.prop > 0 && canGetItem(item, c)) {
@@ -361,16 +341,20 @@ public class MapleQuestAction implements Serializable {
                         }
                     }
                     final short count = (short) item.count;
+                    if (id == 1112400) {
+                        c.dropMessage(1, "You may not complete this quest.");
+                        return false;
+                    }
                     if (count < 0) { // remove items
                         if (!c.haveItem(id, count, false, true)) {
                             c.dropMessage(1, "You are short of some item to complete quest.");
                             return false;
                         }
                     } else { // add items
-                        if (MapleItemInformationProvider.getInstance().isPickupRestricted(id) && c.haveItem(id, 1, true, false)) {
-                            c.dropMessage(1, "You have this item already: " + MapleItemInformationProvider.getInstance().getName(id));
-                            return false;
-                        }
+                        //if (c.haveItem(id, 1, true, false)) { //擁有相同的道具，無法完成任務
+                        //    c.dropMessage(1, "You have this item already: " + MapleItemInformationProvider.getInstance().getName(id));
+                        //    return false;
+                        //}
                         switch (GameConstants.getInventoryType(id)) {
                             case EQUIP:
                                 eq++;
@@ -426,12 +410,12 @@ public class MapleQuestAction implements Serializable {
     public void runEnd(MapleCharacter c, Integer extSelection) {
         switch (type) {
             case exp: {
-                c.gainExp(intStore * GameConstants.getExpRate_Quest(c.getLevel()) * (c.getStat().questBonus) * ((c.getTrait(MapleTraitType.sense).getLevel() * 3 / 10) + 100) / 100, true, true, true);
+                c.gainExp(intStore * (c.getStat().questBonus) * ((c.getTrait(MapleTraitType.sense).getLevel() * 3 / 10) + 100) / 100, true, true, true);
                 break;
             }
             case item: {
                 // first check for randomness in item selection
-                Map<Integer, Integer> props = new HashMap<Integer, Integer>();
+                Map<Integer, Integer> props = new HashMap<>();
                 for (QuestItem item : items) {
                     if (item.prop > 0 && canGetItem(item, c)) {
                         for (int i = 0; i < item.prop; i++) {
@@ -449,6 +433,10 @@ public class MapleQuestAction implements Serializable {
                         continue;
                     }
                     final int id = item.itemid;
+                                        if (id == 1112400) {
+                        System.out.println("hax sfukdsdsd");
+                        return;
+                    }
                     if (item.prop != -2) {
                         if (item.prop == -1) {
                             if (extSelection != null && extSelection != extNum++) {
@@ -464,12 +452,7 @@ public class MapleQuestAction implements Serializable {
                         c.getClient().getSession().write(InfoPacket.getShowItemGain(id, count, true));
                     } else { // add items
                         final int period = item.period / 1440; //im guessing.
-                        final String name = MapleItemInformationProvider.getInstance().getName(id);
-                        if (id / 10000 == 114 && name != null && name.length() > 0) { //medal
-                            final String msg = "You have attained title <" + name + ">";
-                            c.dropMessage(-1, msg);
-                            c.dropMessage(5, msg);
-                        }
+
                         MapleInventoryManipulator.addById(c.getClient(), id, count, "", null, period + " on " + FileoutputUtil.CurrentReadable_Date());
                         c.getClient().getSession().write(InfoPacket.getShowItemGain(id, count, true));
                     }
@@ -563,71 +546,11 @@ public class MapleQuestAction implements Serializable {
         }
     }
 
-    private static List<Integer> getJobBy5ByteEncoding(int encoded) {
-        List<Integer> ret = new ArrayList<Integer>();
-        if ((encoded & 0x1) != 0) {
-            ret.add(0);
-        }
-        if ((encoded & 0x2) != 0) {
-            ret.add(100);
-        }
-        if ((encoded & 0x4) != 0) {
-            ret.add(200);
-        }
-        if ((encoded & 0x8) != 0) {
-            ret.add(300);
-        }
-        if ((encoded & 0x10) != 0) {
-            ret.add(400);
-        }
-        if ((encoded & 0x20) != 0) {
-            ret.add(500);
-        }
-        if ((encoded & 0x400) != 0) {
-            ret.add(1000);
-        }
-        if ((encoded & 0x800) != 0) {
-            ret.add(1100);
-        }
-        if ((encoded & 0x1000) != 0) {
-            ret.add(1200);
-        }
-        if ((encoded & 0x2000) != 0) {
-            ret.add(1300);
-        }
-        if ((encoded & 0x4000) != 0) {
-            ret.add(1400);
-        }
-        if ((encoded & 0x8000) != 0) {
-            ret.add(1500);
-        }
-        if ((encoded & 0x20000) != 0) {
-            ret.add(2001); //im not sure of this one
-            ret.add(2200);
-        }
-        if ((encoded & 0x100000) != 0) {
-            ret.add(2000);
-            ret.add(2001); //?
-        }
-        if ((encoded & 0x200000) != 0) {
-            ret.add(2100);
-        }
-        if ((encoded & 0x400000) != 0) {
-            ret.add(2001); //?
-            ret.add(2200);
-        }
-
-        if ((encoded & 0x40000000) != 0) { //i haven't seen any higher than this o.o
-            ret.add(3000);
-            ret.add(3200);
-            ret.add(3300);
-            ret.add(3500);
-        }
-        return ret;
-    }
-
+    /*
+    任務道具職業裝備檢測
+    */
     private static List<Integer> getJobBySimpleEncoding(int encoded) {
-        List<Integer> ret = new ArrayList<Integer>();
+        List<Integer> ret = new ArrayList<>();
         if ((encoded & 0x1) != 0) {
             ret.add(200);
         }

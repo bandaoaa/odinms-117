@@ -1,14 +1,9 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the ZeroFusion MapleStory Server
+Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
+ZeroFusion organized by "RMZero213" <RMZero213@hotmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -34,19 +29,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import client.inventory.Item;
 import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
+import constants.GameConstants;
 import database.DatabaseConnection;
 import handling.channel.ChannelServer;
 import handling.world.MapleCharacterLook;
 import handling.world.World;
-
 import java.util.ArrayList;
-
 import server.maps.*;
 import tools.packet.CField.NPCPacket;
 import tools.packet.CWvsContext;
@@ -105,7 +98,7 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
     }
 
     public static void loadAll() {
-        List<PlayerNPC> toAdd = new ArrayList<PlayerNPC>();
+	List<PlayerNPC> toAdd = new ArrayList<PlayerNPC>();
         Connection con = DatabaseConnection.getConnection();
         try {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM playernpcs");
@@ -118,9 +111,9 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
         } catch (Exception se) {
             se.printStackTrace();
         }
-        for (PlayerNPC npc : toAdd) {
-            npc.addToServer();
-        }
+	for (PlayerNPC npc : toAdd) {
+	    npc.addToServer();
+	}
     }
 
     public static void updateByCharId(MapleCharacter chr) {
@@ -166,7 +159,7 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
 
     public void destroy() {
         destroy(false); //just sql
-    }
+        }
 
     public void destroy(boolean remove) {
         Connection con = DatabaseConnection.getConnection();
@@ -233,11 +226,11 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
             se.printStackTrace();
         }
     }
-
+    
     public short getJob() {
         return 0; // we'll do this later,
     }
-
+    
     public int getDemonMarking() {
         return 0; // player npcs should have demon mark? ..idk, we'll see later
     }
@@ -303,7 +296,7 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
     @Override
     public void sendSpawnData(MapleClient client) {
         client.getSession().write(NPCPacket.spawnNPC(this, true));
-        client.getSession().write(CWvsContext.spawnPlayerNPC(this));
+        client.getSession().write(CWvsContext.spawnPlayerNPC(this, client));
         client.getSession().write(NPCPacket.spawnNPCRequestController(this, true));
     }
 
@@ -313,5 +306,13 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
             npc.setName(getName());
         }
         return npc;
+    }
+
+
+    public boolean isElf(MapleCharacter chr) {
+               if (chr.containsAreaInfo(7784, "sw=")) {
+            return chr.containsAreaInfo(7784, GameConstants.isMercedes(getJob()) ? "sw=0" : "sw=1");
+        }
+        return GameConstants.isMercedes(getJob());
     }
 }

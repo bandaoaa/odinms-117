@@ -1,47 +1,23 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import client.inventory.Item;
-import client.inventory.ItemFlag;
-import constants.GameConstants;
 import client.MapleCharacter;
 import client.MapleClient;
+import client.inventory.Item;
+import client.inventory.ItemFlag;
 import client.inventory.MapleInventoryType;
 import client.messages.CommandProcessor;
+import constants.GameConstants;
+import constants.ServerConstants;
 import constants.ServerConstants.CommandType;
-import handling.world.World;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
-
-import tools.packet.CField;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import tools.packet.CField.InteractionPacket;
 import tools.packet.CWvsContext;
 import tools.packet.PlayerShopPacket;
@@ -49,7 +25,7 @@ import tools.packet.PlayerShopPacket;
 public class MapleTrade {
 
     private MapleTrade partner = null;
-    private final List<Item> items = new LinkedList<Item>();
+    private final List<Item> items = new LinkedList<>();
     private List<Item> exchangeItems;
     private int meso = 0, exchangeMeso = 0;
     private boolean locked = false, inTrade = false;
@@ -58,12 +34,12 @@ public class MapleTrade {
 
     public MapleTrade(final byte tradingslot, final MapleCharacter chr) {
         this.tradingslot = tradingslot;
-        this.chr = new WeakReference<MapleCharacter>(chr);
+        this.chr = new WeakReference<>(chr);
     }
 
     public final void CompleteTrade() {
         if (exchangeItems != null) { // just to be on the safe side...
-            List<Item> itemz = new LinkedList<Item>(exchangeItems);
+            List<Item> itemz = new LinkedList<>(exchangeItems);
             for (final Item item : itemz) {
                 short flag = item.getFlag();
 
@@ -91,7 +67,7 @@ public class MapleTrade {
 
     public final void cancel(final MapleClient c, final MapleCharacter chr, final int unsuccessful) {
         if (items != null) { // just to be on the safe side...
-            List<Item> itemz = new LinkedList<Item>(items);
+            List<Item> itemz = new LinkedList<>(items);
             for (final Item item : itemz) {
                 MapleInventoryManipulator.addFromDrop(c, item, false);
             }
@@ -135,31 +111,66 @@ public class MapleTrade {
         }
     }
 
-    public final void chat(final String message) throws Exception {
+    public final void chat(String message) {
+        if (chr.get().getMap().getId() == GameConstants.JAIL) {
+            chr.get().dropMessage(5, "You're in jail, herp derp.");
+            chr.get().getClient().getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        if (chr.get().isMuted() || (chr.get().getMap().getMuted() && !chr.get().isGM())) {
+            chr.get().dropMessage(5, chr.get().isMuted() ? "You are Muted, therefore you are unable to talk. " : "The map is Muted, therefore you are unable to talk.");
+            chr.get().getClient().getSession().write(CWvsContext.enableActions());
+            return;
+        }
         if (!CommandProcessor.processCommand(chr.get().getClient(), message, CommandType.TRADE)) {
             chr.get().dropMessage(-2, chr.get().getName() + " : " + message);
             if (partner != null) {
                 partner.getChr().getClient().getSession().write(PlayerShopPacket.shopChat(chr.get().getName() + " : " + message, 1));
             }
         }
-        if (chr.get().getClient().isMonitored()) { //Broadcast info even if it was a command.
-            World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, chr.get().getName() + " said in trade with " + partner.getChr().getName() + ": " + message));
-        } else if (partner != null && partner.getChr() != null && partner.getChr().getClient().isMonitored()) {
-            World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, chr.get().getName() + " said in trade with " + partner.getChr().getName() + ": " + message));
-        }
+        /*
+         * if (chr.get().getClient().isMonitored()) { //Broadcast info even if
+         * it was a command.
+         * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
+         * chr.get().getName() + " said in trade with " +
+         * partner.getChr().getName() + ": " + message)); } else if (partner !=
+         * null && partner.getChr() != null &&
+         * partner.getChr().getClient().isMonitored()) {
+         * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
+         * chr.get().getName() + " said in trade with " +
+         * partner.getChr().getName() + ": " + message)); }
+         *
+         */
     }
 
-
-    public final void chatAuto(final String message) {
+    public final void chatAuto(String message) {
+        if (chr.get().getMap().getId() == GameConstants.JAIL) {
+            chr.get().dropMessage(5, "You're in jail, herp derp.");
+            chr.get().getClient().getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        if (chr.get().isMuted() || (chr.get().getMap().getMuted() && !chr.get().isGM())) {
+            chr.get().dropMessage(5, chr.get().isMuted() ? "You are Muted, therefore you are unable to talk. " : "The map is Muted, therefore you are unable to talk.");
+            chr.get().getClient().getSession().write(CWvsContext.enableActions());
+            return;
+        }
         chr.get().dropMessage(-2, message);
         if (partner != null) {
             partner.getChr().getClient().getSession().write(PlayerShopPacket.shopChat(message, 1));
         }
-        if (chr.get().getClient().isMonitored()) { //Broadcast info even if it was a command.
-            World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, chr.get().getName() + " said in trade [Automated] with " + partner.getChr().getName() + ": " + message));
-        } else if (partner != null && partner.getChr() != null && partner.getChr().getClient().isMonitored()) {
-            World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, chr.get().getName() + " said in trade [Automated] with " + partner.getChr().getName() + ": " + message));
-        }
+        /*
+         * if (chr.get().getClient().isMonitored()) { //Broadcast info even if
+         * it was a command.
+         * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
+         * chr.get().getName() + " said in trade [Automated] with " +
+         * partner.getChr().getName() + ": " + message)); } else if (partner !=
+         * null && partner.getChr() != null &&
+         * partner.getChr().getClient().isMonitored()) {
+         * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
+         * chr.get().getName() + " said in trade [Automated] with " +
+         * partner.getChr().getName() + ": " + message)); }
+         *
+         */
     }
 
     public final MapleTrade getPartner() {
@@ -205,7 +216,7 @@ public class MapleTrade {
             c.getSession().write(CWvsContext.enableActions());
             return false;
         }
-        if (ii.isDropRestricted(item.getItemId()) || ii.isAccountShared(item.getItemId())) {
+        if (ii.isAccountShared(item.getItemId())) {
             if (!(ItemFlag.KARMA_EQ.check(flag) || ItemFlag.KARMA_USE.check(flag))) {
                 c.getSession().write(CWvsContext.enableActions());
                 return false;
@@ -215,9 +226,11 @@ public class MapleTrade {
         if (GameConstants.isThrowingStar(item.getItemId()) || GameConstants.isBullet(item.getItemId())) {
             tradeItem.setQuantity(item.getQuantity());
             MapleInventoryManipulator.removeFromSlot(c, GameConstants.getInventoryType(item.getItemId()), item.getPosition(), item.getQuantity(), true);
+            c.getPlayer().saveToDB(false, false); 
         } else {
             tradeItem.setQuantity((short) quantity);
             MapleInventoryManipulator.removeFromSlot(c, GameConstants.getInventoryType(item.getItemId()), item.getPosition(), (short) quantity, true);
+            c.getPlayer().saveToDB(false, false); 
         }
         if (targetSlot < 0) {
             targetSlot = (byte) target;
@@ -231,10 +244,11 @@ public class MapleTrade {
         }
         tradeItem.setPosition(targetSlot);
         addItem(tradeItem);
+        c.getPlayer().saveToDB(false, false); 
         return true;
     }
 
-    private final int check() { //0 = fine, 1 = invent space not, 2 = pickupRestricted
+    private int check() { //0 = fine, 1 = invent space not, 2 = pickupRestricted
         if (chr.get().getMeso() + exchangeMeso < 0) {
             return 1;
         }
@@ -260,9 +274,9 @@ public class MapleTrade {
                         cash++;
                         break;
                 }
-                if (ii.isPickupRestricted(item.getItemId()) && chr.get().haveItem(item.getItemId(), 1, true, true)) {
-                    return 2;
-                }
+//            	if (ii.isPickupRestricted(item.getItemId()) && chr.get().haveItem(item.getItemId(), 1, true, true)) {
+                //                  return 2;
+                //        	}
             }
             if (chr.get().getInventory(MapleInventoryType.EQUIP).getNumFreeSlot() < eq || chr.get().getInventory(MapleInventoryType.USE).getNumFreeSlot() < use || chr.get().getInventory(MapleInventoryType.SETUP).getNumFreeSlot() < setup || chr.get().getInventory(MapleInventoryType.ETC).getNumFreeSlot() < etc || chr.get().getInventory(MapleInventoryType.CASH).getNumFreeSlot() < cash) {
                 return 1;
@@ -272,7 +286,7 @@ public class MapleTrade {
         return 0;
     }
 
-    public final static void completeTrade(final MapleCharacter c) {
+    public static void completeTrade(final MapleCharacter c) {
         final MapleTrade local = c.getTrade();
         final MapleTrade partner = local.getPartner();
 
@@ -282,7 +296,7 @@ public class MapleTrade {
         local.locked = true; // Locking the trade
         partner.getChr().getClient().getSession().write(InteractionPacket.getTradeConfirmation());
 
-        partner.exchangeItems = new LinkedList<Item>(local.items); // Copy this to partner's trade since it's alreadt accepted
+        partner.exchangeItems = new LinkedList<>(local.items); // Copy this to partner's trade since it's alreadt accepted
         partner.exchangeMeso = local.meso; // Copy this to partner's trade since it's alreadt accepted
 
         if (partner.isLocked()) { // Both locked
@@ -300,7 +314,7 @@ public class MapleTrade {
         }
     }
 
-    public static final void cancelTrade(final MapleTrade Localtrade, final MapleClient c, final MapleCharacter chr) {
+    public static void cancelTrade(final MapleTrade Localtrade, final MapleClient c, final MapleCharacter chr) {
         Localtrade.cancel(c, chr);
 
         final MapleTrade partner = Localtrade.getPartner();
@@ -311,7 +325,7 @@ public class MapleTrade {
         chr.setTrade(null);
     }
 
-    public static final void startTrade(final MapleCharacter c) {
+    public static void startTrade(final MapleCharacter c) {
         if (c.getTrade() == null) {
             c.setTrade(new MapleTrade((byte) 0, c));
             c.getClient().getSession().write(InteractionPacket.getTradeStart(c.getClient(), c.getTrade(), (byte) 0));
@@ -320,7 +334,7 @@ public class MapleTrade {
         }
     }
 
-    public static final void inviteTrade(final MapleCharacter c1, final MapleCharacter c2) {
+    public static void inviteTrade(final MapleCharacter c1, final MapleCharacter c2) {
         if (c1 == null || c1.getTrade() == null) {
             return;
         }
@@ -335,20 +349,20 @@ public class MapleTrade {
         }
     }
 
-    public static final void visitTrade(final MapleCharacter c1, final MapleCharacter c2) {
+    public static void visitTrade(final MapleCharacter c1, final MapleCharacter c2) {
         if (c2 != null && c1.getTrade() != null && c1.getTrade().getPartner() == c2.getTrade() && c2.getTrade() != null && c2.getTrade().getPartner() == c1.getTrade()) {
             // We don't need to check for map here as the user is found via MapleMap.getCharacterById()
             c1.getTrade().inTrade = true;
             c2.getClient().getSession().write(PlayerShopPacket.shopVisitorAdd(c1, 1));
             c1.getClient().getSession().write(InteractionPacket.getTradeStart(c1.getClient(), c1.getTrade(), (byte) 1));
-            // c1.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
-            // c2.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
+            c1.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
+            c2.dropMessage(-2, "System : Use @tradehelp to see the list of trading commands");
         } else {
             c1.getClient().getSession().write(CWvsContext.serverNotice(5, "The other player has already closed the trade"));
         }
     }
 
-    public static final void declineTrade(final MapleCharacter c) {
+    public static void declineTrade(final MapleCharacter c) {
         final MapleTrade trade = c.getTrade();
         if (trade != null) {
             if (trade.getPartner() != null) {

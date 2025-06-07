@@ -1,62 +1,34 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
 import client.MapleDisease;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import server.life.MobSkillFactory;
+import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
-import provider.MapleData;
 import provider.MapleDataTool;
 import server.life.MobSkill;
+import server.life.MobSkillFactory;
 
 public class MapleCarnivalFactory {
 
     private final static MapleCarnivalFactory instance = new MapleCarnivalFactory();
-    private final Map<Integer, MCSkill> skills = new HashMap<Integer, MCSkill>();
-    private final Map<Integer, MCSkill> guardians = new HashMap<Integer, MCSkill>();
+    private final Map<Integer, MCSkill> skills = new HashMap<>();
+    private final Map<Integer, MCSkill> guardians = new HashMap<>();
     private final MapleDataProvider dataRoot = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/Skill.wz"));
 
     public MapleCarnivalFactory() {
         //whoosh
-        initialize();
+	initialize();
     }
 
-    public static final MapleCarnivalFactory getInstance() {
+    public static MapleCarnivalFactory getInstance() {
         return instance;
     }
 
     private void initialize() {
-        if (skills.size() != 0) {
+        if (!skills.isEmpty()) {
             return;
         }
         for (MapleData z : dataRoot.getData("MCSkill.img")) {

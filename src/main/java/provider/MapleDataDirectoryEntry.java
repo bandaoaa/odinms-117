@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,20 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package provider;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * @author Burblish
+ *
+ * @author Matze
  */
 public class MapleDataDirectoryEntry extends MapleDataEntry {
 
-    private List<MapleDataDirectoryEntry> subdirs = new ArrayList<MapleDataDirectoryEntry>();
-    private List<MapleDataFileEntry> files = new ArrayList<MapleDataFileEntry>();
-    private Map<String, MapleDataEntry> entries = new HashMap<String, MapleDataEntry>();
+    private List<MapleDataDirectoryEntry> subdirs = new ArrayList<>();
+    private List<MapleDataFileEntry> files = new ArrayList<>();
+    private Map<String, MapleDataEntry> entries = new HashMap<>();
 
     public MapleDataDirectoryEntry(String name, int size, int checksum, MapleDataEntity parent) {
         super(name, size, checksum, parent);

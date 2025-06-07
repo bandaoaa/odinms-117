@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -36,10 +30,10 @@ public class MapleBBSThread implements java.io.Serializable {
     public String name, text;
     public long timestamp;
     public int localthreadID, guildID, ownerID, icon;
-    public Map<Integer, MapleBBSReply> replies = new HashMap<Integer, MapleBBSReply>();
+    public Map<Integer, MapleBBSReply> replies = new HashMap<>();
 
     public MapleBBSThread(final int localthreadID, final String name, final String text, final long timestamp,
-                          final int guildID, final int ownerID, final int icon) {
+            final int guildID, final int ownerID, final int icon) {
         this.localthreadID = localthreadID;
         this.name = name;
         this.text = text;

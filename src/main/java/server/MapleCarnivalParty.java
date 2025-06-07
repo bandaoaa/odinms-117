@@ -1,47 +1,20 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package server;
 
 import client.MapleCharacter;
 import handling.channel.ChannelServer;
-
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
-import java.lang.ref.WeakReference;
-
 import server.maps.MapleMap;
 import tools.packet.CField;
 
 /**
- * @author Burblish
+ * Note for this class : MapleCharacter reference must be removed immediately after cpq or upon dc.
+ * @author Rob
  */
 public class MapleCarnivalParty {
 
-    private List<Integer> members = new LinkedList<Integer>();
+    private List<Integer> members = new LinkedList<>();
     private WeakReference<MapleCharacter> leader;
     private byte team;
     private int channel;
@@ -49,7 +22,7 @@ public class MapleCarnivalParty {
     private boolean winner = false;
 
     public MapleCarnivalParty(final MapleCharacter owner, final List<MapleCharacter> members1, final byte team1) {
-        leader = new WeakReference<MapleCharacter>(owner);
+        leader = new WeakReference<>(owner);
         for (MapleCharacter mem : members1) {
             members.add(mem.getId());
             mem.setCarnivalParty(this);

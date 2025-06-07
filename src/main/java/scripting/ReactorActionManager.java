@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,28 +20,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package scripting;
 
+import client.MapleClient;
+import client.inventory.Equip;
+import client.inventory.Item;
+import client.inventory.MapleInventoryType;
+import constants.GameConstants;
+import handling.channel.ChannelServer;
 import java.awt.Point;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import client.inventory.Equip;
-import client.inventory.Item;
-import constants.GameConstants;
-import client.MapleCharacter;
-import client.MapleClient;
-import client.inventory.MapleInventoryType;
-import handling.channel.ChannelServer;
 import server.MapleCarnivalFactory;
 import server.MapleCarnivalFactory.MCSkill;
 import server.MapleItemInformationProvider;
 import server.Randomizer;
 import server.life.MapleLifeFactory;
-import server.maps.ReactorDropEntry;
-import server.maps.MapleReactor;
-import tools.packet.CField;
 import server.life.MapleMonster;
-import server.maps.MapleMap;
+import server.maps.MapleReactor;
+import server.maps.ReactorDropEntry;
+import tools.packet.CField;
 
 public class ReactorActionManager extends AbstractPlayerInteraction {
 
@@ -67,9 +58,12 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         dropItems(meso, mesoChance, minMeso, maxMeso, 0);
     }
 
+    /*
+    反應堆掉寶相關設定
+    */
     public void dropItems(boolean meso, int mesoChance, int minMeso, int maxMeso, int minItems) {
         final List<ReactorDropEntry> chances = ReactorScriptManager.getInstance().getDrops(reactor.getReactorId());
-        final List<ReactorDropEntry> items = new LinkedList<ReactorDropEntry>();
+        final List<ReactorDropEntry> items = new LinkedList<>();
 
         if (meso) {
             if (Math.random() < (1 / (double) mesoChance)) {
@@ -101,6 +95,11 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         int range, mesoDrop;
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         for (final ReactorDropEntry d : items) {
+            try {
+                    Thread.sleep(200); //反應堆物品掉落延時
+                } catch (Exception e) {
+
+            }
             if (d.itemId == 0) {
                 range = maxMeso - minMeso;
                 mesoDrop = Randomizer.nextInt(range) + minMeso * ChannelServer.getInstance(getClient().getChannel()).getMesoRate();
@@ -212,7 +211,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
     }
 
     public void doHarvest() { //TODO LEGEND
-        if (getPlayer().getFatigue() >= (GameConstants.GMS ? 200 : 100) || getPlayer().getStat().harvestingTool <= 0 || getReactor().getTruePosition().distanceSq(getPlayer().getTruePosition()) > 10000) {
+        if (getPlayer().getFatigue() >=  (GameConstants.GMS ? 200 : 100) || getPlayer().getStat().harvestingTool <= 0 || getReactor().getTruePosition().distanceSq(getPlayer().getTruePosition()) > 10000) {
             return;
         }
         final int pID = getReactor().getReactorId() < 200000 ? 92000000 : 92010000;
@@ -221,10 +220,10 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         if (he <= 0) {
             return;
         }
-        final Item item = getInventory(1).getItem((short) getPlayer().getStat().harvestingTool);
-        if (item == null || ((item.getItemId() / 10000) | 0) != (getReactor().getReactorId() < 200000 ? 150 : 151)) {
-            return;
-        }
+        //final Item item = getInventory(1).getItem((short)getPlayer().getStat().harvestingTool);
+        //if (item == null || ((item.getItemId() / 10000)) != (getReactor().getReactorId() < 200000 ? 150 : 151)) {
+        //    return;
+        //}
         int hm = getReactor().getReactorId() % 100;
         int successChance = 90 + ((he - hm) * 10);
         if (getReactor().getReactorId() % 100 == 10) {
@@ -244,17 +243,17 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
             dropItems();
             if (getReactor().getReactorId() < 200000) {
                 addTrait("sense", 5);
-                if (Randomizer.nextInt(10) == 0) {
-                    dropSingleItem(2440000);
-                }
-                if (Randomizer.nextInt(100) == 0) {
-                    dropSingleItem(4032933);
-                }
+				if (Randomizer.nextInt(10) == 0) {
+					dropSingleItem(2440000);
+				}
+				if (Randomizer.nextInt(100) == 0) {
+					dropSingleItem(4032933);
+				}
             } else {
                 addTrait("insight", 5);
-                if (Randomizer.nextInt(10) == 0) {
-                    dropSingleItem(2440001); //IMP
-                }
+				if (Randomizer.nextInt(10) == 0) {
+					dropSingleItem(2440001); //IMP
+				}
             }
         }
         cancelHarvest(succ);

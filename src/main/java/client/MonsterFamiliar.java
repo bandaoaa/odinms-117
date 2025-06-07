@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -29,7 +23,6 @@ package client;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.List;
-
 import server.MapleItemInformationProvider;
 import server.Randomizer;
 import server.life.MapleLifeFactory;
@@ -39,11 +32,11 @@ import server.maps.MapleMapObjectType;
 import server.movement.AbsoluteLifeMovement;
 import server.movement.LifeMovement;
 import server.movement.LifeMovementFragment;
-import tools.packet.CField;
 import tools.data.MaplePacketLittleEndianWriter;
+import tools.packet.CField;
 import tools.packet.PacketHelper;
 
-public class MonsterFamiliar extends AnimatedMapleMapObject implements Serializable {
+public final class MonsterFamiliar extends AnimatedMapleMapObject implements Serializable {
 
     private static final long serialVersionUID = 795419937713738569L;
     private int id, familiar, fatigue, characterid;
@@ -56,7 +49,7 @@ public class MonsterFamiliar extends AnimatedMapleMapObject implements Serializa
         this.familiar = familiar;
         this.characterid = characterid;
         this.expiry = expiry;
-        this.vitality = vitality;
+		this.vitality = vitality;
         this.id = id;
         this.name = name;
         this.fatigue = fatigue;

@@ -1,75 +1,73 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
+ This file is part of the OdinMS Maple Story Server
+ Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
+ Matthias Butz <matze@odinms.de>
+ Jan Christian Meyer <vimes@odinms.de>
 
-Copyright (C) 2011 ~ 2012 TimelessMS
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License version 3
+ as published by the Free Software Foundation. You may not use, modify
+ or distribute this program under any other version of the
+ GNU Affero General Public License.
 
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel.handler;
 
-import client.MapleClient;
 import client.MapleCharacter;
-import client.MapleCharacterUtil;
+import client.MapleClient;
 import client.messages.CommandProcessor;
+import constants.GameConstants;
+import constants.ServerConstants;
 import constants.ServerConstants.CommandType;
 import handling.channel.ChannelServer;
 import handling.world.MapleMessenger;
 import handling.world.MapleMessengerCharacter;
 import handling.world.World;
-import tools.packet.CField;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import tools.data.LittleEndianAccessor;
+import tools.packet.CField;
 import tools.packet.CWvsContext;
 
 public class ChatHandler {
 
-    public static final void GeneralChat(final String text, final byte unk, final MapleClient c, final MapleCharacter chr) {
-        if (text.length() > 0 && chr != null && chr.getMap() != null && !CommandProcessor.processCommand(c, text, chr.getBattle() == null ? CommandType.NORMAL : CommandType.POKEMON)) {
+    public static void GeneralChat(String text, final byte unk, final MapleClient c, final MapleCharacter chr) {
+
+        if (text.length() > 0 && chr != null && chr.getMap() != null && !CommandProcessor.processCommand(c, text, CommandType.NORMAL)) {
             if (!chr.isIntern() && text.length() >= 80) {
                 return;
             }
             if (chr.getCanTalk() || chr.isStaff()) {
                 //Note: This patch is needed to prevent chat packet from being broadcast to people who might be packet sniffing.
                 if (chr.isHidden()) {
-                    if (chr.isIntern() && !chr.isSuperGM() && unk == 0) {
+                    if (chr.isIntern() && !chr.isSuperGM() && unk == 0 && chr.gethiddenGM() == 0) {
                         chr.getMap().broadcastGMMessage(chr, CField.getChatText(chr.getId(), text, false, (byte) 1), true);
                         if (unk == 0) {
                             chr.getMap().broadcastGMMessage(chr, CWvsContext.serverNotice(2, chr.getName() + " : " + text), true);
                         }
                     } else {
-                        chr.getMap().broadcastGMMessage(chr, CField.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), true);
+                         chr.getMap().broadcastGMMessage(chr, CField.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), true);
                     }
                 } else {
-                    chr.getCheatTracker().checkMsg();
-                    if (chr.isIntern() && !chr.isSuperGM() && unk == 0) {
+                    if (chr.isIntern() && !chr.isSuperGM() && unk == 0 && chr.gethiddenGM() == 0) {
                         chr.getMap().broadcastMessage(CField.getChatText(chr.getId(), text, false, (byte) 1), c.getPlayer().getTruePosition());
                         if (unk == 0) {
                             chr.getMap().broadcastMessage(CWvsContext.serverNotice(2, chr.getName() + " : " + text), c.getPlayer().getTruePosition());
-                        }
+                        }                                           
                     } else {
                         chr.getMap().broadcastMessage(CField.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), c.getPlayer().getTruePosition());
                     }
-                }
-                if (text.equalsIgnoreCase(c.getChannelServer().getServerName() + " rocks")) {
-                    chr.finishAchievement(11);
                 }
             } else {
                 c.getSession().write(CWvsContext.serverNotice(6, "You have been muted and are therefore unable to talk."));
@@ -77,7 +75,8 @@ public class ChatHandler {
         }
     }
 
-    public static final void Others(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void Others(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+
         final int type = slea.readByte();
         final byte numRecipients = slea.readByte();
         if (numRecipients <= 0) {
@@ -88,40 +87,15 @@ public class ChatHandler {
         for (byte i = 0; i < numRecipients; i++) {
             recipients[i] = slea.readInt();
         }
-        final String chattext = slea.readMapleAsciiString();
+         String chattext = slea.readMapleAsciiString();
         if (chr == null || !chr.getCanTalk()) {
             c.getSession().write(CWvsContext.serverNotice(6, "You have been muted and are therefore unable to talk."));
             return;
         }
 
-        if (c.isMonitored()) {
-            String chattype = "Unknown";
-            switch (type) {
-                case 0:
-                    chattype = "Buddy";
-                    break;
-                case 1:
-                    chattype = "Party";
-                    break;
-                case 2:
-                    chattype = "Guild";
-                    break;
-                case 3:
-                    chattype = "Alliance";
-                    break;
-                case 4:
-                    chattype = "Expedition";
-                    break;
-            }
-            World.Broadcast.broadcastGMMessage(
-                    CWvsContext.serverNotice(6, "[GM Message] " + MapleCharacterUtil.makeMapleReadable(chr.getName())
-                            + " said (" + chattype + "): " + chattext));
-
-        }
-        if (chattext.length() <= 0 || CommandProcessor.processCommand(c, chattext, chr.getBattle() == null ? CommandType.NORMAL : CommandType.POKEMON)) {
+        if (chattext.length() <= 0 || CommandProcessor.processCommand(c, chattext, CommandType.NORMAL)) {
             return;
         }
-        chr.getCheatTracker().checkMsg();
         switch (type) {
             case 0:
                 World.Buddy.buddyChat(recipients, chr.getId(), chr.getName(), chattext);
@@ -153,7 +127,8 @@ public class ChatHandler {
         }
     }
 
-    public static final void Messenger(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void Messenger(final LittleEndianAccessor slea, final MapleClient c) {
+
         String input;
         MapleMessenger messenger = c.getPlayer().getMessenger();
 
@@ -228,21 +203,27 @@ public class ChatHandler {
             case 0x06: // message
                 if (messenger != null) {
                     final String charname = slea.readMapleAsciiString();
-                    final String text = slea.readMapleAsciiString();
-                    final String chattext = charname + "" + text;
+                    String text = slea.readMapleAsciiString();
+
                     World.Messenger.messengerChat(messenger.getId(), charname, text, c.getPlayer().getName());
-                    if (messenger.isMonitored() && chattext.length() > c.getPlayer().getName().length() + 3) { //name : NOT name0 or name1
-                        World.Broadcast.broadcastGMMessage(
-                                CWvsContext.serverNotice(
-                                        6, "[GM Message] " + MapleCharacterUtil.makeMapleReadable(c.getPlayer().getName()) + "(Messenger: "
-                                                + messenger.getMemberNamesDEBUG() + ") said: " + chattext));
-                    }
+
+                    /*
+                     * if (messenger.isMonitored() && chattext.length() >
+                     * c.getPlayer().getName().length() + 3) { //name : NOT
+                     * name0 or name1 World.Broadcast.broadcastGMMessage(
+                     * CWvsContext.serverNotice( 6, "[GM Message] " +
+                     * MapleCharacterUtil.makeMapleReadable(c.getPlayer().getName())
+                     * + "(Messenger: " + messenger.getMemberNamesDEBUG() + ")
+                     * said: " + chattext)); }
+                     *
+                     */
                 }
                 break;
         }
     }
 
-    public static final void Whisper_Find(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void Whisper_Find(final LittleEndianAccessor slea, final MapleClient c) {
+
         final byte mode = slea.readByte();
         slea.readInt(); //ticks
         switch (mode) {
@@ -292,10 +273,11 @@ public class ChatHandler {
                     c.getSession().write(CWvsContext.serverNotice(6, "You have been muted and are therefore unable to talk."));
                     return;
                 }
-                c.getPlayer().getCheatTracker().checkMsg();
                 final String recipient = slea.readMapleAsciiString();
-                final String text = slea.readMapleAsciiString();
+                String text = slea.readMapleAsciiString();
+
                 final int ch = World.Find.findChannel(recipient);
+
                 if (ch > 0) {
                     MapleCharacter player = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(recipient);
                     if (player == null) {
@@ -307,11 +289,17 @@ public class ChatHandler {
                     } else {
                         c.getSession().write(CField.getWhisperReply(recipient, (byte) 1));
                     }
-                    if (c.isMonitored()) {
-                        World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, c.getPlayer().getName() + " whispered " + recipient + " : " + text));
-                    } else if (player.getClient().isMonitored()) {
-                        World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6, c.getPlayer().getName() + " whispered " + recipient + " : " + text));
-                    }
+                   /*
+                     * if (c.isMonitored()) {
+                     * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
+                     * c.getPlayer().getName() + " whispered " + recipient + " :
+                     * " + text)); } else if (player.getClient().isMonitored())
+                     * {
+                     * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
+                     * c.getPlayer().getName() + " whispered " + recipient + " :
+                     * " + text)); }
+                     *
+                     */
                 } else {
                     c.getSession().write(CField.getWhisperReply(recipient, (byte) 0));
                 }

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -33,6 +27,12 @@ import client.inventory.MapleInventoryType;
 import constants.GameConstants;
 import constants.ServerConstants;
 import handling.SendPacketOpcode;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import server.CashItemFactory;
 import server.CashItemInfo.CashModInfo;
 import server.CashShop;
@@ -41,34 +41,35 @@ import tools.HexTool;
 import tools.Pair;
 import tools.data.MaplePacketLittleEndianWriter;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 public class MTSCSPacket {
-    //98
-    private static byte Operation_Code = 0x63; // We could just change this everytime a version updates
+
+    private static byte Operation_Code = 100; //117.1版本 = 99 117.2 = 100
     private static final byte[] bestItems = HexTool.getByteArrayFromHexString("02 00 00 00 31 00 00 00 0A 00 10 00 12 00 0E 07 E0 3B 8B 0B 60 CE 8A 0B 69 00 6C 00 6C 00 2F 00 35 00 33 00 32 00 30 00 30 00 31 00 31 00 2F 00 73 00 75 00 6D 00 6D 00 6F 00 6E 00 2F 00 61 00 74 00 74 00 61 00 63 00 6B 00 31 00 2F 00 31 0000 00 00 00 00 00 00 00 02 00 1A 00 04 01 08 07 02 00 00 00 32 00 00 00 05 00 1C 00 06 00 08 07 A0 01 2E 00 58 CD 8A 0B");
 
-    //operation code might chae changed hold on im checking something else
+    /*
+    登入商城
+    */
     public static byte[] warpCS(MapleClient c) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPEN.getValue());
+
         PacketHelper.addCharacterInfo(mplew, c.getPlayer());
         mplew.write(1); // 0 shows beta version of CS, 1 will send below.
+
         mplew.writeInt(0); // Not Sale count. -> Send here removes the item from CS. For each: int(SN)
+
         final Collection<CashModInfo> cmi = CashItemFactory.getInstance().getAllModInfo();
         mplew.writeShort(cmi.size());
         for (CashModInfo cm : cmi) {
             addModCashItemInfo(mplew, cm);
         }
+
         mplew.write(0); // Category discount rate (For each: byte(category), byte(sub) byte(rate))
         //mplew.write(1); // Main tab (1 = event, 2 = equip, 3 = use, 4 = special, 5 = etc, 6 = pet, 7 = package)
         //mplew.write(0); // Sub tab (Starts at 0)
         //mplew.write(10); // Discount rate
+
         final Map<Integer, List<Integer>> rmi = CashItemFactory.getInstance().getRandomItemInfo();
         mplew.writeInt(rmi.size()); // I don't know what does this do atm, but it seemed that it corresponds the items..
         for (final Entry<Integer, List<Integer>> i : rmi.entrySet()) {
@@ -81,6 +82,7 @@ public class MTSCSPacket {
                 mplew.writeInt(x); // SN
             }
         }
+
         mplew.write(bestItems);
         int[] itemz = CashItemFactory.getInstance().getBestItems();
         for (int i = 1; i <= 8; i++) { // 1080 bytes including 120 above.
@@ -92,9 +94,11 @@ public class MTSCSPacket {
                 }
             }
         }
+
         mplew.writeShort(0); // Stock [Disable/Enable Buy button] (For each: int(sn), int(amount left))
         //mplew.writeInt(10003092); // Wheel of Marvel
         //mplew.writeInt(4); // amount left?, 0/3/4 = enable, 1/2 = disable
+
         mplew.writeShort(0); // Limited Goods 104 bytes-> A2 35 4D 00 CE FD FD 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 FF FF FF FF FF FF FF FF 06 00 00 00 1F 1C 32 01 A7 3F 32 01 FF FF FF FF FF FF FF FF 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00
         //mplew.writeInt(5530177); // item id
         //mplew.writeInt(10003092); //sn		
@@ -112,13 +116,18 @@ public class MTSCSPacket {
         //mplew.writeInt(0); // Thursday
         //mplew.writeInt(1); // Friday
         //mplew.writeInt(1); // Saturday
+
         mplew.writeShort(0); // Zero Limit Goods -> 68 bytes ea
         mplew.write(0); // event on
         mplew.writeInt(0);
         mplew.write(0); // v99+, idk
+
         return mplew.getPacket();
     }
 
+    /*
+    加載資料庫項目
+    */
     public static void addModCashItemInfo(MaplePacketLittleEndianWriter mplew, CashModInfo item) {
         int flags = item.flags;
         mplew.writeInt(item.sn);
@@ -199,37 +208,56 @@ public class MTSCSPacket {
         }
     }
 
+    /*
+    儲值點卷
+    */
     public static byte[] chargeCash() { // Useless, doesn't do anything.
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_CHARGE_CASH.getValue());
         mplew.writeMapleAsciiString("http://www.google.com");
         mplew.writeMapleAsciiString("http://www.google.com");
+
         return mplew.getPacket();
     }
 
+    /*
+    商城點卷更新
+    */
     public static byte[] showNXMapleTokens(MapleCharacter chr) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_UPDATE.getValue());
-        mplew.writeInt(chr.getCSPoints(1)); // NX Credit THIS NIGGER RIGHT HERE LOL finally 
+        mplew.writeInt(chr.getCSPoints(1)); // NX Credit
         mplew.writeInt(chr.getCSPoints(2)); // MPoint
         mplew.writeInt(chr.getCSPoints(4)); // NX Prepaid
+
         return mplew.getPacket();
     }
 
+    /*
+    限制商品数量更改
+    */
     public static byte[] LimitGoodsCountChanged() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code);
         mplew.writeInt(0); // SN
         mplew.writeInt(0); // Count
         mplew.writeInt(0);
+
         return mplew.getPacket();
     }
 
+    /*
+    商城背包清單
+    */
     public static byte[] getCSInventory(MapleClient c) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
-        mplew.write(Operation_Code + 4); // 5 = Failed + transfer
+        mplew.write(Operation_Code + 3); // 5 = Failed + transfer
         CashShop mci = c.getPlayer().getCashInventory();
         mplew.writeShort(mci.getItemsSize());
         if (mci.getItemsSize() > 0) {
@@ -248,14 +276,19 @@ public class MTSCSPacket {
             }
         }
         mplew.writeShort(c.getPlayer().getStorage().getSlots());
-        mplew.writeShort(c.getCharacterSlots());
+        mplew.writeShort(15);
         mplew.writeShort(0);
         mplew.writeShort(4); //04 00 <-- added?
+
         return mplew.getPacket();
     }
 
+    /*
+    取得禮物
+    */
     public static byte[] getCSGifts(MapleClient c) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 6); // 7 = Failed + transfer
         List<Pair<Item, String>> mci = c.getPlayer().getCashInventory().loadGifts();
@@ -266,79 +299,99 @@ public class MTSCSPacket {
             mplew.writeAsciiString(mcz.getLeft().getGiftFrom(), 13);
             mplew.writeAsciiString(mcz.getRight(), 73);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    購物車清單
+    */
     public static byte[] sendWishList(MapleCharacter chr, boolean update) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + (update ? 15 : 8)); // 9 = Failed + transfer, 16 = Failed.
         int[] list = chr.getWishlist();
         for (int i = 0; i < 10; i++) {
             mplew.writeInt(list[i] != -1 ? list[i] : 0);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    顯示購買的物品
+    */
     public static byte[] showBoughtCSItem(Item item, int sn, int accid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 17);
         addCashItemInfo(mplew, item, accid, sn);
+
         return mplew.getPacket();
     }
 
+    /*
+    顯示購買物品-禮物
+    */
     public static byte[] showBoughtCSItem(int itemid, int sn, int uniqueid, int accid, int quantity, String giftFrom, long expire) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 17);
         addCashItemInfo(mplew, uniqueid, accid, itemid, sn, quantity, giftFrom, expire);
+
         return mplew.getPacket();
     }
 
+    /*
+    購買物品失敗
+    */
     public static byte[] showBoughtCSItemFailed(final int mode, final int sn) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 18);
         mplew.write(mode); // 0/1/2 = transfer, Rest = code
         if (mode == 29 || mode == 30) { // Limit Goods update. this item is out of stock, and therefore not available for sale.
             mplew.writeInt(sn);
         } else if (mode == 69) { // You cannot make any more purchases in %d.\r\nPlease try again in (%d + 1).
-            mplew.write(1);    // Hour?
+            mplew.write(1);	// Hour?	
         } else if (mode == 85) { // %s can only be purchased once a month.
             mplew.writeInt(sn);
             mplew.writeLong(System.currentTimeMillis());
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    購買禮包
+    */
     public static byte[] showBoughtCSPackage(Map<Integer, Item> ccc, int accid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
-        mplew.write(GameConstants.GMS ? 0xA3 : 0x97); //use to be 7a
+        mplew.write(Operation_Code + 71); // 72 = Similar structure to showBoughtCSItemFailed
         mplew.write(ccc.size());
-        int size = 0;
         for (Entry<Integer, Item> sn : ccc.entrySet()) {
             addCashItemInfo(mplew, sn.getValue(), accid, sn.getKey().intValue());
-            if (GameConstants.isPet(sn.getValue().getItemId()) || GameConstants.getInventoryType(sn.getValue().getItemId()) == MapleInventoryType.EQUIP) {
-                size++;
-            }
         }
-        if (ccc.size() > 0) {
-            mplew.writeInt(size);
-            for (Item itemz : ccc.values()) {
-                if (GameConstants.isPet(itemz.getItemId()) || GameConstants.getInventoryType(itemz.getItemId()) == MapleInventoryType.EQUIP) {
-                    PacketHelper.addItemInfo(mplew, itemz);
-                }
-            }
-        }
-        mplew.writeShort(0);
+        mplew.writeShort(0); // Purchase Maple Points = 1, Item = 0
+        mplew.writeInt(0); // SN
+        //mplew.writeLong(System.currentTimeMillis());
+
         return mplew.getPacket();
     }
 
+    /*
+    發送禮物
+    */
     public static byte[] sendGift(int price, int itemid, int quantity, String receiver, boolean packages) {
         // [ %s ] \r\nwas sent to %s. \r\n%d NX Prepaid \r\nwere spent in the process.
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + (packages ? 73 : 24)); // 74 = Similar structure to showBoughtCSItemFailed
         mplew.writeMapleAsciiString(receiver);
@@ -348,11 +401,16 @@ public class MTSCSPacket {
             mplew.writeShort(0); //maplePoints
         }
         mplew.writeInt(price);
+
         return mplew.getPacket();
     }
 
+    /*
+    顯示優惠券兌換的物品
+    */
     public static byte[] showCouponRedeemedItem(Map<Integer, Item> items, int mesos, int maplePoints, MapleClient c) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 19);
         mplew.write(items.size());
@@ -366,11 +424,16 @@ public class MTSCSPacket {
         //    mplew.writeInt(item.getLeft());  // Item ID
         //}
         mplew.writeInt(mesos);
+
         return mplew.getPacket();
     }
 
+    /*
+    顯示優惠券禮物
+    */
     public static byte[] showCouponGifted(Map<Integer, Item> items, String receiver, MapleClient c) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 21); // 22 = Failed. [Mode - 0/2 = transfer, 15 = invalid 3 times]
         mplew.writeMapleAsciiString(receiver); // Split by ;
@@ -379,130 +442,200 @@ public class MTSCSPacket {
             addCashItemInfo(mplew, item.getValue(), c.getAccID(), item.getKey().intValue());
         }
         mplew.writeInt(0); // (amount of receiver - 1)
+
         return mplew.getPacket();
     }
 
+    /*
+    擴充背包
+    */
     public static byte[] increasedInvSlots(int inv, int slots) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 26);
         mplew.write(inv);
         mplew.writeShort(slots);
+
         return mplew.getPacket();
     }
 
+    /*
+    擴充倉庫
+    */
     public static byte[] increasedStorageSlots(int slots, boolean characterSlots) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + (characterSlots ? 30 : 28)); // 32 = Buy Character. O.O
         mplew.writeShort(slots);
+
         return mplew.getPacket();
     }
 
+    /*
+    擴充墜飾
+    */
     public static byte[] increasedPendantSlots() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 34); // 35 = Failed
         mplew.writeShort(0); // 0 = Add, 1 = Extend
         mplew.writeShort(100); // Related to time->Low/High fileTime
         // The time limit for the %s slot \r\nhas been extended to %d-%d-%d %d:%d.
+
         return mplew.getPacket();
     }
 
+    /*
+    商城背包道具移動到角色背包
+    */
     public static byte[] confirmFromCSInventory(Item item, short pos) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 36); // 37 = Failed
         mplew.writeShort(pos);
         PacketHelper.addItemInfo(mplew, item);
         mplew.writeInt(0); // For each: 8 bytes(Could be 2 ints or 1 long)
+
         return mplew.getPacket();
     }
 
+    /*
+    角色背包道具移動到商城背包
+    */
     public static byte[] confirmToCSInventory(Item item, int accId, int sn) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 38); // 39 = Failed
         addCashItemInfo(mplew, item, accId, sn, false);
+
         return mplew.getPacket();
     }
 
+    /*
+    現金道具刪除
+    */
     public static byte[] cashItemDelete(int uniqueid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 40); // 41 = Failed
         mplew.writeLong(uniqueid); // or SN?
+
         return mplew.getPacket();
     }
 
+    /*
+    折扣項目
+    */
     public static byte[] rebateCashItem() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 67); // 41 = Failed
         mplew.writeLong(0); // UniqueID
         mplew.writeInt(0); // MaplePoints accumulated
         mplew.writeInt(0); // For each: 8 bytes.
+
         return mplew.getPacket();
     }
 
+    /*
+    發送戒指
+    */
     public static byte[] sendBoughtRings(boolean couple, Item item, int sn, int accid, String receiver) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + (couple ? 69 : 79));
         addCashItemInfo(mplew, item, accid, sn);
         mplew.writeMapleAsciiString(receiver);
         mplew.writeInt(item.getItemId());
         mplew.writeShort(1); // Count
+
         return mplew.getPacket();
     }
 
+    /*
+    接收免費點數道具
+    */
     public static byte[] receiveFreeCSItem(Item item, int sn, int accid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 87); // 105 = Buy Name Change, 107 = Transfer world
         addCashItemInfo(mplew, item, accid, sn);
+
         return mplew.getPacket();
     }
 
+    /*
+    現金商品已過期
+    */
     public static byte[] cashItemExpired(int uniqueid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 42);
         mplew.writeLong(uniqueid);
+
         return mplew.getPacket();
     }
 
+    /*
+    購買商城任務道具
+    */
     public static byte[] showBoughtCSQuestItem(int price, short quantity, byte position, int itemid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 75); // 76 = Failed.
         mplew.writeInt(1); // size. below gets repeated for each.
         mplew.writeInt(quantity);
         mplew.writeInt(itemid);
+
         return mplew.getPacket();
     }
 
+    /*
+    更新購買記錄
+    */
     public static byte[] updatePurchaseRecord() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
-        mplew.write(Operation_Code + 94); // 95 = Failed. //94
+        mplew.write(Operation_Code + 94); // 95 = Failed.
         mplew.writeInt(0);
         mplew.write(1); // boolean
+
         return mplew.getPacket();
     }
 
+    /*
+    發送現金退款
+    */
     public static byte[] sendCashRefund(final int cash) {
         // Your refund has been processed. \r\n(%d NX Refund)
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 97);
         mplew.writeInt(0); // Item Size.->For each 8 bytes.
         mplew.writeInt(cash); // NX
+
         return mplew.getPacket();
     }
 
+    /*
+    發送隨機箱子
+    */
     public static byte[] sendRandomBox(int uniqueid, Item item, short pos) { // have to revise this
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 99); // 100 = Failed
         mplew.writeLong(uniqueid);
@@ -510,11 +643,16 @@ public class MTSCSPacket {
         PacketHelper.addItemInfo(mplew, item);
         mplew.writeShort(0);
         mplew.writeInt(0); // Item Size.->For each 8 bytes.
+
         return mplew.getPacket();
     }
 
+    /*
+    發送現金扭蛋
+    */
     public static byte[] sendCashGachapon(final boolean cashItem, int idFirst, Item item, int accid) { // Xmas Surprise, Cash Shop Surprise
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 109); // 110 = Failed.		
         mplew.writeLong(idFirst); //uniqueid of the xmas surprise itself
@@ -525,11 +663,16 @@ public class MTSCSPacket {
         }
         mplew.writeInt(item.getItemId());
         mplew.write(1);
+
         return mplew.getPacket();
     }
 
+    /*
+    發送雙龍蛋
+    */
     public static byte[] sendTwinDragonEgg(boolean test1, boolean test2, int idFirst, Item item, int accid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 111); // 112 = Failed.		
         mplew.write(test1 ? 1 : 0);
@@ -541,28 +684,42 @@ public class MTSCSPacket {
         if (test1 && test2) {
             addCashItemInfo(mplew, item, accid, 0); //info of the new item, but packet shows 0 for sn?
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    發送購買楓葉點數
+    */
     public static byte[] sendBoughtMaplePoints(final int maplePoints) {
         // You've received %d Maple Points.
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
         mplew.write(Operation_Code + 113);
         mplew.writeInt(0);
         mplew.writeInt(0);
         mplew.writeInt(maplePoints);
+
         return mplew.getPacket();
     }
 
+    /*
+    改名確認
+    */
     public static byte[] changeNameCheck(final String charname, final boolean nameUsed) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CHANGE_NAME_CHECK.getValue());
         mplew.writeMapleAsciiString(charname);
         mplew.write(nameUsed ? 1 : 0);
+
         return mplew.getPacket();
     }
 
+    /*
+    改名稱響應
+    */
     public static byte[] changeNameResponse(final int mode, final int pic) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
@@ -575,30 +732,46 @@ public class MTSCSPacket {
         mplew.writeInt(0);
         mplew.write(mode);
         mplew.writeInt(pic); // pic or birthdate
+
         return mplew.getPacket();
     }
 
+    /*
+    接收扭蛋郵票
+    */
     public static byte[] receiveGachaStamps(final boolean invfull, final int amount) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.GACHAPON_STAMPS.getValue());
         mplew.write(invfull ? 0 : 1);
         if (!invfull) {
             mplew.writeInt(amount);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    免費現金道具
+    */
     public static byte[] freeCashItem(final int itemId) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.FREE_CASH_ITEM.getValue());
         mplew.writeInt(itemId);
+
         return mplew.getPacket();
     }
 
+    /*
+    神秘服裝箱子
+    */
     public static byte[] showXmasSurprise(boolean full, int idFirst, Item item, int accid) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.XMAS_SURPRISE.getValue());
-        mplew.write(full ? 212 : 213);
+
+        mplew.write(full ? 224 : 225);
         if (!full) {
             mplew.writeLong(idFirst); //uniqueid of the xmas surprise itself
             mplew.writeInt(0);
@@ -607,11 +780,16 @@ public class MTSCSPacket {
             mplew.write(1);
             mplew.write(1);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    顯示當日限定
+    */
     public static byte[] showOneADayInfo(boolean show, int sn) { // hmmph->Buy regular item causes invalid pointer
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.ONE_A_DAY.getValue());
         mplew.writeInt(100); //idk-related to main page
         mplew.writeInt(100000); // idk-related to main page
@@ -619,9 +797,13 @@ public class MTSCSPacket {
         mplew.writeInt(20121231); // yyyy-mm-dd
         mplew.writeInt(sn);
         mplew.writeInt(0);
+
         return mplew.getPacket();
     }
 
+    /*
+    播放點數音樂
+    */
     public static byte[] playCashSong(int itemid, String name) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.CASH_SONG.getValue());
@@ -630,43 +812,79 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
+    /*
+    使用外星電轉機
+    */
     public static byte[] useAlienSocket(boolean start) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-        mplew.writeShort(SendPacketOpcode.ALIEN_SOCKET_CREATOR.getValue());
-        mplew.write(start ? 0 : 2);
+
+       mplew.writeShort(SendPacketOpcode.ALIEN_SOCKET_CREATOR.getValue());
+       mplew.write(start ? 0 : 2);
+
         return mplew.getPacket();
     }
 
+    /*
+    使用黃金鐵槌
+    */
     public static byte[] ViciousHammer(boolean start, int hammered) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.VICIOUS_HAMMER.getValue());
         mplew.write(start ? 66 : 70);
         mplew.writeInt(0);
         if (start) {
             mplew.writeInt(hammered);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    使用卷軸成功提升卡
+    */
+    public static byte[] VegasScroll(int action) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.VEGAS_SCROLL.getValue());
+        mplew.write(action);
+        // 1: This item cannot be used.
+
+        return mplew.getPacket();
+    }
+
+    /*
+    寵物Flag更改?
+    */
     public static byte[] changePetFlag(int uniqueId, boolean added, int flagAdded) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.PET_FLAG_CHANGE.getValue());
+
         mplew.writeLong(uniqueId);
         mplew.write(added ? 1 : 0);
         mplew.writeShort(flagAdded);
+
         return mplew.getPacket();
     }
 
+    /*
+    寵物更名
+    */
     public static byte[] changePetName(MapleCharacter chr, String newname, int slot) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.PET_NAMECHANGE.getValue());
+
         mplew.writeInt(chr.getId());
         mplew.write(0);
         mplew.writeMapleAsciiString(newname);
         mplew.write(slot);
+
         return mplew.getPacket();
     }
 
+    /*
+    備忘錄結果
+    */
     public static byte[] OnMemoResult(final byte act, final byte mode) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
@@ -679,11 +897,16 @@ public class MTSCSPacket {
         if (act == 5) {
             mplew.write(mode);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    顯示迅息
+    */
     public static byte[] showNotes(final ResultSet notes, final int count) throws SQLException {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.SHOW_NOTES.getValue());
         mplew.write(3);
         mplew.write(count);
@@ -695,12 +918,17 @@ public class MTSCSPacket {
             mplew.write(notes.getInt("gift"));
             notes.next();
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    使用小黑板
+    */
     public static byte[] useChalkboard(final int charid, final String msg) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.CHALKBOARD.getValue());
+
         mplew.writeInt(charid);
         if (msg == null || msg.length() <= 0) {
             mplew.write(0);
@@ -708,9 +936,13 @@ public class MTSCSPacket {
             mplew.write(1);
             mplew.writeMapleAsciiString(msg);
         }
+
         return mplew.getPacket();
     }
 
+    /*
+    地圖傳送結果
+    */
     public static byte[] OnMapTransferResult(MapleCharacter chr, byte vip, boolean delete) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
@@ -738,22 +970,26 @@ public class MTSCSPacket {
                 mplew.writeInt(map[i]);
             }
         }
+
         return mplew.getPacket();
     }
 
-    public static final void addCashItemInfo(MaplePacketLittleEndianWriter mplew, Item item, int accId, int sn) {
+    /*
+    購買物品後結果
+    */
+    public static void addCashItemInfo(MaplePacketLittleEndianWriter mplew, Item item, int accId, int sn) {
         addCashItemInfo(mplew, item, accId, sn, true);
     }
 
-    public static final void addCashItemInfo(MaplePacketLittleEndianWriter mplew, Item item, int accId, int sn, boolean isFirst) {
+    public static void addCashItemInfo(MaplePacketLittleEndianWriter mplew, Item item, int accId, int sn, boolean isFirst) {
         addCashItemInfo(mplew, item.getUniqueId(), accId, item.getItemId(), sn, item.getQuantity(), item.getGiftFrom(), item.getExpiration(), isFirst); //owner for the lulz
     }
 
-    public static final void addCashItemInfo(MaplePacketLittleEndianWriter mplew, int uniqueid, int accId, int itemid, int sn, int quantity, String sender, long expire) {
+    public static void addCashItemInfo(MaplePacketLittleEndianWriter mplew, int uniqueid, int accId, int itemid, int sn, int quantity, String sender, long expire) {
         addCashItemInfo(mplew, uniqueid, accId, itemid, sn, quantity, sender, expire, true);
     }
 
-    public static final void addCashItemInfo(MaplePacketLittleEndianWriter mplew, int uniqueid, int accId, int itemid, int sn, int quantity, String sender, long expire, boolean isFirst) {
+    public static void addCashItemInfo(MaplePacketLittleEndianWriter mplew, int uniqueid, int accId, int itemid, int sn, int quantity, String sender, long expire, boolean isFirst) {
         mplew.writeLong(uniqueid > 0 ? uniqueid : 0);
         mplew.writeLong(accId);
         mplew.writeInt(itemid);
@@ -774,117 +1010,178 @@ public class MTSCSPacket {
         //}
     }
 
+    /*
+    商城失敗訊息
+    */
     public static byte[] sendCSFail(int err) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_OPERATION.getValue());
-        mplew.write(0x7F);
+        mplew.write(Operation_Code + 95);
         mplew.write(err);
-        // 1: Request timed out.\r\nPlease try again.
-        // 3: You don't have enough cash.
-        // 4: You can't buy someone a cash item gift if you're under 14.
-        // 5: You have exceeded the allotted limit of price\r\nfor gifts.
-        // 10: Please check and see if you have exceeded\r\nthe number of cash items you can have.
-        // 11: Please check and see\r\nif the name of the character is wrong,\r\nor if the item has gender restrictions.
-        // 44/69: You have reached the daily maximum \r\npurchase limit for the Cash Shop.
-        // 22: Due to gender restrictions, the coupon \r\nis unavailable for use.
-        // 17: This coupon was already used.
-        // 16: This coupon has expired.
-        // 18: This coupon can only be used at\r\nNexon-affiliated Internet Cafe's.\r\nPlease use the Nexon-affiliated Internet Cafe's.
-        // 19: This coupon is a Nexon-affiliated Internet Cafe-only coupon,\r\nand it had already been used.
-        // 20: This coupon is a Nexon-affiliated Internet Cafe-only coupon,\r\nand it had already been expired.
-        // 14: Please check and see if \r\nthe coupon number is right.
-        // 23: This coupon is only for regular items, and \r\nit's unavailable to give away as a gift.
-        // 24: This coupon is only for MapleStory, and\r\nit cannot be gifted to others.
-        // 25: Please check if your inventory is full or not.
-        // 26: This item is only available for purchase by a user at the premium service internet cafe.
-        // 27: You are sending a gift to an invalid recipient.\r\nPlease check the character name and gender.
-        // 28: Please check the name of the receiver.
-        // 29: Items are not available for purchase\r\n at this hour.
-        // 30: The item is out of stock, and therefore\r\nnot available for sale.
-        // 31: You have exceeded the spending limit of NX.
-        // 32: You do not have enough mesos.
-        // 33: The Cash Shop is unavailable\r\nduring the beta-test phase.\r\nWe apologize for your inconvenience.
-        // 34: Check your PIC password and\r\nplease try again.
-        // 37: Please verify your 2nd password and\r\ntry again.
-        // 21: This is the NX coupon number.\r\nRegister your coupon at www.nexon.net.
-        // 38: This coupon is only available to the users buying cash item for the first time.
-        // 39: You have already applied for this.
-        // 47: You have exceeded the maximum number\r\nof usage per account\for this account.\r\nPlease check the coupon for detail.
-        // 49: The coupon system will be available soon.
-        // 50: This item can only be used 15 days \r\nafter the account's registration.
-        // 51: You do not have enough Gift Tokens \r\nin your account. Please charge your account \r\nwith Nexon Game Cards to receive \r\nGift Tokens to gift this item.
-        // 52: Due to technical difficulties,\r\nthis item cannot be sent at this time.\r\nPlease try again.
-        // 53: You may not gift items for \r\nit has been less than two weeks \r\nsince you first charged your account.
-        // 54: Users with history of illegal activities\r\n may not gift items to others. Please make sure \r\nyour account is neither previously blocked, \r\nnor illegally charged with NX.
-        // 55: Due to limitations, \r\nyou may not gift this item as this time. \r\nPlease try again later.
-        // 56: You have exceeded the amount of time \r\nyou can gift items to other characters.
-        // 57: This item cannot be gifted \r\ndue to technical difficulties. \r\nPlease try again later.
-        // 58: You cannot transfer \r\na character under level 20.
-        // 59: You cannot transfer a character \r\nto the same world it is currently in.
-        // 60: You cannot transfer a character \r\ninto the new server world.
-        // 61: You may not transfer out of this \r\nworld at this time.
-        // 62: You cannot transfer a character into \r\na world that has no empty character slots.
-        // 63: The event has either ended or\r\nthis item is not available for free testing.
-        // 6: You cannot send a gift to your own account.\r\nPlease purchase it after logging\r\nin with the related character.
-        // 7: That character could not be found in this world.\r\nGifts can only be sent to character\r\nin the same world.
-        // 8: This item has a gender restriction.\r\nPlease confirm the gender of the recipient.
-        // 9: The gift cannot be sent because\r\nthe recipient's Inventory is full.
-        // 64: This item cannot be purchased \r\nwith MaplePoints.
-        // 65: Sorry for inconvinence. \r\nplease try again.
-        // 67: This item cannot be\r\npurchased by anyone under 7.
-        // 68: This item cannot be\r\nreceived by anyone under 7.
-        // 66: You can no longer purchase or gift that Item of the Day.
-        // 70: NX use is restricted.\r\nPlease change your settings in the NX Security Settings menu\r\nin the Nexon Portal My Info section.
-        // 74: This item is not currently for sale.
-        // 81: You have too many Cash Items.\r\nPlease clear 1 Cash slot and try again.
-        // 90: You have exceeded the purchase limit for this item.\r\nYou cannot buy anymore.
-        // 88: This item is non-refundable.
-        // 87: Items cannot be refunded if\r\n7 days have passed from purchase.
-        // 89: Refund cannot be processed, as some of the items in this\r\npackage have been used.
-        // 86: Refund is currently unavailable.
-        // 91: You cannot name change.\r\na character under level 10.
-        // default: Due to an unknown error,\r\nthe request for Cash Shop has failed.
-        return mplew.getPacket();
+
+        // 0:
+        // 1: 請求超時。\r\n請重試。
+        // 2:
+        // 3: 你沒有足夠的現金。
+        // 4: 如果您未滿 14 歲，則不能向某人購買現金禮物。
+        // 5: 您已經超出了\r\n為禮物分配的價格限制。
+        // 6: 您無法傳送禮物給自己的帳號。\r\n請使用相關角色登入\r\n後購買。
+        // 7: 在這個世界中找不到該角色。\r\n禮物只能發送給同一個世界中的\r\n角色。
+        // 8: 此商品有性別限制。\r\n請確認收件人的性別。
+        // 9: 禮物無法發送，因為\r\n收件人的庫存已滿。
+        // 10: 請檢查您是否超過\r\n可以擁有的現金物品數量。
+        // 11: 請檢查\r\n角色名稱是否有錯誤，\r\n該物品是否有性別限制。
+        // 12:
+        // 13:
+        // 14: 請檢查\r\n優惠券號碼是否正確。
+        // 15:
+        // 16: 此優惠券已過期。
+        // 17: 此優惠券已被使用。
+        // 18: 此優惠券只能在\r\nNexon 附屬網咖使用。\r\n請使用 Nexon 附屬網咖。
+        // 19: 該優惠券是 Nexon 附屬網咖專用優惠券，\r\n並且已被使用。
+        // 20: 此優惠券是 Nexon 附屬網咖專用優惠券，\r\n且已過期。
+        // 21: 這是 NX 優惠券編號。\r\n在 www.nexon.net 上註冊您的優惠券。
+        // 22: 由於性別限制，優惠券\r\n無法使用。
+        // 23: 此優惠券僅適用於常規商品，\r\nit 不可作為禮物。
+        // 24: 此優惠券僅適用於冒險島，\r\n不能贈送給其他人。
+        // 25: 請檢查您的庫存是否已滿。
+        // 26: 此商品僅可由高級服務網咖的使用者購買。
+        // 27: 您正在向無效收件人發送禮物。\r\n請檢查角色姓名和性別。
+        // 28: 請檢查收件人姓名。
+        // 29: 此時無法購買物品。\r\n
+        // 30: 商品缺貨，因此\r\n無法出售。
+        // 31: 您已超出 NX 的支出限額。
+        // 32: 你沒有足夠的金幣。
+        // 33: 在 Beta 測試階段，商城不可用。\r\n對於造成您的不便，我們深表歉意。
+        // 34: 檢查您的 PIC 密碼，\r\n請重試。
+        // 35:
+        // 36:
+        // 37: 請驗證您的第二個密碼，然後重試。\r\n
+        // 38: 此優惠券僅適用於首次購買現金商品的用戶。
+        // 39: 您已經申請此項了。
+        // 40:
+        // 41:
+        // 42:
+        // 43:
+        // 44: 您已達到商城\r\n每日最大購買限額。
+        // 45:
+        // 46:
+        // 47: 您已超出此帳戶每個帳戶\r\n的最大使用次數。\r\n請檢查優惠券以了解詳細資訊。
+        // 48:
+        // 49: 優惠券系統即將上線。
+        // 50: 此項目只能在帳戶註冊後 15 天\r\n使用。
+        // 51: 您的帳戶中\r\n沒有足夠的禮品代幣。 請使用 Nexon 遊戲卡為您的帳戶充值\r\n以接收\r\n禮品代幣來贈送此物品。
+        // 52: 由於技術困難，\r\n此時無法傳送此項目。\r\n請重試。
+        // 53：自您首次向您的帳戶收取費用以來，\r\n您不得在兩週內\r\n贈送物品。
+        // 54: 有非法活動歷史的使用者\r\n不得向他人贈送物品。 請確保\r\n您的帳戶之前既沒有被封鎖，也沒有被非法收取 NX 費用。
+        // 55: 由於限制，\r\n您這次不能贈送此物品。 \r\n請稍後重試。
+        // 56: 你已經超過了\r\n可以贈送物品給其他角色的時間。
+        // 57: 由於技術困難，該物品無法贈送\r\n。 \r\n請稍後重試。
+        // 58: 20級以下不能傳送\r\n。
+        // 59: 您無法將角色\r\n轉移到其目前所在的同一個世界。
+        // 60: 您無法將角色轉移到新的伺服器世界。
+        // 61: 此時你不能轉出這個\r\n世界。
+        // 62: 您無法將角色轉移到沒有空角色槽的 \r\na 世界。
+        // 63: 活動已結束或\r\n此項目不可用於免費測試。
+        // 64: 該物品無法使用 MaplePoints\r\n購買。
+        // 65：抱歉造成不便。 \r\n請重試。
+        // 66：您不能再購買或贈送當天的物品。
+        // 67: 7 歲以下的任何人\r\n都不能購買此商品。
+        // 68: 7 歲以下的任何人\r\n都無法收到此物品。
+        // 69: 您已達到商城\r\n每日最大購買限額。
+        // 70：NX 使用量受到限制。\r\n請在 Nexon Portal 我的資訊部分的 NX 安全性設定選單\r\n中更改您的設定。
+        // 71:
+        // 72:
+        // 73:
+        // 74：該商品目前不出售。
+        // 75:
+        // 76:
+        // 77:
+        // 78:
+        // 79:
+        // 80:
+        // 81: 您的現金物品過多。\r\n請清除 1 個現金槽，然後重試。
+        // 82:
+        // 83:
+        // 84:
+        // 85:
+        // 86: 目前無法退款。
+        // 87: 若購買後超過\r\n7 天，則無法退款。
+        // 88：此商品不可退款。
+        // 89: 無法處理退款，因為此\r\n包裹中的某些物品已被使用。
+        // 90: 您已超出該商品的購買限額。\r\n您無法再購買。
+        // 91: 不能更改名稱。\r\na 10 級以下的字元。
+        // 預設值：由於未知錯誤，\r\n對商城的請求失敗。
+	return mplew.getPacket();
     }
 
+    /*
+    啟用商城使用
+    */
     public static byte[] enableCSUse() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.CS_USE.getValue());
         mplew.write(1);
         mplew.writeInt(0);
+
         return mplew.getPacket();
     }
 
+    /*
+    取得怪物卡
+    */
     public static byte[] getBoosterPack(int f1, int f2, int f3) { //item IDs
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.BOOSTER_PACK.getValue());
         mplew.write(0xD7);
         mplew.writeInt(f1);
         mplew.writeInt(f2);
         mplew.writeInt(f3);
+
         return mplew.getPacket();
     }
 
+    /*
+    點擊怪物卡
+    */
     public static byte[] getBoosterPackClick() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.BOOSTER_PACK.getValue());
         mplew.write(0xD5);
+
         return mplew.getPacket();
     }
 
+    /*
+    怪物卡展示
+    */
     public static byte[] getBoosterPackReveal() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.BOOSTER_PACK.getValue());
         mplew.write(0xD6);
+
         return mplew.getPacket();
     }
 
+    /*
+    發送楓幣錢包失敗
+    */
     public static byte[] sendMesobagFailed(final boolean random) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(random ? SendPacketOpcode.R_MESOBAG_FAILURE.getValue() : SendPacketOpcode.MESOBAG_FAILURE.getValue());
+
         return mplew.getPacket();
     }
 
+    /*
+    發送楓幣錢包成功
+    */
     public static byte[] sendMesobagSuccess(int mesos) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MESOBAG_SUCCESS.getValue());
@@ -892,18 +1189,24 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
+    /*
+    發送隨機楓幣錢包成功
+    */
     public static byte[] sendRandomMesobagSuccess(int size, int mesos) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.R_MESOBAG_SUCCESS.getValue());
         mplew.write(size); // 1 = small, 2 = adequete, 3 = large, 4 = huge
         mplew.writeInt(mesos);
+
         return mplew.getPacket();
     }
 
-    //======================================MTS===========================================
-    public static final byte[] startMTS(final MapleCharacter chr) {
+//======================================MTS===========================================
+    public static byte[] startMTS(final MapleCharacter chr) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPEN.getValue());
+
         PacketHelper.addCharacterInfo(mplew, chr);
         if (!GameConstants.GMS) {
             mplew.writeMapleAsciiString("T13333333337W");
@@ -917,8 +1220,9 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    public static final byte[] sendMTS(final List<MTSItemInfo> items, final int tab, final int type, final int page, final int pages) {
+    public static byte[] sendMTS(final List<MTSItemInfo> items, final int tab, final int type, final int page, final int pages) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x15); //operation
         mplew.writeInt(pages); //total items
@@ -928,14 +1232,17 @@ public class MTSCSPacket {
         mplew.writeInt(page);
         mplew.write(1);
         mplew.write(1);
+
         for (MTSItemInfo item : items) {
             addMTSItemInfo(mplew, item);
         }
         mplew.write(0); //0 or 1?
+
+
         return mplew.getPacket();
     }
 
-    public static final byte[] showMTSCash(final MapleCharacter p) {
+    public static byte[] showMTSCash(final MapleCharacter p) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.GET_MTS_TOKENS.getValue());
         mplew.writeInt(p.getCSPoints(1));
@@ -943,7 +1250,7 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSWantedListingOver(final int nx, final int items) {
+    public static byte[] getMTSWantedListingOver(final int nx, final int items) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x3D);
@@ -952,14 +1259,14 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSConfirmSell() {
+    public static byte[] getMTSConfirmSell() {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x1D);
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSFailSell() {
+    public static byte[] getMTSFailSell() {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x1E);
@@ -967,14 +1274,14 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSConfirmBuy() {
+    public static byte[] getMTSConfirmBuy() {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x33);
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSFailBuy() {
+    public static byte[] getMTSFailBuy() {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x34);
@@ -982,14 +1289,14 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSConfirmCancel() {
+    public static byte[] getMTSConfirmCancel() {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x25);
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSFailCancel() {
+    public static byte[] getMTSFailCancel() {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x26);
@@ -997,7 +1304,7 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    public static final byte[] getMTSConfirmTransfer(final int quantity, final int pos) {
+    public static byte[] getMTSConfirmTransfer(final int quantity, final int pos) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x27);
@@ -1006,7 +1313,7 @@ public class MTSCSPacket {
         return mplew.getPacket();
     }
 
-    private static final void addMTSItemInfo(final MaplePacketLittleEndianWriter mplew, final MTSItemInfo item) {
+    private static void addMTSItemInfo(final MaplePacketLittleEndianWriter mplew, final MTSItemInfo item) {
         PacketHelper.addItemInfo(mplew, item.getItem());
         mplew.writeInt(item.getId()); //id
         mplew.writeInt(item.getTaxes()); //this + below = price
@@ -1018,21 +1325,27 @@ public class MTSCSPacket {
         mplew.writeZeroBytes(28);
     }
 
-    public static final byte[] getNotYetSoldInv(final List<MTSItemInfo> items) {
+    public static byte[] getNotYetSoldInv(final List<MTSItemInfo> items) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x23);
+
         mplew.writeInt(items.size());
+
         for (MTSItemInfo item : items) {
             addMTSItemInfo(mplew, item);
         }
+
         return mplew.getPacket();
     }
 
-    public static final byte[] getTransferInventory(final List<Item> items, final boolean changed) {
+    public static byte[] getTransferInventory(final List<Item> items, final boolean changed) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         mplew.write(0x21);
+
         mplew.writeInt(items.size());
         int i = 0;
         for (Item item : items) {
@@ -1043,11 +1356,13 @@ public class MTSCSPacket {
         }
         mplew.writeInt(-47 + i - 1);
         mplew.write(changed ? 1 : 0);
+
         return mplew.getPacket();
     }
 
-    public static final byte[] addToCartMessage(boolean fail, boolean remove) {
+    public static byte[] addToCartMessage(boolean fail, boolean remove) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
         mplew.writeShort(SendPacketOpcode.MTS_OPERATION.getValue());
         if (remove) {
             if (fail) {
@@ -1064,6 +1379,7 @@ public class MTSCSPacket {
                 mplew.write(0x29);
             }
         }
+
         return mplew.getPacket();
     }
 }

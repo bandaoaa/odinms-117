@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,13 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package server;
 
-import java.awt.Point;
-
 import client.MapleClient;
-import client.anticheat.CheatingOffense;
-import constants.MapConstants;
-import constants.TutorialConstants;
 import handling.channel.ChannelServer;
+import java.awt.Point;
 import scripting.PortalScriptManager;
 import server.maps.MapleMap;
 import tools.packet.CWvsContext;
@@ -51,7 +41,7 @@ public class MaplePortal {
         this.type = type;
     }
 
-
+    
     public final int getId() {
         return id;
     }
@@ -60,32 +50,32 @@ public class MaplePortal {
         this.id = id;
     }
 
-
+    
     public final String getName() {
         return name;
     }
 
-
+    
     public final Point getPosition() {
         return position;
     }
 
-
+    
     public final String getTarget() {
         return target;
     }
 
-
+    
     public final int getTargetMapId() {
         return targetmap;
     }
 
-
+    
     public final int getType() {
         return type;
     }
 
-
+    
     public final String getScriptName() {
         return scriptName;
     }
@@ -106,17 +96,16 @@ public class MaplePortal {
         this.targetmap = targetmapid;
     }
 
-
+    
     public final void setScriptName(final String scriptName) {
         this.scriptName = scriptName;
     }
 
-
+    
     public final void enterPortal(final MapleClient c) {
         if (getPosition().distanceSq(c.getPlayer().getPosition()) > 40000 && !c.getPlayer().isGM()) {
             c.getSession().write(CWvsContext.enableActions());
-            c.getPlayer().getCheatTracker().registerOffense(CheatingOffense.USING_FARAWAY_PORTAL);
-            return;
+	    return;
         }
         final MapleMap currentmap = c.getPlayer().getMap();
         if (!c.getPlayer().hasBlockedInventory() && (portalState || c.getPlayer().isGM())) {
@@ -125,26 +114,24 @@ public class MaplePortal {
                 try {
                     PortalScriptManager.getInstance().executePortalScript(this, c);
                 } catch (final Exception e) {
-                    e.printStackTrace();
                 }
             } else if (getTargetMapId() != 999999999) {
                 final MapleMap to = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(getTargetMapId());
-                if (to == null) {
-                    c.getSession().write(CWvsContext.enableActions());
-                    return;
-                }
+		if (to == null) {
+            	    c.getSession().write(CWvsContext.enableActions());
+		    return;
+		}
                 if (!c.getPlayer().isGM()) {
                     if (to.getLevelLimit() > 0 && to.getLevelLimit() > c.getPlayer().getLevel()) {
                         c.getPlayer().dropMessage(-1, "You are too low of a level to enter this place.");
                         c.getSession().write(CWvsContext.enableActions());
                         return;
                     }
-                } else if (to.getId() == c.getPlayer().getMapId() + 10000 && MapConstants.isStorylineMap(c.getPlayer().getMapId())) {
-                    if (c.getPlayer().getQuestStatus(TutorialConstants.getQuest(c.getPlayer(), c.getPlayer().getMapId())) != 2) {
-                        c.getPlayer().dropMessage(1, TutorialConstants.getPortalBlockedMsg());
-                        c.getSession().write(CWvsContext.enableActions());
-                        return;
-                    }
+                    //if (to.getForceMove() > 0 && to.getForceMove() < c.getPlayer().getLevel()) {
+                    //    c.getPlayer().dropMessage(-1, "You are too high of a level to enter this place.");
+                    //    c.getSession().write(CWvsContext.enableActions());
+                    //    return;
+                    //}
                 }
                 c.getPlayer().changeMapPortal(to, to.getPortal(getTarget()) == null ? to.getPortal(0) : to.getPortal(getTarget())); //late resolving makes this harder but prevents us from loading the whole world at once
             }
@@ -154,12 +141,12 @@ public class MaplePortal {
         }
     }
 
-
+    
     public boolean getPortalState() {
         return portalState;
     }
 
-
+    
     public void setPortalState(boolean ps) {
         this.portalState = ps;
     }

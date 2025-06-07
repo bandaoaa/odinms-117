@@ -1,29 +1,3 @@
-/*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
-Matthias Butz <matze@odinms.de>
-Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License version 3
-as published by the Free Software Foundation. You may not use, modify
-or distribute this program under any other version of the
-GNU Affero General Public License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package client;
 
 import java.io.Serializable;
@@ -32,12 +6,29 @@ public class SkillEntry implements Serializable {
 
     private static final long serialVersionUID = 9179541993413738569L;
     public int skillevel;
-    public byte masterlevel;
+    public int masterlevel;
     public long expiration;
+    public int teachId;
+    public byte slot;
+    public byte equipped;
 
-    public SkillEntry(final int skillevel, final byte masterlevel, final long expiration) {
+    public SkillEntry(int skillevel, int masterlevel, long expiration) {
+
         this.skillevel = skillevel;
         this.masterlevel = masterlevel;
         this.expiration = expiration;
+        this.teachId = 0;
+        this.slot = -1;
+        this.equipped = -1;
+    }
+
+    public SkillEntry(int skillevel, int masterlevel, long expiration, int teachId, byte slot, byte equipped) {
+
+        this.skillevel = skillevel;
+        this.masterlevel = masterlevel;
+        this.expiration = expiration;
+        this.teachId = teachId;
+        this.slot = slot;
+        this.equipped = equipped;
     }
 }

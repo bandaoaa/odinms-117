@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,55 +20,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel.handler;
 
-import client.MapleCharacter;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-
-import client.inventory.Item;
-import client.inventory.Equip;
-import client.SkillFactory;
-import client.MapleClient;
-import client.MapleQuestStatus;
 import client.MapleTrait.MapleTraitType;
-import client.Skill;
-import client.SkillEntry;
+import client.*;
 import client.SkillFactory.CraftingEntry;
-import client.inventory.ItemFlag;
-import client.inventory.MapleImp;
 import client.inventory.MapleImp.ImpFlag;
-import client.inventory.MapleInventoryType;
+import client.inventory.*;
 import constants.GameConstants;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-
-import server.ItemMakerFactory;
 import server.ItemMakerFactory.GemCreateEntry;
 import server.ItemMakerFactory.ItemMakerCreateEntry;
-import server.Randomizer;
-import server.MapleItemInformationProvider;
-import server.MapleInventoryManipulator;
-import server.MapleStatEffect;
+import server.*;
 import server.maps.MapleExtractor;
 import server.maps.MapleReactor;
 import server.quest.MapleQuest;
 import tools.FileoutputUtil;
 import tools.Pair;
-import tools.packet.CField;
 import tools.Triple;
 import tools.data.LittleEndianAccessor;
+import tools.packet.CField;
 import tools.packet.CField.EffectPacket;
 import tools.packet.CWvsContext;
 import tools.packet.CWvsContext.InventoryPacket;
 
 public class ItemMakerHandler {
 
-    private static final Map<String, Integer> craftingEffects = new HashMap<String, Integer>();
+    private static final Map<String, Integer> craftingEffects = new HashMap<>();
 
     static {
-        craftingEffects.put("Effect/BasicEff.img/professions/herbalism", 92000000);
+    /*    craftingEffects.put("Effect/BasicEff.img/professions/herbalism", 92000000);
         craftingEffects.put("Effect/BasicEff.img/professions/mining", 92010000);
         craftingEffects.put("Effect/BasicEff.img/professions/herbalismExtract", 92000000);
         craftingEffects.put("Effect/BasicEff.img/professions/miningExtract", 92010000);
@@ -82,6 +59,8 @@ public class ItemMakerHandler {
         craftingEffects.put("Effect/BasicEff.img/professions/equip_product", 92020000);
         craftingEffects.put("Effect/BasicEff.img/professions/acc_product", 92030000);
         craftingEffects.put("Effect/BasicEff.img/professions/alchemy", 92040000);
+        * 
+        */
     }
 
     public static enum CraftRanking {
@@ -97,7 +76,7 @@ public class ItemMakerHandler {
         }
     }
 
-    public static final void ItemMaker(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void ItemMaker(final LittleEndianAccessor slea, final MapleClient c) {
         //System.out.println(slea.toString()); //change?
         final int makerType = slea.readInt();
 
@@ -227,7 +206,7 @@ public class ItemMakerHandler {
             }
             case 4: { // Disassembling EQ.
                 final int itemId = slea.readInt();
-                c.getPlayer().updateTick(slea.readInt());
+                slea.readInt();
                 final byte slot = (byte) slea.readInt();
 
                 final Item toUse = c.getPlayer().getInventory(MapleInventoryType.EQUIP).getItem(slot);
@@ -236,7 +215,7 @@ public class ItemMakerHandler {
                 }
                 final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
 
-                if (!ii.isDropRestricted(itemId) && !ii.isAccountShared(itemId)) {
+                if (!ii.isAccountShared(itemId)) {
                     final int[] toGive = getCrystal(itemId, ii.getReqLevel(itemId));
                     MapleInventoryManipulator.addById(c, toGive[0], (byte) toGive[1], "Made by disassemble " + itemId + " on " + FileoutputUtil.CurrentReadable_Date());
                     MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.EQUIP, slot, (byte) 1, false);
@@ -248,7 +227,7 @@ public class ItemMakerHandler {
         }
     }
 
-    private static final int getCreateCrystal(final int etc) {
+    private static int getCreateCrystal(final int etc) {
         int itemid;
         final short level = MapleItemInformationProvider.getInstance().getItemMakeLevel(etc);
 
@@ -276,7 +255,7 @@ public class ItemMakerHandler {
         return itemid;
     }
 
-    private static final int[] getCrystal(final int itemid, final int level) {
+    private static int[] getCrystal(final int itemid, final int level) {
         int[] all = new int[2];
         all[0] = -1;
         if (level >= 31 && level <= 50) {
@@ -308,7 +287,7 @@ public class ItemMakerHandler {
         return all;
     }
 
-    private static final void addEnchantStats(final Map<String, Integer> stats, final Equip item) {
+    private static void addEnchantStats(final Map<String, Integer> stats, final Equip item) {
         Integer s = stats.get("PAD");
         if (s != null && s != 0) {
             item.setWatk((short) (item.getWatk() + s));
@@ -385,9 +364,9 @@ public class ItemMakerHandler {
         }
     }
 
-    private static final int getRandomGem(final List<Pair<Integer, Integer>> rewards) {
+    private static int getRandomGem(final List<Pair<Integer, Integer>> rewards) {
         int itemid;
-        final List<Integer> items = new ArrayList<Integer>();
+        final List<Integer> items = new ArrayList<>();
 
         for (final Pair p : rewards) {
             itemid = (Integer) p.getLeft();
@@ -398,7 +377,7 @@ public class ItemMakerHandler {
         return items.get(Randomizer.nextInt(items.size()));
     }
 
-    private static final int checkRequiredNRemove(final MapleClient c, final List<Pair<Integer, Integer>> recipe) {
+    private static int checkRequiredNRemove(final MapleClient c, final List<Pair<Integer, Integer>> recipe) {
         int itemid = 0;
         for (final Pair<Integer, Integer> p : recipe) {
             if (!c.getPlayer().haveItem(p.getLeft(), p.getRight(), false, true)) {
@@ -412,16 +391,16 @@ public class ItemMakerHandler {
         return itemid;
     }
 
-    private static final boolean hasSkill(final MapleClient c, final int reqlvl) {
-        return c.getPlayer().getSkillLevel(SkillFactory.getSkill(c.getPlayer().getStat().getSkillByJob(1007, c.getPlayer().getJob()))) >= reqlvl;
+    private static boolean hasSkill(final MapleClient c, final int reqlvl) {
+        return c.getPlayer().getSkillLevel(SkillFactory.getSkill(PlayerStats.getSkillByJob(1007, c.getPlayer().getJob()))) >= reqlvl;
     }
 
-    public static final void UseRecipe(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void UseRecipe(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (chr == null || !chr.isAlive() || chr.getMap() == null || chr.hasBlockedInventory()) {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-        c.getPlayer().updateTick(slea.readInt());
+        slea.readInt();
         final byte slot = (byte) slea.readShort();
         final int itemId = slea.readInt();
         final Item toUse = chr.getInventory(MapleInventoryType.USE).getItem(slot);
@@ -435,7 +414,7 @@ public class ItemMakerHandler {
         }
     }
 
-    public static final void MakeExtractor(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void MakeExtractor(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (chr == null || !chr.isAlive() || chr.getMap() == null || chr.hasBlockedInventory()) {
             c.getSession().write(CWvsContext.enableActions());
             return;
@@ -454,12 +433,12 @@ public class ItemMakerHandler {
         //MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.SETUP, toUse.getPosition(), (short) 1, false);
     }
 
-    public static final void UseBag(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void UseBag(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (chr == null || !chr.isAlive() || chr.getMap() == null || chr.hasBlockedInventory()) {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-        c.getPlayer().updateTick(slea.readInt());
+       slea.readInt();
         final byte slot = (byte) slea.readShort();
         final int itemId = slea.readInt();
         final Item toUse = chr.getInventory(MapleInventoryType.ETC).getItem(slot);
@@ -482,7 +461,7 @@ public class ItemMakerHandler {
         c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void StartHarvest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void StartHarvest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         //its ok if a hacker bypasses this as we do everything in the reactor anyway
         final MapleReactor reactor = c.getPlayer().getMap().getReactorByOid(slea.readInt());
         if (reactor == null || !reactor.isAlive() || reactor.getReactorId() > 200011 || chr.getStat().harvestingTool <= 0 || reactor.getTruePosition().distanceSq(chr.getTruePosition()) > 10000 || c.getPlayer().getFatigue() >= (GameConstants.GMS ? 200 : 100)) {
@@ -503,11 +482,11 @@ public class ItemMakerHandler {
         } else {
             marr.setCustomData(String.valueOf(System.currentTimeMillis()));
             c.getSession().write(CField.harvestMessage(reactor.getObjectId(), GameConstants.GMS ? 13 : 11)); //ok to harvest, gogo
-            c.getPlayer().getMap().broadcastMessage(chr, CField.showHarvesting(c, item.getItemId()), false);
+            c.getPlayer().getMap().broadcastMessage(chr, CField.showHarvesting(chr.getId(), item.getItemId()), false);
         }
     }
 
-    public static final void StopHarvest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void StopHarvest(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         //its ok if a hacker bypasses this as we do everything in the reactor anyway
         /*final MapleReactor reactor = c.getPlayer().getMap().getReactorByOid(slea.readInt());
         if (reactor == null || !reactor.isAlive() || reactor.getReactorId() > 200011 || chr.getStat().harvestingTool <= 0 || reactor.getTruePosition().distanceSq(chr.getTruePosition()) > 40000.0 || reactor.getState() < 3 || c.getPlayer().getFatigue() >= 100) { //bug in global, so we use this to bug fix
@@ -522,7 +501,7 @@ public class ItemMakerHandler {
         ReactorScriptManager.getInstance().act(c, reactor);*/
     }
 
-    public static final void ProfessionInfo(final LittleEndianAccessor slea, final MapleClient c) { //so pointless
+    public static void ProfessionInfo(final LittleEndianAccessor slea, final MapleClient c) { //so pointless
         try {
             String asdf = slea.readMapleAsciiString();
             int level1 = slea.readInt();
@@ -531,7 +510,7 @@ public class ItemMakerHandler {
         } //idc
     }
 
-    public static final void CraftEffect(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void CraftEffect(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (chr.getMapId() != 910001000 && chr.getMap().getExtractorSize() <= 0) {
             return; //ardent mill
         }
@@ -547,7 +526,7 @@ public class ItemMakerHandler {
         }
     }
 
-    public static final void CraftMake(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void CraftMake(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         if (chr.getMapId() != 910001000 && chr.getMap().getExtractorSize() <= 0) {
             return; //ardent mill
         }
@@ -607,7 +586,7 @@ public class ItemMakerHandler {
                     }
                 }
             }
-            toGet = 4031016;
+            toGet = 4021016;
             quantity = (short) Randomizer.rand(3, GameConstants.isWeapon(itemId) || GameConstants.isOverall(itemId) ? 11 : 7);
             if (reqLevel <= 60) {
                 toGet = 4021013;
@@ -619,21 +598,26 @@ public class ItemMakerHandler {
             if (quantity <= 5) {
                 cr = CraftRanking.SOSO;
             }
-            if (Randomizer.nextInt(5) == 0 && toGet != 4031016) {
+            if (Randomizer.nextInt(5) == 0 && toGet != 4021016) {
                 toGet++;
                 quantity = 1;
                 cr = CraftRanking.COOL;
             }
+            if (Randomizer.nextInt(30) == 0 && reqLevel >= 105) {
+                int hyunja = 4021021;
+            MapleInventoryManipulator.addById(c, hyunja, (short) 1, "Made by disassemble " + itemId + " on " + FileoutputUtil.CurrentReadable_Date());
+            }
             fatigue = 3;
             MapleInventoryManipulator.addById(c, toGet, quantity, "Made by disassemble " + itemId + " on " + FileoutputUtil.CurrentReadable_Date());
             MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.EQUIP, item.getPosition(), (byte) 1, false);
-        } else if (craftID == 92049001) { //fusing. /mindfuck
+        } else if (craftID == 92049001) { //裝備合成
             final int itemId = slea.readInt();
+
             final long invId1 = slea.readLong();
             final long invId2 = slea.readLong();
             final int reqLevel = ii.getReqLevel(itemId);
-            Equip item1 = (Equip) chr.getInventory(MapleInventoryType.EQUIP).findByInventoryIdOnly(invId1, itemId);
-            Equip item2 = (Equip) chr.getInventory(MapleInventoryType.EQUIP).findByInventoryIdOnly(invId2, itemId);
+            Equip item1 = (Equip) chr.getInventory(MapleInventoryType.EQUIP).findByUniqueId(invId1);
+            Equip item2 = (Equip) chr.getInventory(MapleInventoryType.EQUIP).findByUniqueId(invId2);
             for (short i = 0; i < chr.getInventory(MapleInventoryType.EQUIP).getSlotLimit(); i++) {
                 Item item = chr.getInventory(MapleInventoryType.EQUIP).getItem(i);
                 if (item != null && item.getItemId() == itemId && item != item1 && item != item2) {
@@ -697,7 +681,7 @@ public class ItemMakerHandler {
                 MapleInventoryManipulator.removeById(c, GameConstants.getInventoryType(e.getKey()), e.getKey(), e.getValue(), false, false);
             }
             if (Randomizer.nextInt(100) < (100 - (ce.reqSkillLevel - theLevl) * 20) || (craftID / 10000 <= 9201)) {
-                final Map<Skill, SkillEntry> sa = new HashMap<>();
+                final Map<Skill, SkillEntry> sa = new HashMap<Skill, SkillEntry>();
                 while (true) {
                     boolean passed = false;
                     for (Triple<Integer, Integer, Integer> i : ce.targetItems) {
@@ -727,7 +711,7 @@ public class ItemMakerHandler {
                             receive.setGMLog("Crafted from " + craftID + " on " + FileoutputUtil.CurrentReadable_Date());
                             MapleInventoryManipulator.addFromDrop(c, receive, true, false);
                             if (ce.needOpenItem) {
-                                byte mLevel = chr.getMasterLevel(craftID);
+                                int mLevel = chr.getMasterLevel(craftID);
                                 if (mLevel == 1) {
                                     sa.put(ce, new SkillEntry(0, (byte) 0, SkillFactory.getDefaultSExpiry(ce)));
                                 } else if (mLevel > 1) {
@@ -772,6 +756,7 @@ public class ItemMakerHandler {
                     break;
             }
             chr.dropMessage(-5, s + "'s mastery increased. (+" + expGain + ")");
+            //chr.addProfessionExp((craftID / 10000) * 10000, expGain);
             if (chr.addProfessionExp((craftID / 10000) * 10000, expGain)) {
                 chr.dropMessage(-5, s + " has gained a level.");
             }
@@ -783,7 +768,7 @@ public class ItemMakerHandler {
         chr.getMap().broadcastMessage(CField.craftFinished(chr.getId(), craftID, cr.i, toGet, quantity, expGain));
     }
 
-    public static final void UsePot(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void UsePot(final LittleEndianAccessor slea, final MapleClient c) {
         final int itemid = slea.readInt();
         final Item slot = c.getPlayer().getInventory(MapleInventoryType.USE).getItem(slea.readShort());
         if (slot == null || slot.getQuantity() <= 0 || slot.getItemId() != itemid || itemid / 10000 != 244 || MapleItemInformationProvider.getInstance().getPot(itemid) == null) {
@@ -802,7 +787,7 @@ public class ItemMakerHandler {
 
     }
 
-    public static final void ClearPot(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void ClearPot(final LittleEndianAccessor slea, final MapleClient c) {
         final int index = slea.readInt() - 1;
         if (index < 0 || index >= c.getPlayer().getImps().length || c.getPlayer().getImps()[index] == null) {
             c.getSession().write(CWvsContext.enableActions());
@@ -812,7 +797,7 @@ public class ItemMakerHandler {
         c.getPlayer().getImps()[index] = null;
     }
 
-    public static final void FeedPot(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void FeedPot(final LittleEndianAccessor slea, final MapleClient c) {
         final int itemid = slea.readInt();
         final Item slot = c.getPlayer().getInventory(GameConstants.getInventoryType(itemid)).getItem((short) slea.readInt());
         if (slot == null || slot.getQuantity() <= 0 || slot.getItemId() != itemid) {
@@ -856,7 +841,7 @@ public class ItemMakerHandler {
         c.getSession().write(CWvsContext.updateImp(c.getPlayer().getImps()[index], mask, index, false));
     }
 
-    public static final void CurePot(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void CurePot(final LittleEndianAccessor slea, final MapleClient c) {
         final int itemid = slea.readInt();
         final Item slot = c.getPlayer().getInventory(MapleInventoryType.ETC).getItem((short) slea.readInt());
         if (slot == null || slot.getQuantity() <= 0 || slot.getItemId() != itemid || itemid / 10000 != 434) {
@@ -873,7 +858,7 @@ public class ItemMakerHandler {
         MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, slot.getPosition(), (short) 1, false, false);
     }
 
-    public static final void RewardPot(final LittleEndianAccessor slea, final MapleClient c) {
+    public static void RewardPot(final LittleEndianAccessor slea, final MapleClient c) {
         final int index = slea.readInt() - 1;
         if (index < 0 || index >= c.getPlayer().getImps().length || c.getPlayer().getImps()[index] == null || c.getPlayer().getImps()[index].getLevel() < (MapleItemInformationProvider.getInstance().getPot(c.getPlayer().getImps()[index].getItemId()).right - 1)) {
             c.getSession().write(CWvsContext.enableActions());

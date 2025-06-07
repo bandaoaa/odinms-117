@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,14 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.world;
 
-import client.MapleCharacter;
-import handling.channel.ChannelServer;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class MapleMessenger implements Serializable {
+public final class MapleMessenger implements Serializable {
 
     private static final long serialVersionUID = 9179541993413738569L;
     private MapleMessengerCharacter[] members = new MapleMessengerCharacter[3];
@@ -152,31 +143,33 @@ public class MapleMessenger implements Serializable {
     public Collection<MapleMessengerCharacter> getMembers() {
         return Arrays.asList(members);
     }
-
-    public boolean isMonitored() {
-        int ch = -1;
+   /* public boolean isMonitored() {
+        int ch = -1; 
         for (MapleMessengerCharacter m : members) {
-            if (m != null) {
+	    if (m != null) {
                 ch = World.Find.findChannel(m.getName());
                 if (ch != -1) {
                     MapleCharacter mc = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(m.getName());
                     if (mc != null && mc.getClient() != null && mc.getClient().isMonitored()) {
                         return true;
-                    }
+		    }
                 }
             }
         }
         return false;
     }
-
+    * 
+    */
+    
     public String getMemberNamesDEBUG() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < members.length; i++) {
-            if (members[i] != null) {
+        for (int i = 0;i < members.length;i++) {
+	    if (members[i] != null) {
                 sb.append(members[i].getName());
-                if (i != members.length - 1)
+                if (i != members.length - 1) {
                     sb.append(',');
-            }
+                }
+	    }
         }
         return sb.toString();
     }

@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,19 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.login;
 
+import client.MapleClient;
+import handling.channel.ChannelServer;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import client.MapleClient;
-import constants.ServerConstants;
-import database.DatabaseConnection;
-import handling.channel.ChannelServer;
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import server.Timer.PingTimer;
-import tools.FileoutputUtil;
 import tools.packet.CWvsContext;
 import tools.packet.LoginPacket;
 
@@ -84,13 +70,13 @@ public class LoginWorker {
 
             c.setIdleTask(PingTimer.getInstance().schedule(new Runnable() {
 
+                @Override
                 public void run() {
                     c.getSession().close();
                 }
             }, 10 * 60 * 10000));
         } else {
             c.getSession().write(LoginPacket.getLoginFailed(7));
-            return;
         }
     }
 }

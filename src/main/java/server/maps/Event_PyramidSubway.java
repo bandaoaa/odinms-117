@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -33,13 +27,11 @@ import handling.channel.ChannelServer;
 import handling.world.MaplePartyCharacter;
 import handling.world.World;
 import handling.world.exped.PartySearch;
-
 import java.util.concurrent.ScheduledFuture;
-
 import server.Randomizer;
 import server.Timer.MapTimer;
-import server.quest.MapleQuest;
 import server.life.MapleLifeFactory;
+import server.quest.MapleQuest;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
 
@@ -58,15 +50,16 @@ public class Event_PyramidSubway {
             type = mapid % 10000 / 1000;
         }
         if (c.getParty() == null || c.getParty().getLeader().getId() == c.getId()) {
-            if (c.getParty() != null && c.getParty().getLeader().getId() == c.getId()) {
-                PartySearch ps = World.Party.getSearch(c.getParty());
-                if (ps != null) {
-                    World.Party.removeSearch(ps, "The Party Listing has been removed because the Party Quest started.");
-                }
-            }
+	    if (c.getParty() != null && c.getParty().getLeader().getId() == c.getId()) {
+		PartySearch ps = World.Party.getSearch(c.getParty());
+		if (ps != null) {
+		    World.Party.removeSearch(ps, "The Party Listing has been removed because the Party Quest started.");
+		}
+	    }
             commenceTimerNextMap(c, 1);
             energyBarDecrease = MapTimer.getInstance().register(new Runnable() {
 
+                @Override
                 public void run() {
                     energybar -= (c.getParty() != null && c.getParty().getMembers().size() > 1 ? 5 : 2);
                     if (broaded) {
@@ -100,8 +93,8 @@ public class Event_PyramidSubway {
         }
         final MapleMap ourMap = c.getMap();
         final int time = (type == -1 ? 180 : (stage == 1 ? 240 : 300)) - 1;
-        energybar = 100;
-        bar = 0;
+	energybar = 100;
+	bar = 0;
         if (c.getParty() != null && c.getParty().getMembers().size() > 1) {
             for (MaplePartyCharacter mpc : c.getParty().getMembers()) {
                 final MapleCharacter chr = ourMap.getCharacterById(mpc.getId());
@@ -122,15 +115,16 @@ public class Event_PyramidSubway {
         }
         if (type != -1 && (stage == 4 || stage == 5)) { //yetis. temporary
             for (int i = 0; i < (stage == 4 ? 1 : 2); i++) {
-                //9700023 = 90 secs removeAfter -> real yeti
-                //real yeti -> 9700022 when killed -> 15 secs removeAfter -> real yeti
+		//9700023 = 90 secs removeAfter -> real yeti
+		//real yeti -> 9700022 when killed -> 15 secs removeAfter -> real yeti
                 ourMap.spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9700023), c.getPosition());
             }
         }
         timerSchedule = MapTimer.getInstance().schedule(new Runnable() {
 
+            @Override
             public void run() {
-                boolean ret = false;
+                boolean ret;
                 if (type == -1) {
                     ret = warpNextMap_Subway(c);
                 } else {
@@ -145,10 +139,10 @@ public class Event_PyramidSubway {
 
     public final void onKill(final MapleCharacter c) {
         kill++;
-        bar++;
+	bar++;
         if (Randomizer.nextInt(100) < 5) { //monster properties coolDamage and coolDamageProb determine this, will code later
             cool++;
-            bar++;
+	    bar++;
             broadcastEnergy(c, "massacre_cool", cool);
         }
         energybar++;
@@ -195,10 +189,8 @@ public class Event_PyramidSubway {
         } else {
             if (type == -1 && (newmapid < 910320100 || newmapid > 910320304)) {
                 dispose(c);
-                return;
             } else if (type != -1 && (newmapid < 926010100 || newmapid > 926013504)) {
                 dispose(c);
-                return;
             } else if (c.getParty() == null || c.getParty().getLeader().getId() == c.getId()) {
                 energybar = 100;
                 commenceTimerNextMap(c, newmapid % 1000 / 100);
@@ -328,7 +320,7 @@ public class Event_PyramidSubway {
             exp = ((kill + (cool * 5)) + pt) * c.getClient().getChannelServer().getExpRate();
             c.gainExp(exp, true, false, false);
         }
-        c.getTrait(MapleTraitType.will).addExp((type + 2) * 8, c);
+	c.getTrait(MapleTraitType.will).addExp((type + 2) * 8, c);
         c.getClient().getSession().write(CField.showEffect("killing/clear"));
         c.getClient().getSession().write(CField.sendPyramidResult(rank, exp));
         dispose(c);
@@ -494,11 +486,11 @@ public class Event_PyramidSubway {
         return false;
     }
 
-    private static final void changeMap(final MapleCharacter c, final MapleMap map, final int minLevel, final int maxLevel) {
+    private static void changeMap(final MapleCharacter c, final MapleMap map, final int minLevel, final int maxLevel) {
         changeMap(c, map, minLevel, maxLevel, 0);
     }
 
-    private static final void changeMap(final MapleCharacter c, final MapleMap map, final int minLevel, final int maxLevel, final int clear) {
+    private static void changeMap(final MapleCharacter c, final MapleMap map, final int minLevel, final int maxLevel, final int clear) {
         final MapleMap oldMap = c.getMap();
         if (c.getParty() != null && c.getParty().getMembers().size() > 1) {
             for (MaplePartyCharacter mpc : c.getParty().getMembers()) {
@@ -521,7 +513,7 @@ public class Event_PyramidSubway {
         c.changeMap(map, map.getPortal(0));
     }
 
-    private static final void clearMap(final MapleMap map, final boolean check) {
+    private static void clearMap(final MapleMap map, final boolean check) {
         if (check && map.getCharactersSize() > 0) {
             return;
         }

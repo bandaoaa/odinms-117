@@ -1,14 +1,8 @@
 /*
-This file is part of the OdinMS Maple Story Server.
-Copyright (C) 2008 ~ 2012 OdinMS
-
-Copyright (C) 2011 ~ 2012 TimelessMS
-
-Patrick Huy <patrick.huy@frz.cc> 
+This file is part of the OdinMS Maple Story Server
+Copyright (C) 2008 ~ 2010 Patrick Huy <patrick.huy@frz.cc> 
 Matthias Butz <matze@odinms.de>
 Jan Christian Meyer <vimes@odinms.de>
-
-Burblish <burblish@live.com> (DO NOT RELEASE SOMEWHERE ELSE)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -26,48 +20,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package handling.channel.handler;
 
-import java.util.List;
-
-import client.inventory.Item;
-import client.MapleClient;
 import client.MapleCharacter;
+import client.MapleClient;
 import client.MapleDisease;
+import client.Skill;
+import client.SkillFactory;
+import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
-import constants.GameConstants;
 import client.inventory.PetCommand;
+import constants.GameConstants;
 import handling.world.MaplePartyCharacter;
-
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
-
-import server.Randomizer;
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
+import server.Randomizer;
 import server.life.MapleMonster;
-import server.movement.LifeMovementFragment;
 import server.maps.FieldLimitType;
 import server.maps.MapleMapItem;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
-import tools.packet.PetPacket;
+import server.movement.LifeMovementFragment;
 import tools.data.LittleEndianAccessor;
 import tools.packet.CField.EffectPacket;
 import tools.packet.CWvsContext;
+import tools.packet.PetPacket;
 
 public class PetHandler {
 
-    public static final void SpawnPet(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
-        chr.updateTick(slea.readInt());
+    public static void SpawnPet(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        slea.readInt();
         chr.spawnPet(slea.readByte(), slea.readByte() > 0);
-
     }
 
-    public static final void Pet_AutoPotion(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+    public static void Pet_AutoBuff(LittleEndianAccessor slea, MapleClient c, MapleCharacter chr) {
+        int petid = slea.readInt();
+        MaplePet pet = chr.getPet(petid);
+        if (chr == null || (chr.getMap() == null) || (pet == null)) {
+            return;
+        }
+        int skillId = slea.readInt();
+        Skill buffId = SkillFactory.getSkill(skillId);
+        if ((chr.getSkillLevel(buffId) > 0) || (skillId == 0)) {
+            pet.setBuffSkill(skillId);
+            c.getSession().write(PetPacket.updatePet(pet, chr.getInventory(MapleInventoryType.CASH).getItem((short)(byte)pet.getInventoryPosition()), true));
+        }
+        c.getSession().write(CWvsContext.enableActions());
+    }
+
+    public static void Pet_AutoPotion(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
         slea.skip(GameConstants.GMS ? 9 : 1);
-        chr.updateTick(slea.readInt());
+        slea.readInt();
         final short slot = slea.readShort();
         if (chr == null || !chr.isAlive() || chr.getMapId() == 749040100 || chr.getMap() == null || chr.hasDisease(MapleDisease.POTION)) {
             return;
@@ -96,14 +103,14 @@ public class PetHandler {
         }
     }
 
-    public static final void PetChat(final int petid, final short command, final String text, MapleCharacter chr) {
+    public static void PetChat(final int petid, final short command, final String text, MapleCharacter chr) {
         if (chr == null || chr.getMap() == null || chr.getPet(petid) == null) {
             return;
         }
         chr.getMap().broadcastMessage(chr, PetPacket.petChat(chr.getId(), command, text, (byte) petid), true);
     }
 
-    public static final void PetCommand(final MaplePet pet, final PetCommand petCommand, final MapleClient c, final MapleCharacter chr) {
+    public static void PetCommand(final MaplePet pet, final PetCommand petCommand, final MapleClient c, final MapleCharacter chr) {
 
         if (petCommand == null) {
             return;
@@ -129,8 +136,8 @@ public class PetHandler {
         chr.getMap().broadcastMessage(PetPacket.commandResponse(chr.getId(), (byte) petCommand.getSkillId(), petIndex, success, false));
     }
 
-    public static final void PetFood(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
-        int previousFullness = 100;
+    public static void PetFood(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        int previousFullness = 99;
         MaplePet pet = null;
         if (chr == null) {
             return;
@@ -148,7 +155,7 @@ public class PetHandler {
             return;
         }
 
-        c.getPlayer().updateTick(slea.readInt());
+        slea.readInt();
         short slot = slea.readShort();
         final int itemId = slea.readInt();
         Item petFood = c.getPlayer().getInventory(MapleInventoryType.USE).getItem(slot);
@@ -202,21 +209,21 @@ public class PetHandler {
         c.getSession().write(CWvsContext.enableActions());
     }
 
-    public static final void MovePet(final LittleEndianAccessor slea, final MapleCharacter chr) {
+    public static void MovePet(final LittleEndianAccessor slea, final MapleCharacter chr) {
         if (chr == null) {
             return;
         }
         final int petId = (int) slea.readLong();
         slea.skip(9); // byte(index?), int(pos), int
         final List<LifeMovementFragment> res = MovementParse.parseMovement(slea, 3);
-        if (res != null && chr != null && res.size() != 0 && chr.getMap() != null) { // map crash hack
+        if (res != null && chr != null && !res.isEmpty() && chr.getMap() != null) { // map crash hack
             final MaplePet pet = chr.getPet(GameConstants.GMS ? (chr.getPetIndex(petId)) : petId);
             if (pet == null) {
                 return;
             }
             pet.updatePosition(res);
-            chr.getMap().broadcastMessage(chr, PetPacket.movePet(chr.getId(), petId, chr.getPetIndex(petId), res), false);
-            if (chr.hasBlockedInventory() || chr.getStat().pickupRange <= 0.0 || chr.inPVP()) {
+			chr.getMap().broadcastMessage(chr, PetPacket.movePet(chr.getId(), petId, chr.getPetIndex(petId), res), false);
+         /*   if (chr.hasBlockedInventory() || chr.getStat().pickupRange <= 0.0 || chr.inPVP()) {
                 return;
             }
             chr.setScrolledPosition((short) 0);
@@ -250,7 +257,7 @@ public class PetHandler {
                             }
                             if (mapitem.getMeso() > 0) {
                                 if (chr.getParty() != null && mapitem.getOwner() != chr.getId()) {
-                                    final List<MapleCharacter> toGive = new LinkedList<MapleCharacter>();
+                                    final List<MapleCharacter> toGive = new LinkedList<>();
                                     final int splitMeso = mapitem.getMeso() * 40 / 100;
                                     for (MaplePartyCharacter z : chr.getParty().getMembers()) {
                                         MapleCharacter m = chr.getMap().getCharacterById(z.getId());
@@ -259,7 +266,7 @@ public class PetHandler {
                                         }
                                     }
                                     for (final MapleCharacter m : toGive) {
-                                        m.gainMeso(splitMeso / toGive.size(), true, true);
+                                        m.gainMeso(splitMeso / toGive.size() + (m.getStat().hasPartyBonus ? (int) (mapitem.getMeso() / 20.0) : 0), true, true);
                                     }
                                     chr.gainMeso(mapitem.getMeso() - splitMeso, true, true);
                                 } else {
@@ -267,13 +274,10 @@ public class PetHandler {
                                 }
                                 InventoryHandler.removeItem_Pet(chr, mapitem, petId);
                                 foundItem = true;
-                            } else if (!MapleItemInformationProvider.getInstance().isPickupBlocked(mapitem.getItem().getItemId()) && mapitem.getItem().getItemId() / 10000 != 291) {
+                            } else if (mapitem.getItem().getItemId() / 10000 != 291) {
                                 if (InventoryHandler.useItem(chr.getClient(), mapitem.getItemId())) {
                                     InventoryHandler.removeItem_Pet(chr, mapitem, petId);
                                 } else if (MapleInventoryManipulator.checkSpace(chr.getClient(), mapitem.getItem().getItemId(), mapitem.getItem().getQuantity(), mapitem.getItem().getOwner())) {
-                                    if (mapitem.getItem().getQuantity() >= 50 && mapitem.getItem().getItemId() == 2340000) {
-                                        chr.getClient().setMonitored(true); //hack check
-                                    }
                                     if (MapleInventoryManipulator.addFromDrop(chr.getClient(), mapitem.getItem(), true, mapitem.getDropper() instanceof MapleMonster)) {
                                         InventoryHandler.removeItem_Pet(chr, mapitem, petId);
                                         foundItem = true;
@@ -288,7 +292,7 @@ public class PetHandler {
                 if (foundItem) {
                     return;
                 }
-            }
+            }*/
         }
     }
 }
