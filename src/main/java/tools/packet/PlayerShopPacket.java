@@ -25,9 +25,7 @@ import client.MapleClient;
 import client.inventory.Item;
 import constants.GameConstants;
 import handling.SendPacketOpcode;
-
 import java.util.List;
-
 import server.MerchItemPackage;
 import server.shops.AbstractPlayerStore.BoughtItem;
 import server.shops.*;
@@ -42,7 +40,6 @@ public class PlayerShopPacket {
 
     public static byte[] sendTitleBox(final int mode) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(8);
-
         // 9: Please use this after retrieving items from Fredrick of Free Market.
         // 10: Another character is currently using the item. Please log on as a different character and close the store, or empty out the Store Bank.
         // 11: You are currently unable to open the store.
@@ -65,55 +62,45 @@ public class PlayerShopPacket {
             mplew.write(1);
             mplew.writeMapleAsciiString("");
         }
-
         return mplew.getPacket();
     }
 
     public static byte[] requestShopPic(final int oid) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(17);
-
         mplew.writeShort(SendPacketOpcode.SEND_TITLE_BOX.getValue());
         mplew.write(17);
         mplew.writeInt(oid);
         mplew.writeShort(0); // idk
         mplew.writeLong(0); // idk also
-
         return mplew.getPacket();
     }
 
     public static byte[] addCharBox(final MapleCharacter c, final int type) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
         mplew.writeInt(c.getId());
         PacketHelper.addAnnounceBox(mplew, c);
-
         return mplew.getPacket();
     }
 
     public static byte[] removeCharBox(final MapleCharacter c) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
         mplew.writeInt(c.getId());
         mplew.write(0);
-
         return mplew.getPacket();
     }
 
     public static byte[] sendPlayerShopBox(final MapleCharacter c) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
         mplew.writeInt(c.getId());
         PacketHelper.addAnnounceBox(mplew, c);
-
         return mplew.getPacket();
     }
 
     public static byte[] getHiredMerch(final MapleCharacter chr, final HiredMerchant merch, final boolean firstTime) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(10);
         mplew.write(5);
@@ -158,13 +145,11 @@ public class PlayerShopPacket {
             PacketHelper.addItemInfo(mplew, item.item);
         }
         mplew.writeShort(0);
-
         return mplew.getPacket();
     }
 
     public static byte[] getPlayerStore(final MapleCharacter chr, final boolean firstTime) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         IMaplePlayerShop ips = chr.getPlayerShop();
         mplew.write(GameConstants.GMS ? 10 : 5);
@@ -208,30 +193,25 @@ public class PlayerShopPacket {
 
     public static byte[] shopChat(final String message, final int slot) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(14);
         mplew.write(15);
         mplew.write(slot);
         mplew.writeMapleAsciiString(message);
-
         return mplew.getPacket();
     }
 
     public static byte[] shopErrorMessage(final int error, final int type) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(GameConstants.GMS ? 18 : 0x0A);
         mplew.write(type);
         mplew.write(error);
-
         return mplew.getPacket();
     }
 
     public static byte[] spawnHiredMerchant(final HiredMerchant hm) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.SPAWN_HIRED_MERCHANT.getValue());
         mplew.writeInt(hm.getOwnerId());
         mplew.writeInt(hm.getItemId());
@@ -239,22 +219,18 @@ public class PlayerShopPacket {
         mplew.writeShort(0);
         mplew.writeMapleAsciiString(hm.getOwnerName());
         PacketHelper.addInteraction(mplew, hm);
-
         return mplew.getPacket();
     }
 
     public static byte[] destroyHiredMerchant(final int id) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.DESTROY_HIRED_MERCHANT.getValue());
         mplew.writeInt(id);
-
         return mplew.getPacket();
     }
 
     public static byte[] shopItemUpdate(final IMaplePlayerShop shop) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(48);
         if (shop.getShopType() == 1) {
@@ -268,41 +244,34 @@ public class PlayerShopPacket {
             PacketHelper.addItemInfo(mplew, item.item);
         }
         mplew.writeShort(0);
-
         return mplew.getPacket();
     }
 
     public static byte[] shopVisitorAdd(final MapleCharacter chr, final int slot) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(9);
         mplew.write(slot);
         PacketHelper.addCharLook(mplew, chr, false);
         mplew.writeMapleAsciiString(chr.getName());
         mplew.writeShort(chr.getJob());
-
         return mplew.getPacket();
     }
 
     public static byte[] shopVisitorLeave(final byte slot) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(18);
         mplew.write(slot);
-
         return mplew.getPacket();
     }
 
     public static byte[] Merchant_Buy_Error(final byte message) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         // 2 = You have not enough meso
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(44);
         mplew.write(message);
-
         return mplew.getPacket();
     }
 
@@ -319,17 +288,14 @@ public class PlayerShopPacket {
 
     public static byte[] updateHiredMerchant(final HiredMerchant shop) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.UPDATE_HIRED_MERCHANT.getValue());
         mplew.writeInt(shop.getOwnerId());
         PacketHelper.addInteraction(mplew, shop);
-
         return mplew.getPacket();
     }
 
     public static byte[] merchItem_Message(final int op) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         //35: You have retrieved your items and mesos.
         //36: Unable to retrieve mesos and items due to\r\ntoo much money stored\r\nat the Store Bank.
         //37: Unable to retrieve mesos and items due to\r\none of the items\r\nthat can only be possessed one at a time.
@@ -337,13 +303,11 @@ public class PlayerShopPacket {
         //39: Unable to retrieve mesos and items\r\ndue to full inventory.
         mplew.writeShort(SendPacketOpcode.MERCH_ITEM_MSG.getValue());
         mplew.write(op);
-
         return mplew.getPacket();
     }
 
     public static byte[] merchItemStore(final byte op, final int days, final int fees) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         // 40: This is currently unavailable.\r\nPlease try again later
         mplew.writeShort(SendPacketOpcode.MERCH_ITEM_STORE.getValue());
         mplew.write(op);
@@ -360,13 +324,11 @@ public class PlayerShopPacket {
                 mplew.writeInt(fees); // feees
                 break;
         }
-
         return mplew.getPacket();
     }
 
     public static byte[] merchItemStore_ItemData(final MerchItemPackage pack) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.MERCH_ITEM_STORE.getValue());
         mplew.write(40);
         mplew.writeInt(9030000); // Fredrick
@@ -379,7 +341,6 @@ public class PlayerShopPacket {
             PacketHelper.addItemInfo(mplew, item);
         }
         mplew.writeZeroBytes(3);
-
         return mplew.getPacket();
     }
 
@@ -439,7 +400,6 @@ public class PlayerShopPacket {
         for (Pair<Byte, MapleCharacter> visitorz : game.getVisitors()) {
             addGameInfo(mplew, visitorz.right, game);
         }
-
         return mplew.getPacket();
     }
 
@@ -522,7 +482,6 @@ public class PlayerShopPacket {
         return mplew.getPacket();
     }
 
-
     public static byte[] getMiniGameFull() {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
@@ -573,7 +532,6 @@ public class PlayerShopPacket {
 
     public static final byte[] MerchantBlackListView(final List<String> blackList) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(39);
         mplew.writeShort(blackList.size());
@@ -585,7 +543,6 @@ public class PlayerShopPacket {
 
     public static final byte[] MerchantVisitorView(List<String> visitor) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(38);
         mplew.writeShort(visitor.size());
