@@ -39,6 +39,7 @@ public class MapleTrait {
             return null;
         }
     }
+
     private MapleTraitType type;
     private int totalExp = 0, localTotalExp = 0;
     private short exp = 0;
@@ -56,7 +57,7 @@ public class MapleTrait {
 
     public void addExp(int e) {
         this.totalExp += e;
-		this.localTotalExp += e;
+        this.localTotalExp += e;
         if (e != 0) {
             recalcLevel();
         }
@@ -114,15 +115,15 @@ public class MapleTrait {
     public int getTotalExp() {
         return totalExp;
     }
-	
+
     public int getLocalTotalExp() {
         return localTotalExp;
     }
-	
+
     public void addLocalExp(int e) {
         this.localTotalExp += e;
     }
-	
+
     public void clearLocalExp() {
         this.localTotalExp = totalExp;
     }

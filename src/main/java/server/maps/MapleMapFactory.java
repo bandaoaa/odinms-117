@@ -24,6 +24,7 @@ import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.PreparedStatement;
 import constants.GameConstants;
 import database.DatabaseConnection;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.File;
@@ -31,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -64,10 +66,10 @@ public class MapleMapFactory {
         return getMap(mapid, true, true, true);
     }
 
-    
+
     private static final List<Integer> clearedLifeMaps = new ArrayList<>();
 
-public static void loadClearedMaps() {
+    public static void loadClearedMaps() {
         try {
             Connection con = (Connection) DatabaseConnection.getConnection();
             PreparedStatement ps = (PreparedStatement) con.prepareStatement("SELECT * FROM wz_clearedlife");
@@ -79,15 +81,15 @@ public static void loadClearedMaps() {
             ex.printStackTrace();
         }
     }
-    
+
     public static boolean isMapCleared(final int mapid) {
         return clearedLifeMaps.contains(mapid);
     }
-    
+
     public static void addClearedMap(final int mapid) {
         clearedLifeMaps.add(mapid);
-    }  
-    
+    }
+
     //backwards-compatible
     public final MapleMap getMap(final int mapid, final boolean respawns, final boolean npcs) {
         return getMap(mapid, respawns, npcs, true);
@@ -1050,13 +1052,13 @@ public static void loadClearedMaps() {
                             SN.add(MapleDataTool.getIntConvert("SN" + x, node, 0));
                         }
                         final MaplePlatform mni = new MaplePlatform(
-                            name, MapleDataTool.getIntConvert("start", node, 2), speed,
-                            MapleDataTool.getIntConvert("x1", node, 0),
-                            MapleDataTool.getIntConvert("y1", node, 0),
-                            MapleDataTool.getIntConvert("x2", node, 0),
-                            MapleDataTool.getIntConvert("y2", node, 0),
-                            MapleDataTool.getIntConvert("r", node, 0), SN);
-                            nodeInfo.addPlatform(mni);
+                                name, MapleDataTool.getIntConvert("start", node, 2), speed,
+                                MapleDataTool.getIntConvert("x1", node, 0),
+                                MapleDataTool.getIntConvert("y1", node, 0),
+                                MapleDataTool.getIntConvert("x2", node, 0),
+                                MapleDataTool.getIntConvert("y2", node, 0),
+                                MapleDataTool.getIntConvert("r", node, 0), SN);
+                        nodeInfo.addPlatform(mni);
                     } else if (node.getChildByPath("tags") != null) { //匠人街製作道具顯示
                         String name = MapleDataTool.getString("tags", node, "");
                         //nodeInfo.addFlag(new Pair<>(name, name.endsWith("3") ? 1 : 0)); //idk, no indication in wz
@@ -1091,9 +1093,9 @@ public static void loadClearedMaps() {
                 final MapleData mc2 = area.getChildByPath("eventQ");
                 if (mc2 != null) {
                     for (MapleData event : mc2) {
-			di.eventQ.add(MapleDataTool.getString(event));
-		    }
-		}
+                        di.eventQ.add(MapleDataTool.getString(event));
+                    }
+                }
                 nodeInfo.addDirection(Integer.parseInt(area.getName()), di);
             }
         }
@@ -1102,10 +1104,10 @@ public static void loadClearedMaps() {
             if (mc.getChildByPath("mobGenPos") != null) {
                 for (MapleData area : mc.getChildByPath("mobGenPos")) {
                     nodeInfo.addMonsterPoint(MapleDataTool.getInt(area.getChildByPath("x")),
-                    MapleDataTool.getInt(area.getChildByPath("y")),
-                    MapleDataTool.getInt(area.getChildByPath("fh")),
-                    MapleDataTool.getInt(area.getChildByPath("cy")),
-                    MapleDataTool.getInt("team", area, -1));
+                            MapleDataTool.getInt(area.getChildByPath("y")),
+                            MapleDataTool.getInt(area.getChildByPath("fh")),
+                            MapleDataTool.getInt(area.getChildByPath("cy")),
+                            MapleDataTool.getInt("team", area, -1));
                 }
             }
             if (mc.getChildByPath("mob") != null) {

@@ -20,6 +20,7 @@ package server;
 import client.CardData;
 import constants.GameConstants;
 import database.DatabaseConnection;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -39,7 +41,6 @@ import tools.Pair;
 import tools.Triple;
 
 /**
- *
  * @author AlphaEta
  */
 public class CharacterCardFactory {

@@ -32,10 +32,12 @@ import constants.GameConstants;
 import constants.QuickMove;
 import constants.QuickMoveEntry;
 import handling.SendPacketOpcode;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import scripting.NPCConversationManager;
 import scripting.NPCScriptManager;
 import server.MapleInventoryManipulator;
@@ -64,7 +66,7 @@ public class NPCHandler {
         int length = (int) slea.available();
 
 
-          if (length == 10) { // NPC Talk
+        if (length == 10) { // NPC Talk
             mplew.writeShort(SendPacketOpcode.NPC_ACTION.getValue());
             mplew.writeInt(slea.readInt());
             mplew.writeShort(slea.readShort());
@@ -76,7 +78,7 @@ public class NPCHandler {
             mplew.write(bytes);
             c.announce(mplew.getPacket());
         } else {
-            
+
         }
     }
 
@@ -211,9 +213,9 @@ public class NPCHandler {
             case 3: { // Forefit Quest
                 if (GameConstants.canForfeit(q.getId())) {
                     q.forfeit(chr);
-                if (c.getPlayer().isGM()) {
-                    chr.dropMessage(5, "forfeit Quest ID : " + quest);
-                }
+                    if (c.getPlayer().isGM()) {
+                        chr.dropMessage(5, "forfeit Quest ID : " + quest);
+                    }
                 } else {
                     chr.dropMessage(1, "You may not forfeit this quest.");
                 }
@@ -538,7 +540,7 @@ public class NPCHandler {
 
             final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
             if (stats != null && stats.getStatus() == 1) {
-                if (stats.getCustomData()== null){
+                if (stats.getCustomData() == null) {
                     stats.setCustomData(String.valueOf(0));
                 }
                 int num = 100;

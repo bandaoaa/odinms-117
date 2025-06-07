@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import database.DatabaseConnection;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,6 +30,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import tools.packet.CWvsContext.BuddylistPacket;
 
 public class BuddyList implements Serializable {
@@ -42,6 +44,7 @@ public class BuddyList implements Serializable {
 
         BUDDYLIST_FULL, ALREADY_ON_LIST, OK
     }
+
     private static final long serialVersionUID = 1413738569L;
     private Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<>();
     private int capacity;
@@ -87,12 +90,12 @@ public class BuddyList implements Serializable {
 
     public void put(BuddylistEntry entry) {
         buddies.put(Integer.valueOf(entry.getCharacterId()), entry);
-	changed = true;
+        changed = true;
     }
 
     public void remove(int characterId) {
         buddies.remove(Integer.valueOf(characterId));
-	changed = true;
+        changed = true;
     }
 
     public Collection<BuddylistEntry> getBuddies() {
@@ -107,9 +110,9 @@ public class BuddyList implements Serializable {
         int buddyIds[] = new int[buddies.size()];
         int i = 0;
         for (BuddylistEntry ble : buddies.values()) {
-	    if (ble.isVisible()) {
+            if (ble.isVisible()) {
                 buddyIds[i++] = ble.getCharacterId();
-	    }
+            }
         }
         return buddyIds;
     }
@@ -140,10 +143,10 @@ public class BuddyList implements Serializable {
     }
 
     public void setChanged(boolean v) {
-	this.changed = v;
+        this.changed = v;
     }
 
     public boolean changed() {
-	return changed;
+        return changed;
     }
 }

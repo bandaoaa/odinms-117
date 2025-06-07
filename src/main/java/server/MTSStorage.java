@@ -27,6 +27,7 @@ import client.inventory.MapleInventoryType;
 import constants.GameConstants;
 import constants.ServerConstants;
 import database.DatabaseConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +36,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import tools.Pair;
 import tools.packet.MTSCSPacket;
 
@@ -141,8 +143,8 @@ public class MTSStorage {
         Map<Long, Pair<Item, MapleInventoryType>> items;
         final Connection con = DatabaseConnection.getConnection();
         try {
-            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM mts_items WHERE tab = 1"); 
-                    ResultSet rs = ps.executeQuery()) {
+            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM mts_items WHERE tab = 1");
+                 ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     lastPackage = rs.getInt("id");
                     cId = rs.getInt("characterid");

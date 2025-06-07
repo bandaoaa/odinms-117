@@ -26,11 +26,13 @@ import client.inventory.MapleInventoryType;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import server.MapleStatEffect;
 import server.Randomizer;
 import server.life.Element;
@@ -87,12 +89,12 @@ public class DamageParse {
         if (player.getClient().getChannelServer().isAdminOnly()) {
             player.dropMessage(-1, "Animation: " + Integer.toHexString(((attack.display & 0x8000) != 0 ? (attack.display - 0x8000) : attack.display)));
         }
-        
+
         // 屬性攻擊(强化) 必殺狙擊(BOSS) 爆頭射擊(BOSS) 閃電之鋒 炫目卡牌 死神卡牌 惡魔末日烈焰 機械狀態
         final boolean useAttackCount = attack.skill != 1211002 && attack.skill != 3221007 && attack.skill != 5221016 && attack.skill != 24100003 && attack.skill != 24120002 && attack.skill != 31121010 && player.getBuffSource(MapleBuffStat.MORPH) != 2210065;
-    
+
         if (attack.hits > attackCount) {
-                System.err.println("skills" + attack.skill);
+            System.err.println("skills" + attack.skill);
             if (useAttackCount) { //buster
                 System.err.println("Intercept skills" + attack.skill);
                 return;
@@ -391,7 +393,7 @@ public class DamageParse {
                                     if (c == 1211008) { //雷鳴之劍
                                         mobEff = new MonsterStatusEffect(MonsterStatus.STUN, 1, skill.getId(), null, false);
                                         time = skill.getEffect(player.getSkillLevel(c)).getY();
-                                    } 
+                                    }
                                     if (c == 1221004) { //聖靈之劍
                                         mobEff = new MonsterStatusEffect(MonsterStatus.SEAL, 1, skill.getId(), null, false);
                                         time = skill.getEffect(player.getSkillLevel(c)).getY();
@@ -780,7 +782,7 @@ public class DamageParse {
 
             }
         }
-        
+
         //致命箭傷害設定
         double elementalMaxDamagePerMonster = maximumDamageToMonster;
         if (player.getJob() == 311 || player.getJob() == 312 || player.getJob() == 321 || player.getJob() == 322 || player.getJob() == 1311 || player.getJob() == 1312) {
@@ -909,7 +911,7 @@ public class DamageParse {
                     mid_att = shadow ? (p.attack.size() / 2) : p.attack.size();
 
                     // 致命暗殺 隱??鎖鏈地獄
-                    toCrit = attack.skill == 4221001 ||  attack.skill == 4331006 ? mid_att : 0;
+                    toCrit = attack.skill == 4221001 || attack.skill == 4331006 ? mid_att : 0;
                     if (toCrit == 0) {
                         for (Pair<Integer, Boolean> eachd : p.attack) {
                             if (!eachd.right && hit < mid_att) {
@@ -935,7 +937,7 @@ public class DamageParse {
                         if (!eachd.right) {
                             if (attack.skill == 4221001) { // 致命暗殺 assassinate never crit first 3, always crit last
                                 eachd.right = hit == 3;
-                                
+
                                 //隱??鎖鏈地獄
                             } else if (attack.skill == 4331006) { //snipe always crit
                                 eachd.right = true;
@@ -955,62 +957,104 @@ public class DamageParse {
         return attack;
     }
 
-    /*      */ public static final AttackInfo parseDmgMa(LittleEndianAccessor lea, MapleCharacter chr) /*      */ {
-        /*      */ try {
-            /*  987 */ AttackInfo ret = new AttackInfo();
+    /*      */
+    public static final AttackInfo parseDmgMa(LittleEndianAccessor lea, MapleCharacter chr) /*      */ {
+        /*      */
+        try {
+            /*  987 */
+            AttackInfo ret = new AttackInfo();
             /*      */
-            /*  995 */ lea.skip(1);
-            /*  996 */ ret.tbyte = lea.readByte();
+            /*  995 */
+            lea.skip(1);
+            /*  996 */
+            ret.tbyte = lea.readByte();
             /*      */
-            /*  998 */ ret.targets = (byte) (ret.tbyte >>> 4 & 0xF);
-            /*  999 */ ret.hits = (byte) (ret.tbyte & 0xF);
-            /* 1000 */ ret.skill = lea.readInt();
-            /* 1001 */ if (ret.skill >= 91000000) {
-                /* 1002 */ return null;
-                /*      */            }
-            /* 1004 */ lea.skip(GameConstants.GMS ? 9 : 17);
-            /* 1005 */ if (GameConstants.isMagicChargeSkill(ret.skill)) {
+            /*  998 */
+            ret.targets = (byte) (ret.tbyte >>> 4 & 0xF);
+            /*  999 */
+            ret.hits = (byte) (ret.tbyte & 0xF);
+            /* 1000 */
+            ret.skill = lea.readInt();
+            /* 1001 */
+            if (ret.skill >= 91000000) {
+                /* 1002 */
+                return null;
+                /*      */
+            }
+            /* 1004 */
+            lea.skip(GameConstants.GMS ? 9 : 17);
+            /* 1005 */
+            if (GameConstants.isMagicChargeSkill(ret.skill)) {
                 ret.charge = lea.readInt();
             } /*      */ else {
-                /* 1008 */ ret.charge = -1;
-                /*      */            }
-            /* 1010 */ ret.unk = lea.readByte();
-            /* 1011 */ ret.display = lea.readUShort();
-            /*      */
-            /* 1017 */ lea.skip(4);
-            /* 1018 */ lea.skip(1);
-            /* 1019 */ ret.speed = lea.readByte();
-            /* 1020 */ ret.lastAttackTickCount = lea.readInt();
-            /* 1021 */ lea.skip(4);
-            /*      */
-            /* 1032 */ ret.allDamage = new ArrayList();
-            /*      */
-            /* 1034 */ for (int i = 0; i < ret.targets; i++) {
-                /* 1035 */ int oid = lea.readInt();
+                /* 1008 */
+                ret.charge = -1;
                 /*      */
-                /* 1042 */ lea.skip(18);
+            }
+            /* 1010 */
+            ret.unk = lea.readByte();
+            /* 1011 */
+            ret.display = lea.readUShort();
+            /*      */
+            /* 1017 */
+            lea.skip(4);
+            /* 1018 */
+            lea.skip(1);
+            /* 1019 */
+            ret.speed = lea.readByte();
+            /* 1020 */
+            ret.lastAttackTickCount = lea.readInt();
+            /* 1021 */
+            lea.skip(4);
+            /*      */
+            /* 1032 */
+            ret.allDamage = new ArrayList();
+            /*      */
+            /* 1034 */
+            for (int i = 0; i < ret.targets; i++) {
+                /* 1035 */
+                int oid = lea.readInt();
                 /*      */
-                /* 1044 */ List allDamageNumbers = new ArrayList();
+                /* 1042 */
+                lea.skip(18);
                 /*      */
-                /* 1046 */ for (int j = 0; j < ret.hits; j++) {
-                    /* 1047 */ int damage = lea.readInt();
+                /* 1044 */
+                List allDamageNumbers = new ArrayList();
+                /*      */
+                /* 1046 */
+                for (int j = 0; j < ret.hits; j++) {
+                    /* 1047 */
+                    int damage = lea.readInt();
                     chr.dropMessage(6, "MOB : " + chr.getMap().getMonsterByOid(oid));
-                    System.err.println("AAA"+damage);
-                    /* 1048 */ allDamageNumbers.add(new Pair(Integer.valueOf(damage), Boolean.valueOf(false)));
-                    /*      */                }
+                    System.err.println("AAA" + damage);
+                    /* 1048 */
+                    allDamageNumbers.add(new Pair(Integer.valueOf(damage), Boolean.valueOf(false)));
+                    /*      */
+                }
                 /*      */
-                /* 1051 */ lea.skip(4);
-                /* 1052 */ ret.allDamage.add(new AttackPair(Integer.valueOf(oid).intValue(), allDamageNumbers));
-                /*      */            }
-            /* 1054 */ if (lea.available() >= 4) {
-                /* 1055 */ ret.position = lea.readPos();
-                /*      */            }
-            /* 1057 */ return ret;
-            /*      */        } catch (Exception e) {
-            /* 1059 */ e.printStackTrace();
-            /* 1060 */        }
+                /* 1051 */
+                lea.skip(4);
+                /* 1052 */
+                ret.allDamage.add(new AttackPair(Integer.valueOf(oid).intValue(), allDamageNumbers));
+                /*      */
+            }
+            /* 1054 */
+            if (lea.available() >= 4) {
+                /* 1055 */
+                ret.position = lea.readPos();
+                /*      */
+            }
+            /* 1057 */
+            return ret;
+            /*      */
+        } catch (Exception e) {
+            /* 1059 */
+            e.printStackTrace();
+            /* 1060 */
+        }
         return null;
-        /*      */    }
+        /*      */
+    }
 
     public static final AttackInfo parseDmgM(LittleEndianAccessor lea, MapleCharacter chr) {
         //System.out.println("parseDmgM.." + lea.toString());
@@ -1100,7 +1144,7 @@ public class DamageParse {
 
             for (int j = 0; j < ret.hits; j++) {
                 int damage = lea.readInt();
-                System.err.println("BBB"+damage);
+                System.err.println("BBB" + damage);
                 chr.dropMessage(6, "MOB : " + chr.getMap().getMonsterByOid(oid));
                 allDamageNumbers.add(new Pair(Integer.valueOf(damage), Boolean.valueOf(false)));
             }
@@ -1171,9 +1215,9 @@ public class DamageParse {
             List allDamageNumbers = new ArrayList();
             for (int j = 0; j < ret.hits; j++) {
                 chr.dropMessage(6, "MOB : " + chr.getMap().getMonsterByOid(oid));
-                
+
                 int damage = lea.readInt();
-                System.err.println("CCC"+damage);
+                System.err.println("CCC" + damage);
                 allDamageNumbers.add(new Pair(Integer.valueOf(damage), Boolean.valueOf(false)));
             }
 

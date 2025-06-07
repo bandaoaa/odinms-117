@@ -23,8 +23,10 @@ package server.events;
 
 import client.MapleCharacter;
 import client.MapleStat;
+
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
+
 import server.Timer.EventTimer;
 import server.events.MapleOxQuizFactory.MapleOxQuizEntry;
 import server.maps.MapleMap;
@@ -39,7 +41,7 @@ public class MapleOxQuiz extends MapleEvent {
     private boolean finished = false;
 
     public MapleOxQuiz(final int channel, final MapleEventType type) {
-	super(channel,type);
+        super(channel, type);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class MapleOxQuiz extends MapleEvent {
 
     @Override
     public void onMapLoad(MapleCharacter chr) {
-	super.onMapLoad(chr);
+        super.onMapLoad(chr);
         if (chr.getMapId() == type.mapids[0] && !chr.isGM()) {
             chr.canTalk(false);
         }
@@ -84,7 +86,7 @@ public class MapleOxQuiz extends MapleEvent {
     @Override
     public void startEvent() {
         sendQuestion();
-	finished = false;
+        finished = false;
     }
 
     public void sendQuestion() {
@@ -92,7 +94,7 @@ public class MapleOxQuiz extends MapleEvent {
     }
 
     public void sendQuestion(final MapleMap toSend) {
-	final Entry<Pair<Integer, Integer>, MapleOxQuizEntry> question = MapleOxQuizFactory.getInstance().grabRandomQuestion();
+        final Entry<Pair<Integer, Integer>, MapleOxQuizEntry> question = MapleOxQuizFactory.getInstance().grabRandomQuestion();
         if (oxSchedule2 != null) {
             oxSchedule2.cancel(false);
         }
@@ -117,7 +119,7 @@ public class MapleOxQuiz extends MapleEvent {
                         }
                     }
                     //prizes here
-		    finished = true;
+                    finished = true;
                     return;
                 }
 
@@ -130,17 +132,17 @@ public class MapleOxQuiz extends MapleEvent {
         }
         oxSchedule = EventTimer.getInstance().schedule(new Runnable() {
 
-             @Override
-             public void run() {
-		if (finished) {
-		    return;
-		}
+            @Override
+            public void run() {
+                if (finished) {
+                    return;
+                }
                 toSend.broadcastMessage(CField.showOXQuiz(question.getKey().left, question.getKey().right, false));
                 timesAsked++;
                 for (MapleCharacter chr : toSend.getCharactersThreadsafe()) {
                     if (chr != null && !chr.isGM() && chr.isAlive()) { // make sure they aren't null... maybe something can happen in 12 seconds.
                         if (!isCorrectAnswer(chr, question.getValue().getAnswer())) {
-                            chr.getStat().setHp((short) 0,chr);
+                            chr.getStat().setHp((short) 0, chr);
                             chr.updateSingleStat(MapleStat.HP, 0);
                         } else {
                             chr.gainExp(3000, true, true, false);
@@ -148,8 +150,8 @@ public class MapleOxQuiz extends MapleEvent {
                     }
                 }
                 sendQuestion();
-             }
-         }, 20000); // Time to answer = 30 seconds ( Ox Quiz packet shows a 30 second timer.
+            }
+        }, 20000); // Time to answer = 30 seconds ( Ox Quiz packet shows a 30 second timer.
     }
 
     private boolean isCorrectAnswer(MapleCharacter chr, int answer) {

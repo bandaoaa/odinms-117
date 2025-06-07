@@ -36,7 +36,7 @@ public class Item implements Comparable<Item>, Serializable {
     private String giftFrom = "";
 
 
-        public Item(int id, short position, short quantity, short flag, int uniqueid) {
+    public Item(int id, short position, short quantity, short flag, int uniqueid) {
         super();
         this.id = id;
         this.position = position;
@@ -45,7 +45,6 @@ public class Item implements Comparable<Item>, Serializable {
         this.uniqueid = uniqueid;
     }
 
- 
 
     public Item(int id, short position, short quantity, short flag) {
         super();
@@ -143,7 +142,7 @@ public class Item implements Comparable<Item>, Serializable {
     public void setGMLog(String GameMaster_log) {
         this.GameMaster_log = GameMaster_log;
     }
-    
+
 
     public int getUniqueId() {
         return uniqueid;

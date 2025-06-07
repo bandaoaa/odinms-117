@@ -72,8 +72,8 @@ public class MobAttackInfo {
     }
 
     public int getRange() {
-	final int maxX = Math.max(Math.abs(lt == null ? 0 : lt.x), Math.abs(rb == null ? 0 : rb.x));
-	final int maxY = Math.max(Math.abs(lt == null ? 0 : lt.y), Math.abs(rb == null ? 0 : rb.y));
-	return Math.max((maxX * maxX) + (maxY * maxY), range);
+        final int maxX = Math.max(Math.abs(lt == null ? 0 : lt.x), Math.abs(rb == null ? 0 : rb.x));
+        final int maxY = Math.max(Math.abs(lt == null ? 0 : lt.y), Math.abs(rb == null ? 0 : rb.y));
+        return Math.max((maxX * maxX) + (maxY * maxY), range);
     }
 }

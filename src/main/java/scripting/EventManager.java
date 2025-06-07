@@ -24,10 +24,12 @@ import client.MapleCharacter;
 import handling.channel.ChannelServer;
 import handling.world.MapleParty;
 import handling.world.MaplePartyCharacter;
+
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import javax.script.Invocable;
 import javax.script.ScriptException;
+
 import server.MapleSquad;
 import server.Randomizer;
 import server.Timer.EventTimer;
@@ -102,7 +104,7 @@ public class EventManager {
             public void run() {
                 try {
                     iv.invokeFunction(methodName, (Object) null);
-                } catch (        ScriptException | NoSuchMethodException ex) {
+                } catch (ScriptException | NoSuchMethodException ex) {
                     System.out.println("Event name : " + name + ", method Name : " + methodName + ":\n" + ex);
                 }
             }
@@ -175,7 +177,7 @@ public class EventManager {
             FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Event name : " + name + ", method Name : setup:\n" + ex);
         }
     }
-	
+
     public void startInstance_Solo(String mapid, MapleCharacter chr) {
         try {
             EventInstanceManager eim = (EventInstanceManager) iv.invokeFunction("setup", (Object) mapid);

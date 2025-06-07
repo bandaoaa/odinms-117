@@ -5,7 +5,9 @@ import client.MapleClient;
 import client.MapleStat;
 import constants.ServerConstants.PlayerGMRank;
 import handling.world.World;
+
 import java.util.Arrays;
+
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
@@ -14,7 +16,6 @@ import tools.packet.CField;
 import tools.packet.CWvsContext;
 
 /**
- *
  * @author Emilyx3
  */
 public class DonatorCommand {
@@ -22,7 +23,7 @@ public class DonatorCommand {
     public static PlayerGMRank getPlayerLevelRequired() {
         return PlayerGMRank.DONATOR;
     }
-    
+
 
     public static class healme extends CommandExecute {
 
@@ -56,26 +57,26 @@ public class DonatorCommand {
         }
     }
 
-         public static class rbs extends CommandExecute {
-        
+    public static class rbs extends CommandExecute {
+
         @Override
-       public int execute(MapleClient c, String[] splitted) {
-                            if (c.getPlayer().getBuffedValue(MapleBuffStat.SHADOWPARTNER) != null || c.getPlayer().getBuffedValue(MapleBuffStat.WATER_SHIELD) != null) {
-        c.getPlayer().dropMessage(5, "Please disable Shadow Partner/Mirror Image/Water Shield(the dragon thing) before rebirthing or changing job.");   
-        } else {
-                       if ((c.getPlayer().getLevel() >= 150)) {
-               c.getPlayer().doEXPRB();
-               c.getPlayer().dropMessage(6, "Done! You have rebirthed! Use @job to change your job");
-           } else {
-               c.getPlayer().dropMessage(6, "Sorry, you must be level 150 to rebirth");
+        public int execute(MapleClient c, String[] splitted) {
+            if (c.getPlayer().getBuffedValue(MapleBuffStat.SHADOWPARTNER) != null || c.getPlayer().getBuffedValue(MapleBuffStat.WATER_SHIELD) != null) {
+                c.getPlayer().dropMessage(5, "Please disable Shadow Partner/Mirror Image/Water Shield(the dragon thing) before rebirthing or changing job.");
+            } else {
+                if ((c.getPlayer().getLevel() >= 150)) {
+                    c.getPlayer().doEXPRB();
+                    c.getPlayer().dropMessage(6, "Done! You have rebirthed! Use @job to change your job");
+                } else {
+                    c.getPlayer().dropMessage(6, "Sorry, you must be level 150 to rebirth");
 
-           }
+                }
 
+            }
+            return 1;
         }
-         return 1;
-        }
-        }
-    
+    }
+
     public static class cleardrop extends CommandExecute {
 
         @Override
@@ -87,11 +88,11 @@ public class DonatorCommand {
                 map.removeMapObject(itemmo);
                 map.broadcastMessage(CField.removeItemFromMap(itemmo.getObjectId(), 0, c.getPlayer().getId()));
             }
-             c.getPlayer().dropMessage(5, "You have destroyed " + items.size() + " items on the ground.");
-return 1;
+            c.getPlayer().dropMessage(5, "You have destroyed " + items.size() + " items on the ground.");
+            return 1;
 
-             }
-}
+        }
     }
+}
 
 

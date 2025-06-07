@@ -24,9 +24,9 @@ import java.awt.Point;
 
 /**
  * Provides a generic interface to a Little Endian stream of bytes.
- * 
- * @version 1.0
+ *
  * @author Frz
+ * @version 1.0
  * @since Revision 323
  */
 public class GenericLittleEndianAccessor implements LittleEndianAccessor {

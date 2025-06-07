@@ -25,6 +25,7 @@ import client.MapleClient;
 import client.inventory.*;
 import constants.GameConstants;
 import database.DatabaseConnection;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import tools.FileoutputUtil;
 import tools.Pair;
 import tools.packet.MTSCSPacket;
@@ -140,12 +142,12 @@ public class CashShop implements Serializable {
             Item item = new Item(cItem.getId(), (byte) 0, (short) cItem.getCount(), (byte) 0, uniqueid);
             if (period > 0) {
                 switch (cItem.getId()) {
-                case 5211048://4小时經驗加持券
-                case 5360042://4小时掉寶加倍券
-                    item.setExpiration(System.currentTimeMillis() + (4 * 60 * 60 * 1000));
-                    break;
-                default:
-                    item.setExpiration((long) (System.currentTimeMillis() + (long) (period * 24 * 60 * 60 * 1000)));
+                    case 5211048://4小时經驗加持券
+                    case 5360042://4小时掉寶加倍券
+                        item.setExpiration(System.currentTimeMillis() + (4 * 60 * 60 * 1000));
+                        break;
+                    default:
+                        item.setExpiration((long) (System.currentTimeMillis() + (long) (period * 24 * 60 * 60 * 1000)));
                 }
             }
             item.setGMLog("Cash Shop: " + cItem.getSN() + " on " + FileoutputUtil.CurrentReadable_Date());

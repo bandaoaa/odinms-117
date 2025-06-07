@@ -23,7 +23,9 @@ package server.events;
 
 import client.MapleCharacter;
 import client.MapleDisease;
+
 import java.util.concurrent.ScheduledFuture;
+
 import server.Timer.EventTimer;
 import server.life.MobSkillFactory;
 import server.maps.MapleMap;
@@ -35,7 +37,7 @@ public class MapleSnowball extends MapleEvent {
     private MapleSnowballs[] balls = new MapleSnowballs[2];
 
     public MapleSnowball(final int channel, final MapleEventType type) {
-	super(channel,type);
+        super(channel, type);
     }
 
     @Override

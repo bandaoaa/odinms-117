@@ -10,10 +10,13 @@ import handling.channel.ChannelServer;
 import handling.channel.MapleGuildRanking;
 import handling.login.LoginInformationProvider;
 import handling.login.LoginServer;
+
 import static handling.login.LoginServer.TIMEZONE;
+
 import handling.world.World;
 import handling.world.family.MapleFamily;
 import handling.world.guild.MapleGuild;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.TimeZone;
@@ -21,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
+
 import server.Timer.BuffTimer;
 import server.Timer.EtcTimer;
 import server.Timer.EventTimer;
@@ -70,7 +74,7 @@ public class Start {
 
         // 任務並行載入 使用lambda表達式
         CompletableFuture<Void> phase1Tasks = CompletableFuture.allOf(Stream.of((Runnable)
-                        () -> MapleGuildRanking.getInstance().load(),
+                                () -> MapleGuildRanking.getInstance().load(),
                         () -> MapleGuild.loadAll(),
                         () -> MapleFamily.loadAll(),
                         () -> MapleLifeFactory.loadQuestCounts(),

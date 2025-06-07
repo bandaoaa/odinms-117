@@ -75,7 +75,7 @@ public class CashShopServer {
         }
         System.out.println("Saving all connected clients (CS)...");
         players.disconnectAll();
-	playersMTS.disconnectAll();
+        playersMTS.disconnectAll();
         MTSStorage.getInstance().saveBuyNow(true);
         System.out.println("Shutting down CS...");
         acceptor.close();
@@ -83,6 +83,6 @@ public class CashShopServer {
     }
 
     public static boolean isShutdown() {
-	return finishedShutdown;
+        return finishedShutdown;
     }
 }

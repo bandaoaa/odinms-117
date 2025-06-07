@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling;
 
 import constants.GameConstants;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -293,6 +294,7 @@ public enum RecvPacketOpcode implements WritableIntValueHolder {
     public final short getValue() {
         return code;
     }
+
     private boolean CheckState;
 
     private RecvPacketOpcode() {

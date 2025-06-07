@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import provider.MapleData;
 import provider.MapleDataProviderFactory;
 import provider.MapleDataTool;
@@ -47,15 +48,15 @@ public class ItemMakerFactory {
 
                         for (MapleData rewardNRecipe : itemFolder.getChildren()) {
                             for (MapleData ind : rewardNRecipe.getChildren()) {
-                            switch (rewardNRecipe.getName()) {
-                                case "randomReward":
-                                    ret.addRandomReward(MapleDataTool.getInt("item", ind, 0), MapleDataTool.getInt("prob", ind, 0));
+                                switch (rewardNRecipe.getName()) {
+                                    case "randomReward":
+                                        ret.addRandomReward(MapleDataTool.getInt("item", ind, 0), MapleDataTool.getInt("prob", ind, 0));
 // MapleDataTool.getInt("itemNum", ind, 0)
-                                    break;
-                                case "recipe":
-                                    ret.addReqRecipe(MapleDataTool.getInt("item", ind, 0), MapleDataTool.getInt("count", ind, 0));
-                                    break;
-                            }
+                                        break;
+                                    case "recipe":
+                                        ret.addReqRecipe(MapleDataTool.getInt("item", ind, 0), MapleDataTool.getInt("count", ind, 0));
+                                        break;
+                                }
                             }
                         }
                         gemCache.put(Integer.parseInt(itemFolder.getName()), ret);

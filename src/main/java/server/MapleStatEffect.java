@@ -10,6 +10,7 @@ import client.status.MonsterStatusEffect;
 import constants.GameConstants;
 import handling.channel.ChannelServer;
 import handling.world.MaplePartyCharacter;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
+
 import provider.MapleData;
 import provider.MapleDataTool;
 import provider.MapleDataType;
@@ -58,7 +60,7 @@ public class MapleStatEffect implements Serializable {
     private Point lt, rb;
     private int expBuff, itemup, mesoup, cashup, berserk, illusion, booster, berserk2, cp, nuffSkill;
     private byte level;
-//    private List<Pair<Integer, Integer>> randomMorph;
+    //    private List<Pair<Integer, Integer>> randomMorph;
     private List<MapleDisease> cureDebuffs;
     private List<Integer> petsCanConsume, familiars, randomPickup;
     private List<Triple<Integer, Integer, Integer>> rewardItem;
@@ -259,19 +261,19 @@ public class MapleStatEffect implements Serializable {
         ret.charColor = 0;
         String cColor = MapleDataTool.getString("charColor", source, null);
         if (cColor != null) {
-            
-    try {
-            ret.charColor |= Integer.parseInt("0x" + cColor.substring(0, 2));
-            ret.charColor |= Integer.parseInt("0x" + cColor.substring(2, 4) + "00");
-            ret.charColor |= Integer.parseInt("0x" + cColor.substring(4, 6) + "0000");
-            ret.charColor |= Integer.parseInt("0x" + cColor.substring(6, 8) + "000000");
-            
-        } catch (NumberFormatException e) {
-         //  System.out.println("This is not a number");
-           //System.out.println(e.getMessage());
-                
-    
-        }
+
+            try {
+                ret.charColor |= Integer.parseInt("0x" + cColor.substring(0, 2));
+                ret.charColor |= Integer.parseInt("0x" + cColor.substring(2, 4) + "00");
+                ret.charColor |= Integer.parseInt("0x" + cColor.substring(4, 6) + "0000");
+                ret.charColor |= Integer.parseInt("0x" + cColor.substring(6, 8) + "000000");
+
+            } catch (NumberFormatException e) {
+                //  System.out.println("This is not a number");
+                //System.out.println(e.getMessage());
+
+
+            }
         }
         ret.traits = new EnumMap<>(MapleTraitType.class);
         for (MapleTraitType t : MapleTraitType.values()) {
@@ -403,7 +405,7 @@ public class MapleStatEffect implements Serializable {
             addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.SPEED, Integer.valueOf(ret.speed));
             addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.JUMP, Integer.valueOf(ret.jump));
             if (sourceid != 22131001) {//守護之力是被動新增HP上限
-            addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.MAXHP, (int) ret.mhpR);
+                addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.MAXHP, (int) ret.mhpR);
             }
             addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.MAXMP, (int) ret.mmpR);
             addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.BOOSTER, Integer.valueOf(ret.booster));
@@ -1756,8 +1758,8 @@ public class MapleStatEffect implements Serializable {
                     ret.monsterStatus.put(MonsterStatus.STUN, 1);
                     break;
                 case 9101002:
-                  ret.statups.put(MapleBuffStat.DARKSIGHT, 1);
-                   break;
+                    ret.statups.put(MapleBuffStat.DARKSIGHT, 1);
+                    break;
                 case 9101003:
                     ret.statups.put(MapleBuffStat.BLESS, (int) ret.level);
                     break;
@@ -1769,7 +1771,7 @@ public class MapleStatEffect implements Serializable {
                     ret.duration = 2000;
                     ret.monsterStatus.put(MonsterStatus.STUN, 1);
                     break;
-                                    
+
                 default:
                     break;
             }
@@ -1883,7 +1885,7 @@ public class MapleStatEffect implements Serializable {
     /**
      * @param applyto
      * @param obj
-     * @param attack damage done by the skill
+     * @param attack  damage done by the skill
      */
     public final void applyPassive(final MapleCharacter applyto, final MapleMapObject obj) {
         if (makeChanceResult() && !GameConstants.isDemon(applyto.getJob())) { // demon can't heal mp
@@ -2235,7 +2237,7 @@ public class MapleStatEffect implements Serializable {
                 applyfrom.addCooldown(sourceid, System.currentTimeMillis(), getCooldown(applyfrom) * 1000);
                 applyfrom.getMap().broadcastMessage(CField.teslaTriangle(applyfrom.getId(), count.get(0), count.get(1), count.get(2)));
             } else if (sourceid == 35121003) { //戰鬥機器 : 巨人錘
-		applyfrom.getClient().getSession().write(CWvsContext.enableActions()); //doubt we need this at all
+                applyfrom.getClient().getSession().write(CWvsContext.enableActions()); //doubt we need this at all
             }
         } else if (isMechDoor()) {
             int newId = 0;
@@ -2349,7 +2351,7 @@ public class MapleStatEffect implements Serializable {
                     applyTo(applyfrom, mc, false, null, newDuration);
                 }
             }
-        } 
+        }
         return true;
     }
 
@@ -2405,7 +2407,7 @@ public class MapleStatEffect implements Serializable {
             final List<MapleMapObject> affecteds = applyfrom.getMap().getMapObjectsInRect(bounds, Arrays.asList(MapleMapObjectType.PLAYER));
 
             for (final MapleMapObject affectedmo : affecteds) {
-            final MapleCharacter affected = (MapleCharacter) affectedmo;
+                final MapleCharacter affected = (MapleCharacter) affectedmo;
 
                 if (affected.getId() != applyfrom.getId() && ((applyfrom.inPVP() && affected.getTeam() == applyfrom.getTeam() && Integer.parseInt(applyfrom.getEventInstance().getProperty("type")) != 0) || (applyfrom.getParty() != null && affected.getParty() != null && applyfrom.getParty().getId() == affected.getParty().getId()))) {
                     if ((isResurrection() && !affected.isAlive()) || (!isResurrection() && affected.isAlive())) {
@@ -2500,9 +2502,9 @@ public class MapleStatEffect implements Serializable {
             }
         }
     }
-	
+
     public final boolean isSubTime(final int source) {
-	switch (source) {
+        switch (source) {
             case 1201006: //降魔咒
             case 23111008: //元素騎士
             case 23111009: //元素騎士
@@ -2510,14 +2512,14 @@ public class MapleStatEffect implements Serializable {
             case 31101003: //黑暗復仇
             case 31121003: //魔力吶喊
             case 31121005: //變形
-		return true;
-	}
-	return false;
+                return true;
+        }
+        return false;
     }
 
     public final void handleExtraPVP(MapleCharacter applyfrom, MapleCharacter chr) {
 
-         //喚化術
+        //喚化術
         if (sourceid == 2311005 || sourceid == 1201006 || (GameConstants.isBeginnerJob(sourceid / 10000) && sourceid % 10000 == 104)) { //doom, threaten, snatch
             final long starttime = System.currentTimeMillis();
 
@@ -2906,7 +2908,7 @@ public class MapleStatEffect implements Serializable {
                 applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), stat, this), false);
                 break;
             }
-            case 30001001: 
+            case 30001001:
             case 30011001: {
                 if (applyto.isHidden()) {
                     break;
@@ -2933,7 +2935,7 @@ public class MapleStatEffect implements Serializable {
                 final EnumMap<MapleBuffStat, Integer> statt = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
                 statt.put(MapleBuffStat.DARK_AURA, x);
                 applyto.getClient().getSession().write(BuffPacket.giveBuff(32001003, localDuration, statt, this));
-                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), statt, this),false);
+                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), statt, this), false);
                 break;
             }
             case 32101003: { //黃色繩索
@@ -2944,7 +2946,7 @@ public class MapleStatEffect implements Serializable {
                 final EnumMap<MapleBuffStat, Integer> statt = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
                 statt.put(MapleBuffStat.YELLOW_AURA, x);
                 applyto.getClient().getSession().write(BuffPacket.giveBuff(32101003, localDuration, statt, this));
-                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), statt, this),false);
+                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), statt, this), false);
                 break;
             }
             case 32110000: { //進階藍色繩索
@@ -3186,7 +3188,7 @@ public class MapleStatEffect implements Serializable {
                     if (applyto.isHidden()) {
                         break;
                     }
-                  //  applyto.dropMessage(5, "Disabled..");
+                    //  applyto.dropMessage(5, "Disabled..");
                     final EnumMap<MapleBuffStat, Integer> stat = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
                     stat.put(MapleBuffStat.SOARING, 0);
                     applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), stat, this), false);
@@ -3223,7 +3225,7 @@ public class MapleStatEffect implements Serializable {
         if (!isMonsterRiding() && !isMechDoor()) {
             applyto.cancelEffect(this, true, -1, localstatups);
         }
-		// Broadcast effect to self
+        // Broadcast effect to self
         if (normal && localstatups.size() > 0) {
             applyto.getClient().getSession().write(BuffPacket.giveBuff((skill ? sourceid : -sourceid), localDuration, maskedStatups == null ? localstatups : maskedStatups, this));
         }
@@ -3513,19 +3515,19 @@ public class MapleStatEffect implements Serializable {
     public final short getJump() {
         return jump;
     }
-	
+
     public final short getPassiveSpeed() {
         return psdSpeed;
     }
-	
+
     public final short getPassiveJump() {
         return psdJump;
     }
-	
+
     public final int getDuration() {
         return duration;
     }
-	
+
     public final int getSubTime() {
         return subTime;
     }
@@ -3695,14 +3697,14 @@ public class MapleStatEffect implements Serializable {
 
     private boolean isMist() {
         switch (sourceid) {
-        case 1076: //奧茲的火牢術屏障
-        case 2111003: //致命毒霧
-        case 4221006: //煙幕彈
-        case 12111005: //火牢術屏障
-        case 14111006: //毒炸彈
-        case 22161003: //聖療之光
-        case 32121006: //魔法屏障
-            return true;
+            case 1076: //奧茲的火牢術屏障
+            case 2111003: //致命毒霧
+            case 4221006: //煙幕彈
+            case 12111005: //火牢術屏障
+            case 14111006: //毒炸彈
+            case 22161003: //聖療之光
+            case 32121006: //魔法屏障
+                return true;
         }
         return false;
     }
@@ -3917,7 +3919,7 @@ public class MapleStatEffect implements Serializable {
         }
         return false;
     }
-    
+
     public final boolean isMI() {
         switch (sourceid) {
             case 4331002: //替身術
@@ -3936,7 +3938,6 @@ public class MapleStatEffect implements Serializable {
     }
 
     /**
-     *
      * @return true if the effect should happen based on it's probablity, false otherwise
      */
     public final boolean makeChanceResult() {
@@ -3990,7 +3991,7 @@ public class MapleStatEffect implements Serializable {
     public final short getASRRate() {
         return asrR;
     }
-	
+
     public final short getTERRate() {
         return terR;
     }

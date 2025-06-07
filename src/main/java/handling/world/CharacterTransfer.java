@@ -27,6 +27,7 @@ import client.inventory.Item;
 import client.inventory.MapleImp;
 import client.inventory.MapleMount;
 import client.inventory.MaplePet;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -34,13 +35,14 @@ import java.io.ObjectOutput;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import server.quest.MapleQuest;
 import tools.Pair;
 
 public class CharacterTransfer implements Externalizable {
 
     public int characterid, accountid, fame, pvpExp, pvpPoints,
-            meso, hair, face, demonMarking, mapid, guildid, 
+            meso, hair, face, demonMarking, mapid, guildid,
             partyid, messengerid, nxcredit, nxprepaid, MaplePoints,
             mount_itemid, mount_exp, points, vpoints, marriageId, maxhp, maxmp, hp, mp,
             familyid, seniorid, junior1, junior2, currentrep, totalrep, battleshipHP, gachexp, guildContribution, totalWins, totalLosses, buddysize, remainingAp;
@@ -86,7 +88,7 @@ public class CharacterTransfer implements Externalizable {
     public Map<Byte, Integer> mca2 = new LinkedHashMap();
     public long mca1_timestamp;
     public long mca2_timestamp;
-    
+
     /*End of Custom Feature*/
     public CharacterTransfer() {
         famedcharacters = new ArrayList<>();
@@ -106,7 +108,7 @@ public class CharacterTransfer implements Externalizable {
         this.nxcredit = chr.getCSPoints(1);
         this.MaplePoints = chr.getCSPoints(2);
         this.nxprepaid = chr.getCSPoints(4);
-        
+
         this.redeemhn = chr.getHN();
         this.vpoints = chr.getVPoints();
         this.name = chr.getName();
@@ -126,8 +128,8 @@ public class CharacterTransfer implements Externalizable {
         this.remainingAp = chr.getRemainingAp();
         this.remainingSp = chr.getRemainingSps();
         this.meso = chr.getMeso();
-	this.pvpExp = chr.getTotalBattleExp();
-	this.pvpPoints = chr.getBattlePoints();
+        this.pvpExp = chr.getTotalBattleExp();
+        this.pvpPoints = chr.getBattlePoints();
         /*Start of Custom Feature*/
         this.reborns = chr.getReborns();
         this.apstorage = chr.getAPS();
@@ -354,8 +356,8 @@ public class CharacterTransfer implements Externalizable {
         this.totalLosses = in.readInt();
         this.anticheat = in.readObject();
         this.tempIP = in.readUTF();
-	this.pvpExp = in.readInt();
-	this.pvpPoints = in.readInt();
+        this.pvpExp = in.readInt();
+        this.pvpPoints = in.readInt();
         /*Start of Custom Feature*/
         this.reborns = in.readInt();
         this.apstorage = in.readInt();
@@ -370,11 +372,11 @@ public class CharacterTransfer implements Externalizable {
         this.dgm = in.readInt();
         this.cardStack = in.readInt();
         this.gml = in.readInt();
-                this.honourexp = in.readInt();
+        this.honourexp = in.readInt();
         this.honourlevel = in.readInt();
         this.innerSkills = (LinkedList<InnerSkillValueHolder>) in.readObject();
         /*End of Custom Feature*/
-        
+
         final int mbooksize = in.readShort();
         for (int i = 0; i < mbooksize; i++) {
             this.mbook.put(in.readInt(), in.readInt());
@@ -591,8 +593,8 @@ public class CharacterTransfer implements Externalizable {
         out.writeInt(this.totalLosses);
         out.writeObject(this.anticheat);
         out.writeUTF(this.tempIP);
-	out.writeInt(this.pvpExp);
-	out.writeInt(this.pvpPoints);
+        out.writeInt(this.pvpExp);
+        out.writeInt(this.pvpPoints);
         /*Start of Custom Feature*/
         out.writeInt(this.reborns);
         out.writeInt(this.apstorage);
@@ -628,13 +630,13 @@ public class CharacterTransfer implements Externalizable {
             out.writeByte(qs.getValue().equipped);
             // Bless of fairy is transported here too.
         }
-        
+
         out.writeByte(this.cardsInfo.size());
         for (Map.Entry qs : this.cardsInfo.entrySet()) {
-            out.writeInt(((Integer)qs.getKey()).intValue());
-            out.writeInt(((CardData)qs.getValue()).cid);
-            out.writeShort(((CardData)qs.getValue()).level);
-            out.writeShort(((CardData)qs.getValue()).job);
+            out.writeInt(((Integer) qs.getKey()).intValue());
+            out.writeInt(((CardData) qs.getValue()).cid);
+            out.writeShort(((CardData) qs.getValue()).level);
+            out.writeShort(((CardData) qs.getValue()).job);
         }
 
         //寶盒的護佑
@@ -686,7 +688,7 @@ public class CharacterTransfer implements Externalizable {
             out.writeByte(ss.getKey());
             out.writeInt(ss.getValue());
         }
-        
+
         out.writeByte(this.famedcharacters.size());
         for (final Integer zz : famedcharacters) {
             out.writeInt(zz.intValue());

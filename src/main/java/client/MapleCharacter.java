@@ -54,6 +54,7 @@ import handling.world.family.MapleFamilyBuff;
 import handling.world.family.MapleFamilyCharacter;
 import handling.world.guild.MapleGuild;
 import handling.world.guild.MapleGuildCharacter;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.Serializable;
@@ -64,6 +65,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import scripting.EventInstanceManager;
 import scripting.NPCScriptManager;
 import server.CashShop;
@@ -1861,28 +1863,28 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 client.getSession().write(CField.updateQuestInfo(this, quest.getQuest().getId(), quest.getNpc(), (byte) 10));
             }
             final int[] ss = {2100, 2144, 2198, 2199, 2200, 2201, 2202, 2205, 3080, 3081, 3334, 3527, 3536, 3641, 3945, 4307, 6033, 20300, //nextquest的任務ID -1 避免38錯誤
-                1000, 1003, 1005, 1009, 1010, 1011, 1012, 1013, 1014, 1016, 1032, 1033, 1041, 1042, 1043, 1600, 1601, 1603, 1604, 1612, 1614, 
-                1617, 1618, 1619, 1620, 1621, 1624, 1626, 1630, 1659, 2002, 2003, 2004, 2005, 2006, 2007, 2014, 2015, 2063, 2064, 2065, 2066, 
-                2067, 2068, 2071, 2085, 2086, 2090, 2092, 2099, 2103, 2120, 2123, 2125, 2165, 2171, 2172, 2177, 2181, 2272, 2277, 2284, 2288, 
-                2289, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2321, 2322, 2323, 2325, 2326, 2328, 2354, 2356, 2359, 2360, 2361, 2364, 2372, 
-                2373, 2378, 2379, 2381, 2382, 2480, 2481, 2485, 2710, 2712, 2889, 2890, 2891, 3000, 3001, 3002, 3004, 3005, 3006, 3007, 3008, 
-                3009, 3010, 3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019, 3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029, 
-                3030, 3031, 3032, 3033, 3036, 3039, 3040, 3041, 3051, 3070, 3072, 3073, 3075, 3076, 3105, 3107, 3116, 3118, 3123, 3184, 3185, 
-                3186, 3188, 3189, 3190, 3191, 3210, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3219, 3226, 3231, 3242, 3253, 3254, 3401, 
-                3402, 3403, 3405, 3417, 3423, 3424, 3425, 3427, 3428, 3453, 3454, 3456, 3459, 3460, 3461, 3554, 3610, 3715, 3716, 3719, 3724, 
-                3730, 3736, 3742, 3756, 3757, 3758, 3765, 3767, 3851, 3906, 3910, 4480, 4484, 4486, 4488, 4646, 4900, 4901, 4902, 4903, 4904, 
-                4905, 4906, 4907, 4908, 4909, 4910, 4911, 4951, 6034, 6035, 7100, 8002, 8003, 8007, 8008, 8009, 8010, 8018, 8019, 8020, 8021, 
-                8022, 8023, 8024, 8034, 8035, 8037, 8038, 8041, 8053, 8054, 8055, 8056, 8057, 8058, 8061, 8065, 8066, 8067, 8069, 8072, 8073, 
-                8080, 9160, 9161, 9162, 9163, 9164, 9165, 9166, 9167, 9168, 9170, 9171, 9180, 9181, 9190, 9191, 9300, 9301, 9302, 9303, 9304, 
-                9306, 9370, 9505, 9506, 9507, 9508, 9539, 9544, 9545, 9552, 9553, 9555, 9556, 9557, 9954, 9986, 10001, 10570, 10571, 10572, 
-                10573, 10630, 10631, 10866, 10867, 10868, 10869, 10915, 10931, 11330, 11331, 20532, 21000, 22003, 22005, 22008, 22009, 22403, 
-                22501, 22502, 22503, 22504, 22505, 22508, 22510, 22512, 22513, 22517, 22524, 22540, 22549, 22550, 22551, 22560, 22571, 22581, 
-                22583, 22589, 22592, 28170, 28876, 28880, 28881, 28886, 31101, 31103, 31149, 31150, 31151, 31158, 31159, 31201, 31202, 31203, 
-                31207, 31213, 31219, 31221, 31227};
+                    1000, 1003, 1005, 1009, 1010, 1011, 1012, 1013, 1014, 1016, 1032, 1033, 1041, 1042, 1043, 1600, 1601, 1603, 1604, 1612, 1614,
+                    1617, 1618, 1619, 1620, 1621, 1624, 1626, 1630, 1659, 2002, 2003, 2004, 2005, 2006, 2007, 2014, 2015, 2063, 2064, 2065, 2066,
+                    2067, 2068, 2071, 2085, 2086, 2090, 2092, 2099, 2103, 2120, 2123, 2125, 2165, 2171, 2172, 2177, 2181, 2272, 2277, 2284, 2288,
+                    2289, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2321, 2322, 2323, 2325, 2326, 2328, 2354, 2356, 2359, 2360, 2361, 2364, 2372,
+                    2373, 2378, 2379, 2381, 2382, 2480, 2481, 2485, 2710, 2712, 2889, 2890, 2891, 3000, 3001, 3002, 3004, 3005, 3006, 3007, 3008,
+                    3009, 3010, 3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019, 3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029,
+                    3030, 3031, 3032, 3033, 3036, 3039, 3040, 3041, 3051, 3070, 3072, 3073, 3075, 3076, 3105, 3107, 3116, 3118, 3123, 3184, 3185,
+                    3186, 3188, 3189, 3190, 3191, 3210, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 3219, 3226, 3231, 3242, 3253, 3254, 3401,
+                    3402, 3403, 3405, 3417, 3423, 3424, 3425, 3427, 3428, 3453, 3454, 3456, 3459, 3460, 3461, 3554, 3610, 3715, 3716, 3719, 3724,
+                    3730, 3736, 3742, 3756, 3757, 3758, 3765, 3767, 3851, 3906, 3910, 4480, 4484, 4486, 4488, 4646, 4900, 4901, 4902, 4903, 4904,
+                    4905, 4906, 4907, 4908, 4909, 4910, 4911, 4951, 6034, 6035, 7100, 8002, 8003, 8007, 8008, 8009, 8010, 8018, 8019, 8020, 8021,
+                    8022, 8023, 8024, 8034, 8035, 8037, 8038, 8041, 8053, 8054, 8055, 8056, 8057, 8058, 8061, 8065, 8066, 8067, 8069, 8072, 8073,
+                    8080, 9160, 9161, 9162, 9163, 9164, 9165, 9166, 9167, 9168, 9170, 9171, 9180, 9181, 9190, 9191, 9300, 9301, 9302, 9303, 9304,
+                    9306, 9370, 9505, 9506, 9507, 9508, 9539, 9544, 9545, 9552, 9553, 9555, 9556, 9557, 9954, 9986, 10001, 10570, 10571, 10572,
+                    10573, 10630, 10631, 10866, 10867, 10868, 10869, 10915, 10931, 11330, 11331, 20532, 21000, 22003, 22005, 22008, 22009, 22403,
+                    22501, 22502, 22503, 22504, 22505, 22508, 22510, 22512, 22513, 22517, 22524, 22540, 22549, 22550, 22551, 22560, 22571, 22581,
+                    22583, 22589, 22592, 28170, 28876, 28880, 28881, 28886, 31101, 31103, 31149, 31150, 31151, 31158, 31159, 31201, 31202, 31203,
+                    31207, 31213, 31219, 31221, 31227};
             for (int i : ss)
-            if (quest.getQuest().getId() == i) {//限制<int name="state" value="2" />和nextquest的任務
-                return;
-            }
+                if (quest.getQuest().getId() == i) {//限制<int name="state" value="2" />和nextquest的任務
+                    return;
+                }
             if (quest.getStatus() == 2) {//完成任務後與NPC完整對話
                 client.getSession().write(CField.updateQuestInfo(this, quest.getQuest().getId(), quest.getNpc(), (byte) 10));
             }
@@ -2181,12 +2183,12 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                                 toRemove.add(summon);
                             }
 
-                             //甦醒
+                            //甦醒
                             if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((getSkillLevel(32111006) / 2) * 1000))) {
                                 map.broadcastMessage(SummonPacket.removeSummon(summon, true));
                                 map.removeMapObject(summon);
                                 visibleMapObjects.remove(summon);
-                                toRemove.add(summon);                                
+                                toRemove.add(summon);
                             }
                         }
                         for (MapleSummon s : toRemove) {
@@ -2219,7 +2221,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     /**
      * @param effect
      * @param overwrite when overwrite is set no data is sent and all the
-     * Buffstats in the StatEffect are deregistered
+     *                  Buffstats in the StatEffect are deregistered
      * @param startTime
      */
     public void cancelEffect(final MapleStatEffect effect, final boolean overwrite, final long startTime) {
@@ -2859,8 +2861,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             MapleTrade.cancelTrade(getTrade(), client, this);
         }
         //if (getQuickMoved()) {
-            client.getSession().write(CField.getQuickMove(new ArrayList<QuickMoveEntry>()));
-            //setQuickMoved(false);
+        client.getSession().write(CField.getQuickMove(new ArrayList<QuickMoveEntry>()));
+        //setQuickMoved(false);
         //}
         final int nowmapid = map.getId();
         if (eventInstance != null) {
@@ -3013,7 +3015,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                     maxhp += 99999;
                     maxmp += 99999;
                     break;
-                }
+            }
             if (maxhp >= 99999) {
                 maxhp = 99999;
             }
@@ -3476,8 +3478,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
      * Convenience function which adds the supplied parameter to the current hp
      * then directly does a updateSingleStat.
      *
-     * @see MapleCharacter#setHp(int)
      * @param delta
+     * @see MapleCharacter#setHp(int)
      */
     public void addHP(int delta) {
         if (stats.setHp(stats.getHp() + delta, this)) {
@@ -3489,8 +3491,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
      * Convenience function which adds the supplied parameter to the current mp
      * then directly does a updateSingleStat.
      *
-     * @see MapleCharacter#setMp(int)
      * @param delta
+     * @see MapleCharacter#setMp(int)
      */
     public void addMP(int delta) {
         addMP(delta, false);
@@ -3857,7 +3859,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             quests.remove(MapleQuest.getInstance(7830));
             quests.remove(MapleQuest.getInstance(GameConstants.PENDANT_SLOT));
         }
-       lastExpirationTime = System.currentTimeMillis();
+        lastExpirationTime = System.currentTimeMillis();
     }
 
     public boolean canExpiration(long now) {
@@ -4518,7 +4520,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ps.close();
             return -1;
         } catch (Exception Ex) {
-          //log.error("Error while read bosslog.", Ex);
+            //log.error("Error while read bosslog.", Ex);
         }
         return -1;
     }
@@ -7417,7 +7419,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     public void cancelFamiliarBuffs() {
         final LinkedList<MapleBuffStatValueHolder> all = new LinkedList<MapleBuffStatValueHolder>(effects.values());
         for (MapleBuffStatValueHolder mbsvh : all) {
-            if (mbsvh.effect.getSourceId() / 10000 == 286){
+            if (mbsvh.effect.getSourceId() / 10000 == 286) {
                 cancelEffect(mbsvh.effect, false, mbsvh.startTime);
             }
         }
@@ -7873,6 +7875,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         }
         return eq;
     }
+
     private transient PlayerRandomStream CRand;
 
     public final PlayerRandomStream CRand() {

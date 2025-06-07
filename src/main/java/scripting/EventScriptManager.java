@@ -21,16 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package scripting;
 
 import handling.channel.ChannelServer;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+
 import tools.FileoutputUtil;
 
 /**
- *
  * @author Matze
  */
 public class EventScriptManager extends AbstractScriptManager {
@@ -42,10 +43,12 @@ public class EventScriptManager extends AbstractScriptManager {
             this.iv = iv;
             this.em = em;
         }
+
         public String script;
         public Invocable iv;
         public EventManager em;
     }
+
     private final Map<String, EventEntry> events = new LinkedHashMap<>();
     private static final AtomicInteger runningInstanceMapId = new AtomicInteger(0);
 

@@ -29,6 +29,7 @@ import constants.GameConstants;
 import database.DatabaseConnection;
 import handling.channel.ChannelServer;
 import handling.world.World;
+
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
@@ -55,7 +57,7 @@ public abstract class AbstractPlayerStore extends MapleMapObject implements IMap
     protected List<BoughtItem> bought = new LinkedList<>();
     protected List<MaplePlayerShopItem> items = new LinkedList<>();
     protected List<Pair<String, Byte>> messages = new LinkedList<Pair<String, Byte>>();
-    
+
     @SuppressWarnings("unchecked")
     public AbstractPlayerStore(MapleCharacter owner, int itemId, String desc, String pass, int slots) {
         this.setPosition(owner.getTruePosition());
@@ -398,7 +400,7 @@ public abstract class AbstractPlayerStore extends MapleMapObject implements IMap
     public List<BoughtItem> getBoughtItems() {
         return bought;
     }
-    
+
     public final List<Pair<String, Byte>> getMessages() {
         return messages;
     }

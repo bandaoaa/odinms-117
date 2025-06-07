@@ -88,7 +88,7 @@ public class MapleFootholdTree {
             }
         }
     }
-	
+
     public final List<MapleFoothold> getAllRelevants() {
         return getAllRelevants(new LinkedList<MapleFoothold>());
     }
@@ -102,7 +102,7 @@ public class MapleFootholdTree {
             se.getAllRelevants(list);
         }
         return list;
-	}
+    }
 
     private List<MapleFoothold> getRelevants(final Point p) {
         return getRelevants(p, new LinkedList<MapleFoothold>());

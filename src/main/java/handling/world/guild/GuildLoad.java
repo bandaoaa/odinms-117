@@ -6,6 +6,7 @@ package handling.world.guild;
 
 import handling.world.World;
 import handling.world.guild.MapleBBSThread.MapleBBSReply;
+
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,14 +24,15 @@ public class GuildLoad {
             Threads[i] = new TimingThread(new GuildLoadRunnable());
         }
     }
+
     private static final AtomicInteger Distribute = new AtomicInteger(0);
 
     public static void QueueGuildForLoad(int hm, Map<Integer, Map<Integer, MapleBBSReply>> replie) {
         int Current = Distribute.getAndIncrement() % NumSavingThreads;
         Threads[Current].getRunnable().Queue(Integer.valueOf(hm));
-	if (replies == null) {
-	    replies = replie;
-	}
+        if (replies == null) {
+            replies = replie;
+        }
     }
 
     public static void Execute(Object ToNotify) {

@@ -26,9 +26,11 @@ import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
+
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
+
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.Randomizer;
@@ -336,7 +338,7 @@ public class MobHandler {
         String newName = slea.readMapleAsciiString();
         if (mf != null && mf.getName().equals(mf.getOriginalName()) && MapleCharacterUtil.isEligibleCharName(newName, false)) {
             mf.setName(newName);
-			c.getSession().write(CField.renameFamiliar(mf));
+            c.getSession().write(CField.renameFamiliar(mf));
         } else {
             chr.dropMessage(1, "Name was not eligible.");
         }
@@ -407,7 +409,7 @@ public class MobHandler {
             }
             for (int damage : attack.right) {
                 //if (damage <= (oStats.getPhysicalAttack() * 4)) { //approx.
-                    mons.damage(chr, damage, true);
+                mons.damage(chr, damage, true);
                 //}
             }
             if (f.makeChanceResult() && mons.isAlive()) {

@@ -24,10 +24,12 @@ import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import constants.GameConstants;
 import handling.SendPacketOpcode;
+
 import java.awt.Point;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import server.life.MapleMonster;
 import server.life.MobSkill;
 import server.maps.MapleMap;
@@ -65,7 +67,7 @@ public class MobPacket {
             mplew.writeInt(damage);
         }
         if (mob.getHp() > Integer.MAX_VALUE) {
-            mplew.writeInt((int)((mob.getHp() / mob.getMobMaxHp()) * Integer.MAX_VALUE));
+            mplew.writeInt((int) ((mob.getHp() / mob.getMobMaxHp()) * Integer.MAX_VALUE));
         } else {
             mplew.writeInt((int) mob.getHp());
         }
@@ -260,9 +262,9 @@ public class MobPacket {
 
         return mplew.getPacket();
     }
-    
-    
-        public static byte[] movePokemon(int oid, Point startPos, List<LifeMovementFragment> moves) {
+
+
+    public static byte[] movePokemon(int oid, Point startPos, List<LifeMovementFragment> moves) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
         mplew.writeShort(SendPacketOpcode.MOVE_MONSTER.getValue());
@@ -279,7 +281,7 @@ public class MobPacket {
 
         return mplew.getPacket();
     }
-    
+
 
     public static byte[] spawnMonster(MapleMonster life, int spawnType, int link) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
@@ -298,7 +300,7 @@ public class MobPacket {
             mplew.writeInt(link);
         }
         mplew.write(life.getCarnivalTeam());
-        
+
         if (life.getStats().isPatrol()) {
             mplew.writeInt(life.getPatrolScopeX1());
             mplew.writeInt(life.getPatrolScopeX2());
@@ -353,13 +355,13 @@ public class MobPacket {
                     }
                 }
                 if (buff.getStati() != MonsterStatus.EMPTY_7) {
-                mplew.writeShort(buff.getStati() == MonsterStatus.HYPNOTIZE ? 40 : (buff.getStati().isEmpty() ? 0 : 1));
-                if (buff.getStati() == MonsterStatus.EMPTY_1 || buff.getStati() == MonsterStatus.EMPTY_3) {
-                    mplew.writeShort(0);
-                } else if (buff.getStati() == MonsterStatus.EMPTY_4 || buff.getStati() == MonsterStatus.EMPTY_5) {
-                    mplew.writeInt(0);
+                    mplew.writeShort(buff.getStati() == MonsterStatus.HYPNOTIZE ? 40 : (buff.getStati().isEmpty() ? 0 : 1));
+                    if (buff.getStati() == MonsterStatus.EMPTY_1 || buff.getStati() == MonsterStatus.EMPTY_3) {
+                        mplew.writeShort(0);
+                    } else if (buff.getStati() == MonsterStatus.EMPTY_4 || buff.getStati() == MonsterStatus.EMPTY_5) {
+                        mplew.writeInt(0);
+                    }
                 }
-            }
             }
         }
     }

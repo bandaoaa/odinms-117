@@ -43,9 +43,11 @@ import handling.world.family.MapleFamilyBuff;
 import handling.world.family.MapleFamilyCharacter;
 import handling.world.guild.MapleBBSThread.MapleBBSReply;
 import handling.world.guild.*;
+
 import java.awt.Point;
 import java.util.*;
 import java.util.Map.Entry;
+
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
 import server.StructFamiliar;
@@ -58,7 +60,6 @@ import tools.StringUtil;
 import tools.data.MaplePacketLittleEndianWriter;
 
 /**
- *
  * @author AlphaEta
  */
 public class CWvsContext {
@@ -79,7 +80,7 @@ public class CWvsContext {
 
     public static byte[] professionInfo(String skil, int level1, int level2, int chance) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
- 
+
         mplew.writeShort(SendPacketOpcode.PROFESSION_INFO.getValue());
         mplew.writeMapleAsciiString(skil);
         mplew.writeInt(level1);
@@ -99,7 +100,7 @@ public class CWvsContext {
         mplew.write(levelup ? 1 : 0);
 
         return mplew.getPacket();
-    } 
+    }
 
     public static byte[] updateStolenSkills(int mode) {
         return updateStolenSkills(mode, 0, 0, 0);
@@ -484,9 +485,9 @@ public class CWvsContext {
 
     public static class BuffPacket {
 
-    /*
-     幸運骰子   
-    */  
+        /*
+         幸運骰子
+        */
         public static byte[] giveDice(int buffid, int skillid, int duration, Map<MapleBuffStat, Integer> statups) {
             MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
             mplew.writeShort(SendPacketOpcode.GIVE_BUFF.getValue());
@@ -512,9 +513,9 @@ public class CWvsContext {
             return mplew.getPacket();
         }
 
-    /*
-     卡牌審判   
-    */    
+        /*
+         卡牌審判
+        */
         public static byte[] giveCard(int buffid, int bufflength, Map<MapleBuffStat, Integer> statups, MapleStatEffect effect) {
             MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
             mplew.writeShort(SendPacketOpcode.GIVE_BUFF.getValue());
@@ -539,9 +540,9 @@ public class CWvsContext {
             return mplew.getPacket();
         }
 
-    /*
-     靈魂竊取  
-    */  
+        /*
+         靈魂竊取
+        */
         public static byte[] soulSteel(int buffid, int bufflength, int buffeffect, Map<MapleBuffStat, Integer> statups) {
             MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
             mplew.writeShort(SendPacketOpcode.GIVE_BUFF.getValue());
@@ -561,9 +562,9 @@ public class CWvsContext {
             return mplew.getPacket();
         }
 
-    /*
-     襲殺翼  
-    */   
+        /*
+         襲殺翼
+        */
         public static byte[] giveHoming(int skillid, int mobid, int x) {
             MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
@@ -1007,33 +1008,57 @@ public class CWvsContext {
         public static byte[] GainEXP_Monster(final int gain, final boolean white, final int partyinc, final int Class_Bonus_EXP, final int Equipment_Bonus_EXP, final int Premium_Bonus_EXP) {
             final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
-/*  894 */       mplew.writeShort(SendPacketOpcode.SHOW_STATUS_INFO.getValue());
-/*  895 */       mplew.write(3);
-/*  896 */       mplew.write(white ? 1 : 0);
-/*  897 */       mplew.writeInt(gain);
-/*  898 */       mplew.write(0);
-/*  899 */       mplew.writeInt(0);
-/*  900 */       mplew.write(0);
-/*  901 */       mplew.write(0);
-/*  902 */       mplew.writeInt(0);
-/*  903 */       mplew.write(0);
-/*  904 */       mplew.writeInt(partyinc);
-/*      */ 
-/*  906 */       mplew.writeInt(Equipment_Bonus_EXP);
-/*  907 */       mplew.writeInt(0);
-/*  908 */       mplew.writeInt(0);
-/*  909 */       mplew.write(0);
-/*  910 */       mplew.writeInt(0);
-/*  911 */       mplew.writeInt(0);
-/*  912 */       mplew.writeInt(0);
-/*      */ 
-/*  915 */       mplew.writeInt(0);
-/*  916 */       mplew.writeInt(0);
-/*  917 */       mplew.writeInt(0);
-/*  918 */       mplew.writeInt(0);
-/*  919 */       mplew.writeInt(Premium_Bonus_EXP);
-/*  920 */       mplew.writeInt(0);
-/*      */ 
+            /*  894 */
+            mplew.writeShort(SendPacketOpcode.SHOW_STATUS_INFO.getValue());
+            /*  895 */
+            mplew.write(3);
+            /*  896 */
+            mplew.write(white ? 1 : 0);
+            /*  897 */
+            mplew.writeInt(gain);
+            /*  898 */
+            mplew.write(0);
+            /*  899 */
+            mplew.writeInt(0);
+            /*  900 */
+            mplew.write(0);
+            /*  901 */
+            mplew.write(0);
+            /*  902 */
+            mplew.writeInt(0);
+            /*  903 */
+            mplew.write(0);
+            /*  904 */
+            mplew.writeInt(partyinc);
+            /*      */
+            /*  906 */
+            mplew.writeInt(Equipment_Bonus_EXP);
+            /*  907 */
+            mplew.writeInt(0);
+            /*  908 */
+            mplew.writeInt(0);
+            /*  909 */
+            mplew.write(0);
+            /*  910 */
+            mplew.writeInt(0);
+            /*  911 */
+            mplew.writeInt(0);
+            /*  912 */
+            mplew.writeInt(0);
+            /*      */
+            /*  915 */
+            mplew.writeInt(0);
+            /*  916 */
+            mplew.writeInt(0);
+            /*  917 */
+            mplew.writeInt(0);
+            /*  918 */
+            mplew.writeInt(0);
+            /*  919 */
+            mplew.writeInt(Premium_Bonus_EXP);
+            /*  920 */
+            mplew.writeInt(0);
+            /*      */
 
             return mplew.getPacket();
         }
@@ -1218,7 +1243,7 @@ public class CWvsContext {
             mplew.writeMapleAsciiString(charName);
             mplew.writeInt(levelFrom);
             mplew.writeInt(jobFrom);
-mplew.writeInt(0);
+            mplew.writeInt(0);
             return mplew.getPacket();
         }
 
@@ -1711,11 +1736,11 @@ mplew.writeInt(0);
             for (MaplePartyCharacter partychar : partymembers) {
                 lew.writeInt(partychar.getJobId()); // 24
             }
-            
-                        for (MaplePartyCharacter partychar : partymembers) {
+
+            for (MaplePartyCharacter partychar : partymembers) {
                 lew.writeInt(0); // 24
             }
-            
+
             for (MaplePartyCharacter partychar : partymembers) {
                 lew.writeInt(partychar.getLevel()); // 24
             }
@@ -2307,7 +2332,7 @@ mplew.writeInt(0);
                 mplew.writeInt(1); //times used, but if 0 it still records!
             }
             mplew.writeShort(2);
-mplew.writeZeroBytes(100);
+            mplew.writeZeroBytes(100);
             return mplew.getPacket();
         }
 
@@ -2742,7 +2767,7 @@ mplew.writeZeroBytes(100);
         mplew.writeInt(2);//this makes it read the itemId
         mplew.writeInt(itemId);
         return mplew.getPacket();
-    }  
+    }
 
     /*
     重繪角色内容
@@ -2775,7 +2800,7 @@ mplew.writeZeroBytes(100);
                     mplew.writeShort(statupdate.getValue().shortValue());
                     break;
                 case AVAILABLESP:
-                    if (GameConstants.isEvan(chr.getJob()) || GameConstants.isResist(chr.getJob()) || GameConstants.isMercedes(chr.getJob())  || GameConstants.isJett(chr.getJob()) || GameConstants.isPhantom(chr.getJob()) || GameConstants.isMihile(chr.getJob())) {
+                    if (GameConstants.isEvan(chr.getJob()) || GameConstants.isResist(chr.getJob()) || GameConstants.isMercedes(chr.getJob()) || GameConstants.isJett(chr.getJob()) || GameConstants.isPhantom(chr.getJob()) || GameConstants.isMihile(chr.getJob())) {
                         mplew.write(chr.getRemainingSpSize());
                         for (int i = 0; i < chr.getRemainingSps().length; i++) {
                             if (chr.getRemainingSp(i) > 0) {
@@ -3808,7 +3833,7 @@ mplew.writeZeroBytes(100);
         for (Integer i : items) {
             mplew.writeInt(i);
         }
-        mplew.writeMapleAsciiString(unique+"");
+        mplew.writeMapleAsciiString(unique + "");
         mplew.write(random);
         return mplew.getPacket();
     }
@@ -3960,11 +3985,11 @@ mplew.writeZeroBytes(100);
     public static byte[] loadInformation(int location, int what, int birthday, int found) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.YOUR_INFORMATION.getValue());
-        mplew.write(2); 
-        mplew.writeInt(location); 
-        mplew.writeInt(birthday); 
-        mplew.writeInt(what); 
-        mplew.writeInt(found); 
+        mplew.write(2);
+        mplew.writeInt(location);
+        mplew.writeInt(birthday);
+        mplew.writeInt(what);
+        mplew.writeInt(found);
         return mplew.getPacket();
     }
 
@@ -3993,13 +4018,13 @@ mplew.writeZeroBytes(100);
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
         mplew.writeShort(SendPacketOpcode.FIND_FRIEND.getValue());
-        mplew.write(8); 
-        mplew.writeShort(friends.size()); 
+        mplew.write(8);
+        mplew.writeShort(friends.size());
         for (MapleCharacter mc : friends) {
-            mplew.writeInt(mc.getId()); 
-            mplew.writeMapleAsciiString(mc.getName()); 
-            mplew.write(mc.getLevel()); 
-            mplew.writeShort(mc.getJob()); 
+            mplew.writeInt(mc.getId());
+            mplew.writeMapleAsciiString(mc.getName());
+            mplew.write(mc.getLevel());
+            mplew.writeShort(mc.getJob());
             mplew.writeInt(mc.getTODO());
             mplew.writeInt(mc.getFOUND());
         }

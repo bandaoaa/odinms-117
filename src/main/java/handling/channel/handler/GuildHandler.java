@@ -27,10 +27,12 @@ import client.SkillFactory;
 import handling.world.World;
 import handling.world.guild.MapleGuild;
 import handling.world.guild.MapleGuildResponse;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import server.MapleStatEffect;
 import tools.Pair;
 import tools.data.LittleEndianAccessor;
@@ -63,8 +65,9 @@ public class GuildHandler {
             return;
         }
         mc.getMap().broadcastMessage(CField.loadGuildName(mc));
-		mc.getMap().broadcastMessage(CField.loadGuildIcon(mc));
+        mc.getMap().broadcastMessage(CField.loadGuildIcon(mc));
     }
+
     private static final Map<String, Pair<Integer, Long>> invited = new HashMap<>();
     private static long nextPruneTime = System.currentTimeMillis() + 5 * 60 * 1000;
 
@@ -109,7 +112,7 @@ public class GuildHandler {
                 World.Guild.setGuildMemberOnline(c.getPlayer().getMGC(), true, c.getChannel());
                 //c.getSession().write(GuildPacket.showGuildInfo(c.getPlayer()));
                 c.getSession().write(GuildPacket.newGuildInfo(c.getPlayer()));
-		World.Guild.gainGP(c.getPlayer().getGuildId(), 500, c.getPlayer().getId());
+                World.Guild.gainGP(c.getPlayer().getGuildId(), 500, c.getPlayer().getId());
                 //c.getPlayer().dropMessage(1, "You have successfully created a Guild.");
                 //respawnPlayer(c.getPlayer());
                 break;

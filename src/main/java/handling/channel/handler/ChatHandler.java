@@ -30,12 +30,14 @@ import handling.channel.ChannelServer;
 import handling.world.MapleMessenger;
 import handling.world.MapleMessengerCharacter;
 import handling.world.World;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import tools.data.LittleEndianAccessor;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
@@ -57,14 +59,14 @@ public class ChatHandler {
                             chr.getMap().broadcastGMMessage(chr, CWvsContext.serverNotice(2, chr.getName() + " : " + text), true);
                         }
                     } else {
-                         chr.getMap().broadcastGMMessage(chr, CField.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), true);
+                        chr.getMap().broadcastGMMessage(chr, CField.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), true);
                     }
                 } else {
                     if (chr.isIntern() && !chr.isSuperGM() && unk == 0 && chr.gethiddenGM() == 0) {
                         chr.getMap().broadcastMessage(CField.getChatText(chr.getId(), text, false, (byte) 1), c.getPlayer().getTruePosition());
                         if (unk == 0) {
                             chr.getMap().broadcastMessage(CWvsContext.serverNotice(2, chr.getName() + " : " + text), c.getPlayer().getTruePosition());
-                        }                                           
+                        }
                     } else {
                         chr.getMap().broadcastMessage(CField.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), c.getPlayer().getTruePosition());
                     }
@@ -87,7 +89,7 @@ public class ChatHandler {
         for (byte i = 0; i < numRecipients; i++) {
             recipients[i] = slea.readInt();
         }
-         String chattext = slea.readMapleAsciiString();
+        String chattext = slea.readMapleAsciiString();
         if (chr == null || !chr.getCanTalk()) {
             c.getSession().write(CWvsContext.serverNotice(6, "You have been muted and are therefore unable to talk."));
             return;
@@ -289,7 +291,7 @@ public class ChatHandler {
                     } else {
                         c.getSession().write(CField.getWhisperReply(recipient, (byte) 1));
                     }
-                   /*
+                    /*
                      * if (c.isMonitored()) {
                      * World.Broadcast.broadcastGMMessage(CWvsContext.serverNotice(6,
                      * c.getPlayer().getName() + " whispered " + recipient + " :

@@ -24,8 +24,10 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.Item;
 import client.inventory.ItemFlag;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import server.MapleInventoryManipulator;
 import tools.packet.PlayerShopPacket;
 

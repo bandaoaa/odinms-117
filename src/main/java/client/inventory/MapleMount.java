@@ -23,11 +23,13 @@ package client.inventory;
 import client.MapleBuffStat;
 import client.MapleCharacter;
 import database.DatabaseConnection;
+
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
 import server.Randomizer;
 import tools.packet.CWvsContext;
 
@@ -116,15 +118,15 @@ public class MapleMount implements Serializable {
     }
 
     public final boolean canTire(long now) {
-	return lastFatigue > 0 && lastFatigue + 30000 < now;
+        return lastFatigue > 0 && lastFatigue + 30000 < now;
     }
 
     public void startSchedule() {
-	lastFatigue = System.currentTimeMillis();
+        lastFatigue = System.currentTimeMillis();
     }
 
     public void cancelSchedule() {
-	lastFatigue = 0;
+        lastFatigue = 0;
     }
 
     public void increaseExp() {

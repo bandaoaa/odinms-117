@@ -1,16 +1,17 @@
 package server;
 
 import constants.GameConstants;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+
 import database.DatabaseConnection;
 
 /**
- *
  * @author Emilyx3
  */
 public class ServerProperties {
@@ -21,11 +22,11 @@ public class ServerProperties {
     }
 
     static {
-        String toLoad = "channel.properties";
+        String toLoad = "config.properties";
         loadProperties(toLoad);
-		if (getProperty("GMS") != null) {
-			GameConstants.GMS = Boolean.parseBoolean(getProperty("GMS"));
-		}
+        if (getProperty("GMS") != null) {
+            GameConstants.GMS = Boolean.parseBoolean(getProperty("GMS"));
+        }
       /*  try {
             PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("SELECT * FROM auth_server_channel_ip");
             ResultSet rs = ps.executeQuery();
@@ -42,7 +43,7 @@ public class ServerProperties {
             ex.printStackTrace();
             System.exit(0); //Big ass error.
         }*/
-        toLoad = GameConstants.GMS ? "server.properties" : "server.properties";
+        toLoad = GameConstants.GMS ? "config.properties" : "config.properties";
         loadProperties(toLoad);
 
     }

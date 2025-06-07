@@ -24,6 +24,7 @@ import client.*;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.lang.ref.WeakReference;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
 import server.Randomizer;
@@ -56,7 +58,7 @@ public class SummonHandler {
             if (!chr.isHidden()) {
                 chr.getMap().broadcastMessage(chr, CField.moveDragon(chr.getDragon(), pos, res), chr.getTruePosition());
             }
-            
+
         }
     }
 
@@ -104,9 +106,9 @@ public class SummonHandler {
 
         //甦醒
         if (sum.isReaper() && (System.currentTimeMillis() - sum.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
-        chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
-        chr.getMap().removeMapObject(sum);
-        chr.removeSummon(sum);                                
+            chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
+            chr.getMap().removeMapObject(sum);
+            chr.removeSummon(sum);
         }
     }
 
@@ -127,8 +129,8 @@ public class SummonHandler {
                 if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
                     chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
                     chr.getMap().removeMapObject(summon);
-                    chr.removeSummon(summon);                                
-                    }
+                    chr.removeSummon(summon);
+                }
 
                 if (summon.isPuppet() && summon.getOwnerId() == chr.getId() && damage > 0) { //We can only have one puppet(AFAIK O.O) so this check is safe.
                     summon.addHP((short) -damage);
@@ -175,7 +177,7 @@ public class SummonHandler {
         }
 
         //if (sse != null && sse.delay > 0) {
-            slea.readInt();
+        slea.readInt();
         //}
 
         if (!GameConstants.GMS) {
@@ -207,7 +209,7 @@ public class SummonHandler {
             allDamage.add(new Pair<Integer, Integer>(mob.getObjectId(), damge));
         }
         //if (!summon.isChangedMap()) {
-            map.broadcastMessage(chr, SummonPacket.summonAttack(summon.getOwnerId(), summon.getObjectId(), animation, allDamage, chr.getLevel(), false), summon.getTruePosition());
+        map.broadcastMessage(chr, SummonPacket.summonAttack(summon.getOwnerId(), summon.getObjectId(), animation, allDamage, chr.getLevel(), false), summon.getTruePosition());
         //}
         final Skill summonSkill = SkillFactory.getSkill(summon.getSkill());
         final MapleStatEffect summonEffect = summonSkill.getEffect(summon.getSkillLevel());
@@ -222,8 +224,8 @@ public class SummonHandler {
                 continue;
             }
             //if (sse != null && sse.delay > 0 && summon.getMovementType() != SummonMovementType.STATIONARY && summon.getMovementType() != SummonMovementType.CIRCLE_STATIONARY && summon.getMovementType() != SummonMovementType.WALK_STATIONARY && chr.getTruePosition().distanceSq(mob.getTruePosition()) > 400000.0) {
-           //     chr.getCheatTracker().registerOffense(CheatingOffense.ATTACK_FARAWAY_MONSTER_SUMMON);
-           // }
+            //     chr.getCheatTracker().registerOffense(CheatingOffense.ATTACK_FARAWAY_MONSTER_SUMMON);
+            // }
             if (toDamage > 0 && summonEffect.getMonsterStati().size() > 0) {
                 if (summonEffect.makeChanceResult()) {
                     for (Map.Entry<MonsterStatus, Integer> z : summonEffect.getMonsterStati().entrySet()) {
@@ -241,7 +243,7 @@ public class SummonHandler {
                 chr.dropMessage(5, "Warning - high damage.");
                 //AutobanManager.getInstance().autoban(c, "High Summon Damage (" + toDamage + " to " + attackEntry.right + ")");
                 // TODO : Check player's stat for damage checking.
-              //  break;
+                //  break;
             }
         }
         if (!summon.isMultiAttack()) {
@@ -256,9 +258,9 @@ public class SummonHandler {
 
         //甦醒
         if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
-        chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
-        chr.getMap().removeMapObject(summon);
-        chr.removeSummon(summon);                                
+            chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+            chr.getMap().removeMapObject(summon);
+            chr.removeSummon(summon);
         }
     }
 
@@ -296,7 +298,7 @@ public class SummonHandler {
         }
 
         //甦醒
-        if (sum.isReaper() && (System.currentTimeMillis() - sum.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {        
+        if (sum.isReaper() && (System.currentTimeMillis() - sum.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
             chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
             chr.getMap().removeMapObject(sum);
             chr.removeSummon(sum);
@@ -503,7 +505,7 @@ public class SummonHandler {
         if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
             chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
             chr.getMap().removeMapObject(summon);
-            chr.removeSummon(summon);                                
+            chr.removeSummon(summon);
         }
     }
 }

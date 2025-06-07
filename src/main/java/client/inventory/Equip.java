@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client.inventory;
 
 import constants.GameConstants;
+
 import java.io.Serializable;
+
 import server.Randomizer;
 
 public class Equip extends Item implements Serializable {
@@ -30,6 +32,7 @@ public class Equip extends Item implements Serializable {
 
         SUCCESS, FAIL, CURSE
     }
+
     public static final int ARMOR_RATIO = 350000;
     public static final int WEAPON_RATIO = 700000;
     //charm: -1 = has not been initialized yet, 0 = already been worn, >0 = has teh charm exp
@@ -47,7 +50,7 @@ public class Equip extends Item implements Serializable {
     public Equip(int id, short position, int uniqueid, short flag) {
         super(id, position, (short) 1, flag, uniqueid);
     }
-    
+
     @Override
     public Item copy() {
         Equip ret = new Equip(getItemId(), getPosition(), getUniqueId(), getFlag());

@@ -21,11 +21,13 @@ import handling.world.guild.MapleBBSThread;
 import handling.world.guild.MapleGuild;
 import handling.world.guild.MapleGuildAlliance;
 import handling.world.guild.MapleGuildCharacter;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import server.Timer.WorldTimer;
 import server.life.MapleMonster;
 import server.maps.MapleMap;
@@ -78,7 +80,6 @@ public class World {
         ret.put(0, total);
         return ret;
     }
-
 
 
     public static boolean isConnected(String charName) {
@@ -1058,7 +1059,7 @@ public class World {
 
         public static void changeEmblem(int gid, int affectedPlayers, MapleGuild mgs) {
             Broadcast.sendGuildPacket(affectedPlayers, GuildPacket.guildEmblemChange(gid, (short) mgs.getLogoBG(), (byte) mgs.getLogoBGColor(), (short) mgs.getLogo(), (byte) mgs.getLogoColor()), -1, gid);
-            setGuildAndRank(affectedPlayers, -1, -1, -1, -1);	//respawn player
+            setGuildAndRank(affectedPlayers, -1, -1, -1, -1);    //respawn player
         }
 
         public static void setGuildAndRank(int cid, int guildid, int rank, int contribution, int alliancerank) {
@@ -1084,7 +1085,7 @@ public class World {
             }
             if (bDifferentGuild && ch > 0) {
                 mc.getMap().broadcastMessage(mc, CField.loadGuildName(mc), false);
-				mc.getMap().broadcastMessage(mc, CField.loadGuildIcon(mc), false);
+                mc.getMap().broadcastMessage(mc, CField.loadGuildIcon(mc), false);
             }
         }
     }
@@ -1633,6 +1634,7 @@ public class World {
             }
         }
     }
+
     private final static int CHANNELS_PER_THREAD = 3;
 
     public static void registerRespawn() {

@@ -18,19 +18,20 @@
 package client;
 
 import constants.GameConstants;
+
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import server.CharacterCardFactory;
 import tools.Pair;
 import tools.Triple;
 import tools.data.MaplePacketLittleEndianWriter;
 
 /**
- *
  * @author AlphaEta
  */
 public class MapleCharacterCards {

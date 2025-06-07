@@ -22,8 +22,10 @@ package handling.channel.handler;
 
 import client.*;
 import constants.GameConstants;
+
 import java.util.EnumMap;
 import java.util.Map;
+
 import server.Randomizer;
 import tools.Pair;
 import tools.data.LittleEndianAccessor;
@@ -140,8 +142,8 @@ public class StatsHandling {
         boolean isBeginnerSkill = false;
         final int remainingSp;
         //if (chr.isGM()) {
-            chr.dropMessage(6, "Skill ID" + skillid);
-            //}
+        chr.dropMessage(6, "Skill ID" + skillid);
+        //}
         if (GameConstants.isBeginnerJob(skillid / 10000) && (skillid % 10000 == 1000 || skillid % 10000 == 1001 || skillid % 10000 == 1002 || skillid % 10000 == 2)) {
             final boolean resistance = skillid / 10000 == 3000 || skillid / 10000 == 3001;
             final int snailsLevel = chr.getSkillLevel(SkillFactory.getSkill(((skillid / 10000) * 10000) + 1000));
@@ -165,7 +167,7 @@ public class StatsHandling {
         final int maxlevel = skill.isFourthJob() ? chr.getMasterLevel(skill) : skill.getMaxLevel();
         final int curLevel = chr.getSkillLevel(skill);
 
-        if (skill.isInvisible() && chr.getSkillLevel(skill) == 0 && maxlevel !=1) { //過濾騎士團最大等級為1等級的新技能
+        if (skill.isInvisible() && chr.getSkillLevel(skill) == 0 && maxlevel != 1) { //過濾騎士團最大等級為1等級的新技能
             if ((skill.isFourthJob() && chr.getMasterLevel(skill) == 0) || (!skill.isFourthJob() && maxlevel < 10 && !isBeginnerSkill)) {
                 c.getSession().write(CWvsContext.enableActions());
                 //AutobanManager.getInstance().addPoints(c, 1000, 0, "Illegal distribution of SP to invisible skills (" + skillid + ")");

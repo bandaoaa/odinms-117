@@ -13,10 +13,12 @@ import handling.channel.ChannelServer;
 import handling.login.LoginServer;
 import handling.world.CharacterTransfer;
 import handling.world.World;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import scripting.NPCScriptManager;
 import server.*;
 import tools.FileoutputUtil;
@@ -43,7 +45,7 @@ public class CashShopOperation {
             chr.saveToDB(false, true);
             c.setPlayer(null);
             c.setReceiving(false);
-         //   c.getSession().close(true);
+            //   c.getSession().close(true);
         }
     }
 
@@ -64,11 +66,11 @@ public class CashShopOperation {
         c.setPlayer(chr);
         c.setAccID(chr.getAccountID());
 
-       if (!c.CheckIPAddress()) { // Remote hack
+        if (!c.CheckIPAddress()) { // Remote hack
             System.out.println("Something fk with ip hack");
-           c.getSession().close();
-           return;
-       }
+            c.getSession().close();
+            return;
+        }
 
         final int state = c.getLoginState();
         boolean allowLogin = false;
@@ -81,7 +83,7 @@ public class CashShopOperation {
             return;
         }
         c.updateLoginState(MapleClient.LOGIN_LOGGEDIN, c.getSessionIPAddress());
-       // System.out.println("Something fk with sth login");
+        // System.out.println("Something fk with sth login");
         if (mts) {
             CashShopServer.getPlayerStorageMTS().registerPlayer(chr);
             c.getSession().write(MTSCSPacket.startMTS(chr));
@@ -255,7 +257,7 @@ public class CashShopOperation {
             final boolean coupon = slea.readByte() > 0;
             if (coupon) {
                 final MapleInventoryType type = getInventoryType(slea.readInt());
-                int itemsCount = chr.getInventory(type).getNumFreeSlot() + chr.getInventory(type).list().size();    
+                int itemsCount = chr.getInventory(type).getNumFreeSlot() + chr.getInventory(type).list().size();
                 if (chr.getCSPoints(toCharge) >= (GameConstants.GMS ? 6000 : 12000) && chr.getInventory(type).getSlotLimit() < 89) {
                     chr.modifyCSPoints(toCharge, (GameConstants.GMS ? -6000 : -12000), false);
                     chr.getInventory(type).addSlot((byte) 8);
@@ -296,11 +298,11 @@ public class CashShopOperation {
                 doCSPackets(c);
                 return;
             }
-           // if (c.gainCharacterSlot()) {
-             //   c.getPlayer().modifyCSPoints(toCharge, -item.getPrice(), false);
-               // chr.dropMessage(1, "Character slots increased to: " + (slots + 1));
+            // if (c.gainCharacterSlot()) {
+            //   c.getPlayer().modifyCSPoints(toCharge, -item.getPrice(), false);
+            // chr.dropMessage(1, "Character slots increased to: " + (slots + 1));
             //} else {
-                c.getSession().write(MTSCSPacket.sendCSFail(0));
+            c.getSession().write(MTSCSPacket.sendCSFail(0));
             //}
             /*} else if (action == 9) { //...9 = pendant slot expansion
             slea.readByte();
@@ -497,13 +499,13 @@ public class CashShopOperation {
             c.getSession().write(MTSCSPacket.showBoughtCSQuestItem(item.getPrice(), (short) item.getCount(), pos, item.getId()));
         } else if (action == 48) {
             c.getSession().write(MTSCSPacket.updatePurchaseRecord());
-                    } else if (action == 10) { // Open random box.
+        } else if (action == 10) { // Open random box.
             c.getPlayer().dropMessage(1, "Sorry, this feature is not available.");
-			
+
         } else if (action == 91) { // Open random box.
             final int uniqueid = (int) slea.readLong();
-			
-			//c.getSession().write(MTSCSPacket.sendRandomBox(uniqueid, new Item(1302000, (short) 1, (short) 1, (short) 0, 10), (short) 0));
+
+            //c.getSession().write(MTSCSPacket.sendRandomBox(uniqueid, new Item(1302000, (short) 1, (short) 1, (short) 0, 10), (short) 0));
         } else {
             System.out.println("New Action: " + action + " Remaining: " + slea.toString());
             c.getSession().write(MTSCSPacket.sendCSFail(0));
@@ -542,7 +544,7 @@ public class CashShopOperation {
             CashShopOperation.doCSPackets(c);
             return;
         }
-        if(slea.available() <= 2) {
+        if (slea.available() <= 2) {
             CashShopOperation.doCSPackets(c);
             return;
         }
@@ -577,7 +579,7 @@ public class CashShopOperation {
         CashShopOperation.doCSPackets(c);
     }
 
-    public static final void UseGachapon(final LittleEndianAccessor slea, MapleClient c){ 
+    public static final void UseGachapon(final LittleEndianAccessor slea, MapleClient c) {
         int type = slea.readInt();
         if (c.getPlayer().getInventory(GameConstants.getInventoryType(type)).countById(type) < 1) {
             return;

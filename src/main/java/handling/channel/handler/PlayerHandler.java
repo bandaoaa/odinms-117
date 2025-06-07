@@ -27,6 +27,7 @@ import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import constants.GameConstants;
 import handling.channel.ChannelServer;
+
 import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+
 import server.*;
 import server.Timer.PokeTimer;
 import server.Timer.WorldTimer;
@@ -240,7 +242,7 @@ public class PlayerHandler {
         final MapleCharacter player = c.getPlayer().getMap().getCharacterById(objectid);
         c.getSession().write(CWvsContext.enableActions());
         if (player != null) {
-                c.getSession().write(CWvsContext.charInfo(player, c.getPlayer().getId() == objectid));
+            c.getSession().write(CWvsContext.charInfo(player, c.getPlayer().getId() == objectid));
         }
     }
 
@@ -284,7 +286,7 @@ public class PlayerHandler {
             if (attacker == null || attacker.getId() != monsteridfrom || attacker.getLinkCID() > 0 || attacker.isFake() || attacker.getStats().isFriendly()) {
                 return;
             }
-            if (attacker.getId() == 9400809 || attacker.getId() ==  9300498 || attacker.getId() == 9300507) {
+            if (attacker.getId() == 9400809 || attacker.getId() == 9300498 || attacker.getId() == 9300507) {
                 List<BanishInfo> infos = attacker.getStats().getBanishInfo();
                 BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
                 if (info != null) {
@@ -295,7 +297,7 @@ public class PlayerHandler {
                 final MobAttackInfo attackInfo = attacker.getStats().getMobAttack(type);
                 if (attackInfo != null) {
                     if (attackInfo.isElement && stats.TER > 0 && Randomizer.nextInt(100) < stats.TER) {
-                 //       System.out.println("Avoided ER from mob id: " + monsteridfrom);
+                        //       System.out.println("Avoided ER from mob id: " + monsteridfrom);
                         return;
                     }
                     if (attackInfo.isDeadlyAttack()) {
@@ -588,11 +590,11 @@ public class PlayerHandler {
             skillid += Randomizer.nextInt(3);
         }
         if (skillid == 5211011) { //召喚船員
-            int bla = Randomizer.nextInt(10); 
+            int bla = Randomizer.nextInt(10);
             if (bla > 5) {
-            skillid += 4 + (int) (Math.random() * ((5 - 4) + 1)); 
+                skillid += 4 + (int) (Math.random() * ((5 - 4) + 1));
             } else {
-               skillid = 5211011;
+                skillid = 5211011;
             }
         }
         int skillLevel = slea.readByte();
@@ -601,7 +603,7 @@ public class PlayerHandler {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-        
+
         //PVP冰騎士相關
         if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0 || chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) != skillLevel) {
             if (!GameConstants.isMulungSkill(skillid) && !GameConstants.isPyramidSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
@@ -672,7 +674,7 @@ public class PlayerHandler {
                 chr.getMap().broadcastMessage(chr, EffectPacket.showBuffeffect(chr.getId(), skillid, 1, chr.getLevel(), skillLevel, slea.readByte()), chr.getTruePosition());
                 c.getSession().write(CWvsContext.enableActions());
                 break;
-            case 24121007:{  //靈魂竊取
+            case 24121007: {  //靈魂竊取
                 slea.skip(4);
                 MapleMonster mob;
                 byte mobcountPhantom = slea.readByte();
@@ -896,7 +898,7 @@ public class PlayerHandler {
             chr.getMap().broadcastGMMessage(chr, CField.closeRangeAttack(chr.getId(), attack.tbyte, attack.skill, skillLevel, attack.display, attack.speed, attack.allDamage, energy, chr.getLevel(), chr.getStat().passive_mastery(), attack.unk, attack.charge), false);
         }
         DamageParse.applyAttack(attack, skill, c.getPlayer(), attackCount, maxdamage, effect, mirror ? AttackType.NON_RANGED_WITH_MIRROR : AttackType.NON_RANGED);
-            
+
     }
 
     public static void rangedAttack(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
@@ -1092,7 +1094,7 @@ public class PlayerHandler {
             }
         }
         DamageParse.applyAttack(attack, skill, chr, bulletCount, basedamage, effect, ShadowPartner != null ? AttackType.RANGED_WITH_SHADOWPARTNER : AttackType.RANGED);
-    
+
     }
 
     public static void MagicDamage(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
@@ -1159,7 +1161,7 @@ public class PlayerHandler {
         }
         chr.gainMeso(-meso, false, true);
         chr.getMap().spawnMesoDrop(meso, chr.getTruePosition(), chr, chr, true, (byte) 0);
-       // chr.getCheatTracker().checkDrop(true);
+        // chr.getCheatTracker().checkDrop(true);
     }
 
     public static void ChangeAndroidEmotion(final int emote, final MapleCharacter chr) {
@@ -1288,7 +1290,7 @@ public class PlayerHandler {
                 c.getPlayer().setFallCounter(0);
             }
             c.getPlayer().setOldPosition(pos);
-                 
+
             if (!samepos && c.getPlayer().getBuffSource(MapleBuffStat.DARK_AURA) == 32120000) { //進階黑色繩索
                 c.getPlayer().getStatForBuff(MapleBuffStat.DARK_AURA).applyMonsterBuff(c.getPlayer());
             } else if (!samepos && c.getPlayer().getBuffSource(MapleBuffStat.YELLOW_AURA) == 32120001) { //進階黃色繩索

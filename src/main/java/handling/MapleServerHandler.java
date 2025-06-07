@@ -69,10 +69,8 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
     private final Map<String, Pair<Long, Byte>> tracker = new ConcurrentHashMap<>();
     private static final EnumSet<RecvPacketOpcode> blocked = EnumSet.noneOf(RecvPacketOpcode.class), sBlocked = EnumSet.noneOf(RecvPacketOpcode.class);
 
-   
 
- 
-// <editor-fold defaultstate="collapsed" desc="Packet Log Implementation">
+    // <editor-fold defaultstate="collapsed" desc="Packet Log Implementation">
     private static final int Log_Size = 10000, Packet_Log_Size = 25;
     private static final ArrayList<LoggedPacket> Packet_Log = new ArrayList<>(Log_Size);
     private static final ReentrantReadWriteLock Packet_Log_Lock = new ReentrantReadWriteLock();
@@ -147,7 +145,8 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             MapleServerHandler mbean = new MapleServerHandler();
             //The log is a static object, so we can just use this hacky method.
             mBeanServer.registerMBean(mbean, new ObjectName("handling:type=MapleServerHandler"));
-        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
+        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException |
+                 NotCompliantMBeanException e) {
             System.out.println("Error registering PacketLog MBean");
         }
     }
@@ -188,9 +187,9 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
 
     public static void initiate() {
         //RecvPacketOpcode[] block = new RecvPacketOpcode[]{RecvPacketOpcode.NPC_ACTION, RecvPacketOpcode.MOVE_PLAYER, RecvPacketOpcode.PONG, RecvPacketOpcode.MOVE_PET, RecvPacketOpcode.MOVE_SUMMON, RecvPacketOpcode.MOVE_DRAGON, RecvPacketOpcode.MOVE_LIFE, RecvPacketOpcode.MOVE_ANDROID, RecvPacketOpcode.HEAL_OVER_TIME, RecvPacketOpcode.AUTO_AGGRO, RecvPacketOpcode.CANCEL_DEBUFF, RecvPacketOpcode.MOVE_FAMILIAR};
-    //    RecvPacketOpcode[] serverBlock = new RecvPacketOpcode[]{RecvPacketOpcode.CHANGE_KEYMAP, RecvPacketOpcode.ITEM_PICKUP, RecvPacketOpcode.PET_LOOT, RecvPacketOpcode.TAKE_DAMAGE, RecvPacketOpcode.FACE_EXPRESSION, RecvPacketOpcode.USE_ITEM, RecvPacketOpcode.CLOSE_RANGE_ATTACK, RecvPacketOpcode.MAGIC_ATTACK, RecvPacketOpcode.RANGED_ATTACK, RecvPacketOpcode.ARAN_COMBO, RecvPacketOpcode.SPECIAL_MOVE, RecvPacketOpcode.GENERAL_CHAT, RecvPacketOpcode.MONSTER_BOMB, RecvPacketOpcode.PASSIVE_ENERGY, RecvPacketOpcode.PET_AUTO_POT, RecvPacketOpcode.USE_CASH_ITEM, RecvPacketOpcode.PARTYCHAT, RecvPacketOpcode.CANCEL_BUFF, RecvPacketOpcode.SKILL_EFFECT, RecvPacketOpcode.CHAR_INFO_REQUEST, RecvPacketOpcode.ALLIANCE_OPERATION, RecvPacketOpcode.AUTO_ASSIGN_AP, RecvPacketOpcode.DISTRIBUTE_AP, RecvPacketOpcode.USE_MAGNIFY_GLASS, RecvPacketOpcode.SPAWN_PET, RecvPacketOpcode.SUMMON_ATTACK, RecvPacketOpcode.ITEM_MOVE, RecvPacketOpcode.PARTY_SEARCH_STOP};
-     //   blocked.addAll(Arrays.asList(block));
-    //    sBlocked.addAll(Arrays.asList(serverBlock));
+        //    RecvPacketOpcode[] serverBlock = new RecvPacketOpcode[]{RecvPacketOpcode.CHANGE_KEYMAP, RecvPacketOpcode.ITEM_PICKUP, RecvPacketOpcode.PET_LOOT, RecvPacketOpcode.TAKE_DAMAGE, RecvPacketOpcode.FACE_EXPRESSION, RecvPacketOpcode.USE_ITEM, RecvPacketOpcode.CLOSE_RANGE_ATTACK, RecvPacketOpcode.MAGIC_ATTACK, RecvPacketOpcode.RANGED_ATTACK, RecvPacketOpcode.ARAN_COMBO, RecvPacketOpcode.SPECIAL_MOVE, RecvPacketOpcode.GENERAL_CHAT, RecvPacketOpcode.MONSTER_BOMB, RecvPacketOpcode.PASSIVE_ENERGY, RecvPacketOpcode.PET_AUTO_POT, RecvPacketOpcode.USE_CASH_ITEM, RecvPacketOpcode.PARTYCHAT, RecvPacketOpcode.CANCEL_BUFF, RecvPacketOpcode.SKILL_EFFECT, RecvPacketOpcode.CHAR_INFO_REQUEST, RecvPacketOpcode.ALLIANCE_OPERATION, RecvPacketOpcode.AUTO_ASSIGN_AP, RecvPacketOpcode.DISTRIBUTE_AP, RecvPacketOpcode.USE_MAGNIFY_GLASS, RecvPacketOpcode.SPAWN_PET, RecvPacketOpcode.SUMMON_ATTACK, RecvPacketOpcode.ITEM_MOVE, RecvPacketOpcode.PARTY_SEARCH_STOP};
+        //   blocked.addAll(Arrays.asList(block));
+        //    sBlocked.addAll(Arrays.asList(serverBlock));
         if (Log_Packets) {
             for (int i = 1; i <= Packet_Log_Size; i++) {
                 if (!(new File(Packet_Log_Output + i + ".txt")).exists() && !(new File(Packet_Log_Output + i + "_DC.txt")).exists()) {
@@ -198,9 +197,9 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                     break;
                 }
             }
-           // if (Packet_Log_Index <= 0) { //25+ files, do not log
-           //     Log_Packets = false;
-         //   }
+            // if (Packet_Log_Index <= 0) { //25+ files, do not log
+            //     Log_Packets = false;
+            //   }
         }
 
         registerMBean();
@@ -372,11 +371,11 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
         }
         final short header_num = slea.readShort();
 
-   
-   // final StringBuilder sb = new StringBuilder("Received data :\n");
-  //  sb.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
 
-    //System.out.println(sb.toString());
+        // final StringBuilder sb = new StringBuilder("Received data :\n");
+        //  sb.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
+
+        //System.out.println(sb.toString());
 
         for (final RecvPacketOpcode recv : RecvPacketOpcode.values()) {
             if (recv.getValue() == header_num) {
@@ -406,9 +405,9 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 return;
             }
         }
-    //  final StringBuilder sbd = new StringBuilder("Received data : (Unhandled)\n");
-      //sbd.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
-      //System.out.println(sbd.toString());
+        //  final StringBuilder sbd = new StringBuilder("Received data : (Unhandled)\n");
+        //sbd.append(HexTool.toString((byte[]) message)).append("\n").append(HexTool.toStringFromAscii((byte[]) message));
+        //System.out.println(sbd.toString());
     }
 
     public static void handlePacket(final RecvPacketOpcode header, final LittleEndianAccessor slea, final MapleClient c, final boolean cs) throws Exception {
@@ -464,23 +463,23 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, false, true);
                 break;
             case CHAR_SELECT_NO_PIC:
-               // System.out.println("CHAR_SELECT_NO_PIC");
+                // System.out.println("CHAR_SELECT_NO_PIC");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, false, false);
                 break;
             case VIEW_REGISTER_PIC:
-              //  System.out.println("VIEW_REGISTER_PIC");
+                //  System.out.println("VIEW_REGISTER_PIC");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, true, true);
                 break;
             case CHAR_SELECT:
-               // System.out.println("CHAR_SELECT");
+                // System.out.println("CHAR_SELECT");
                 CharLoginHandler.Character_WithoutSecondPassword(slea, c, true, false);
                 break;
             case VIEW_SELECT_PIC:
-               // System.out.println("VIEW_SELECT_PIC");
+                // System.out.println("VIEW_SELECT_PIC");
                 CharLoginHandler.Character_WithSecondPassword(slea, c, true);
                 break;
             case AUTH_SECOND_PASSWORD:
-               // System.out.println("AUTH_SECOND_PASSWORD");
+                // System.out.println("AUTH_SECOND_PASSWORD");
                 CharLoginHandler.Character_WithSecondPassword(slea, c, false);
                 break;
             case CHARACTER_CARD:
@@ -506,7 +505,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 short data_length = slea.readShort();
                 slea.skip(4); // ?B3 86 01 00 00 00 FF 00 00 00 00 00 9E 05 C8 FF 02 00 CD 05 C9 FF 7D 00 00 00 3F 00 00 00 00 00 02 77 01 00 25 06 C9 FF 7D 00 00 00 40 00 00 00 00 00 02 C1 02
                 short opcodeheader = slea.readShort();
-                FileoutputUtil.log("ErrorCodes.txt","Error Type: " + errortype + "\r\n" + "Data Length: " + data_length + "\r\n" + "Character: " + c.getPlayer().getName() + " Map: " + c.getPlayer().getMap().getId() + " - Account: " + c.getAccountName() + "\r\n" + SendPacketOpcode.getOpcodeName(opcodeheader) + " Opcode: " + opcodeheader + "\r\n" + HexTool.toString(slea.read((int) slea.available())) + "\r\n\r\n");
+                FileoutputUtil.log("ErrorCodes.txt", "Error Type: " + errortype + "\r\n" + "Data Length: " + data_length + "\r\n" + "Character: " + c.getPlayer().getName() + " Map: " + c.getPlayer().getMap().getId() + " - Account: " + c.getAccountName() + "\r\n" + SendPacketOpcode.getOpcodeName(opcodeheader) + " Opcode: " + opcodeheader + "\r\n" + HexTool.toString(slea.read((int) slea.available())) + "\r\n\r\n");
                 break;
             case ENABLE_SPECIAL_CREATION:
                 c.getSession().write(LoginPacket.enableSpecialCreation(c.getAccID(), true));
@@ -525,7 +524,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 }
                 break;
             case ENTER_PVP:
-            case ENTER_PVP_PARTY:               
+            case ENTER_PVP_PARTY:
                 PlayersHandler.EnterPVP(slea, c);
                 break;
             case PVP_RESPAWN:
@@ -545,7 +544,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 break;
             case ENTER_MTS:
                 InterServerHandler.EnterMTS(c, c.getPlayer());
-              //  InterServerHandler.EnterCS(c, c.getPlayer(), true);
+                //  InterServerHandler.EnterCS(c, c.getPlayer(), true);
                 break;
             case MOVE_PLAYER:
                 PlayerHandler.MovePlayer(slea, c, c.getPlayer());
@@ -589,12 +588,12 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case YOUR_INFORMATION:
                 PlayersHandler.loadInfo(slea, c, c.getPlayer());
                 break;
-            case FIND_FRIEND: 
+            case FIND_FRIEND:
                 PlayersHandler.findFriend(slea, c, c.getPlayer());
                 break;
             case CHANGE_CODEX_SET:
-                 // 41 = honor level up
-               PlayersHandler.ChangeSet(slea, c, c.getPlayer());
+                // 41 = honor level up
+                PlayersHandler.ChangeSet(slea, c, c.getPlayer());
                 break;
             case PROFESSION_INFO:
                 ItemMakerHandler.ProfessionInfo(slea, c);
@@ -763,7 +762,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 ItemMakerHandler.ItemMaker(slea, c);
                 break;
             case ITEM_PICKUP:
-              //  System.out.println("dddpickup");
+                //  System.out.println("dddpickup");
                 InventoryHandler.Pickup_Player(slea, c, c.getPlayer());
                 break;
             case USE_CASH_ITEM:
@@ -790,7 +789,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case USE_ALIEN_SOCKET:
                 InventoryHandler.UseAlienSocket(slea, c);
                 break;
-           case USE_ALIEN_SOCKET_RESPONSE:
+            case USE_ALIEN_SOCKET_RESPONSE:
                 slea.skip(4); // all 0
                 c.getSession().write(MTSCSPacket.useAlienSocket(false));
                 break;
@@ -847,7 +846,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 MobHandler.DisplayNode(slea, c.getPlayer());
                 break;
             case MOVE_LIFE:
-               // System.out.println("ddd");
+                // System.out.println("ddd");
                 MobHandler.MoveMonster(slea, c, c.getPlayer());
                 break;
             case AUTO_AGGRO:
@@ -994,7 +993,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 SummonHandler.MoveSummon(slea, c.getPlayer());
                 break;
             case SUMMON_ATTACK:
-       //         c.getPlayer().dropMessage(5, "durr");
+                //         c.getPlayer().dropMessage(5, "durr");
                 SummonHandler.SummonAttack(slea, c, c.getPlayer());
                 break;
             case MOVE_DRAGON:
@@ -1101,7 +1100,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 NPCHandler.QuestItem(slea, c);
                 break;
             case FOLLOW_REQUEST:
-              PlayersHandler.FollowRequest(slea, c);
+                PlayersHandler.FollowRequest(slea, c);
                 break;
             case AUTO_FOLLOW_REPLY:
             case FOLLOW_REPLY:
@@ -1186,7 +1185,7 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
                 PlayersHandler.UpdateStolenSkills(slea, c, c.getPlayer());
                 break;
             case SKILL_SWIPE_REQUEST:
-                 PlayersHandler.SkillSwipeRequest(slea, c, c.getPlayer());
+                PlayersHandler.SkillSwipeRequest(slea, c, c.getPlayer());
                 break;
             case UPDATE_FRIENDSHIP_POINTS: //楓之高校積分
                 NPCHandler.UpdateFriendshipPoints(slea, c, c.getPlayer());

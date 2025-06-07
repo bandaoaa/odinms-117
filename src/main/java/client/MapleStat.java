@@ -30,11 +30,11 @@ public enum MapleStat {
     SENSE(0x8000000), // empathy, int
     CHARM(0x10000000), // int
     TRAIT_LIMIT(0x20000000), // 12 bytes
-	BATTLE_EXP(0x40000000), // int
-	BATTLE_RANK(0x80000000L), // byte
-	BATTLE_POINTS(0x100000000L),
-	ICE_GAGE(0x200000000L),
-	VIRTUE(0x400000000L);
+    BATTLE_EXP(0x40000000), // int
+    BATTLE_RANK(0x80000000L), // byte
+    BATTLE_POINTS(0x100000000L),
+    ICE_GAGE(0x200000000L),
+    VIRTUE(0x400000000L);
 
     private final long i;
 
@@ -69,8 +69,8 @@ public enum MapleStat {
         AVOID(0x200),
         SPEED(0x400), // byte
         JUMP(0x800), // byte
-		UNKNOWN(0x1000); // byte
-		
+        UNKNOWN(0x1000); // byte
+
         private final int i;
 
         private Temp(int i) {

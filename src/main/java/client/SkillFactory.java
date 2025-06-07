@@ -22,9 +22,11 @@ package client;
 
 import client.status.MonsterStatus;
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.io.File;
 import java.util.*;
+
 import provider.*;
 import server.Randomizer;
 import tools.StringUtil;
@@ -58,7 +60,7 @@ public class SkillFactory {
 
         for (MapleDataFileEntry topDir : root.getFiles()) { // Loop thru jobs
             if (topDir.getName().length() <= 8) {
-				for (MapleData data : datasource.getData(topDir.getName())) { // Loop thru each jobs
+                for (MapleData data : datasource.getData(topDir.getName())) { // Loop thru each jobs
                     if (data.getName().equals("skill")) {
                         for (MapleData data2 : data) { // Loop thru each jobs
                             if (data2 != null) {
@@ -184,7 +186,7 @@ public class SkillFactory {
     }
 
     public static Skill getSkill(final int id) {
-       if (!skills.isEmpty()) {
+        if (!skills.isEmpty()) {
             if (id >= 92000000 && crafts.containsKey(Integer.valueOf(id))) { //92000000
                 return crafts.get(Integer.valueOf(id));
             }
@@ -193,8 +195,8 @@ public class SkillFactory {
 
         return null;
     }
-	
-	 public static long getDefaultSExpiry(final Skill skill) {
+
+    public static long getDefaultSExpiry(final Skill skill) {
         if (skill == null) {
             return -1;
         }

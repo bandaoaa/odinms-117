@@ -6,10 +6,12 @@ package server;
 
 import client.MapleCharacter;
 import handling.world.MaplePartyCharacter;
+
 import java.lang.ref.WeakReference;
 
 /**
  * TODO : Make this a function for NPC instead.. cleaner
+ *
  * @author Rob
  */
 public class MapleCarnivalChallenge {
@@ -40,7 +42,7 @@ public class MapleCarnivalChallenge {
     public static final String getJobNameById(int job) {
         switch (job) {
             case 0:
-	    case 1:
+            case 1:
                 return "Beginner";
             case 1000:
                 return "Nobless";
@@ -205,17 +207,17 @@ public class MapleCarnivalChallenge {
                 return "Evan";
 
             case 2002:
-	    case 2300:
-	    case 2310:
-	    case 2311:
-	    case 2312:
+            case 2300:
+            case 2310:
+            case 2311:
+            case 2312:
                 return "Mercedes";
 
             case 3001:
-	    case 3100:
-	    case 3110:
-	    case 3111:
-	    case 3112:
+            case 3100:
+            case 3110:
+            case 3111:
+            case 3112:
                 return "Demon Slayer";
 
 
@@ -236,12 +238,12 @@ public class MapleCarnivalChallenge {
             case 3511:
             case 3512:
                 return "Mechanic";
-				
+
             case 2400:
             case 2410:
             case 2411:
             case 2412:
-                return "Phantom";	
+                return "Phantom";
             case 508:
             case 570:
             case 571:
@@ -253,8 +255,8 @@ public class MapleCarnivalChallenge {
             case 5110:
             case 5111:
             case 5112:
-                return "Mihile";			
-				
+                return "Mihile";
+
             case 900:
                 return "GM";
             case 910:
@@ -270,19 +272,19 @@ public class MapleCarnivalChallenge {
     public static final String getJobBasicNameById(int job) {
         switch (job) {
             case 0:
-	    case 1:
+            case 1:
             case 1000:
             case 2000:
             case 2001:
-	    case 2002:
+            case 2002:
             case 3000:
-	    case 3001:
+            case 3001:
                 return "Beginner";
 
-	    case 3100:
-	    case 3110:
-	    case 3111:
-	    case 3112:
+            case 3100:
+            case 3110:
+            case 3111:
+            case 3112:
             case 2100:
             case 2110:
             case 2111:
@@ -338,10 +340,10 @@ public class MapleCarnivalChallenge {
             case 3310:
             case 3311:
             case 3312:
-	    case 2300:
-	    case 2310:
-	    case 2311:
-	    case 2312:
+            case 2300:
+            case 2310:
+            case 2311:
+            case 2312:
             case 1300:
             case 1310:
             case 1311:
@@ -382,7 +384,7 @@ public class MapleCarnivalChallenge {
             case 1511:
             case 1512:
             case 500:
-	    case 501:
+            case 501:
             case 510:
             case 511:
             case 512:

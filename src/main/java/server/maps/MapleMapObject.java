@@ -22,6 +22,7 @@ package server.maps;
 
 import client.MapleClient;
 import constants.GameConstants;
+
 import java.awt.Point;
 
 public abstract class MapleMapObject {
@@ -29,7 +30,7 @@ public abstract class MapleMapObject {
     private Point position = new Point();
     private int objectId;
 
- 
+
     public Point getPosition() {
         return new Point(position);
     }
@@ -52,12 +53,12 @@ public abstract class MapleMapObject {
     }
 
     public int getRange() {
-	return GameConstants.maxViewRangeSq();
+        return GameConstants.maxViewRangeSq();
     }
 
     public abstract MapleMapObjectType getType();
 
-    public abstract void sendSpawnData(final MapleClient client); 
+    public abstract void sendSpawnData(final MapleClient client);
 
     public abstract void sendDestroyData(final MapleClient client);
 }

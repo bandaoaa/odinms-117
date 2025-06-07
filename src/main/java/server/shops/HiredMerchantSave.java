@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Emy
  */
 public class HiredMerchantSave {
@@ -23,6 +22,7 @@ public class HiredMerchantSave {
             Threads[i] = new TimingThread(new HiredMerchantSaveRunnable());
         }
     }
+
     private static final AtomicInteger Distribute = new AtomicInteger(0);
 
     public static void QueueShopForSave(HiredMerchant hm) {

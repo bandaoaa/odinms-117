@@ -19,11 +19,13 @@ import database.DatabaseConnection;
 import handling.channel.ChannelServer;
 import handling.channel.handler.HiredMerchantHandler;
 import handling.world.World;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import scripting.NPCScriptManager;
 import server.*;
 import server.RankingWorker.RankingInformation;
@@ -37,7 +39,6 @@ import tools.packet.CField;
 import tools.packet.CWvsContext;
 
 /**
- *
  * @author Emilyx3
  */
 public class PlayerCommand {
@@ -66,11 +67,9 @@ public class PlayerCommand {
             stat = MapleStat.INT;
         }
     }
-    
-    
 
-    
-        public static class Connected extends CommandExecute {
+
+    public static class Connected extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -97,54 +96,48 @@ public class PlayerCommand {
             return 1;
         }
     }
-    
-    
 
-    
-        public static class hireditems extends CommandExecute {
+
+    public static class hireditems extends CommandExecute {
         @Override
-            public int execute(MapleClient c, String[] splitted) {
-        c.getPlayer().setConversation(3);
-        HiredMerchantHandler.displayMerch(c);
-        c.getPlayer().fakeRelog();
-                  return 1;
-            }
-}
-    
-    
+        public int execute(MapleClient c, String[] splitted) {
+            c.getPlayer().setConversation(3);
+            HiredMerchantHandler.displayMerch(c);
+            c.getPlayer().fakeRelog();
+            return 1;
+        }
+    }
+
+
     public static class meso2nek extends CommandExecute {
         @Override
-            public int execute(MapleClient c, String[] splitted) {
-        if (c.getPlayer().getMeso() >= 1000000000)  {
-        if (c.getPlayer().getInventory(MapleInventoryType.ETC).isFull()) {
-        c.getPlayer().dropMessage(1, "ETC inventory is full, can't make NEK");
-        } else {
-        c.getPlayer().gainMeso(-1000000000, true);
-        MapleInventoryManipulator.addById(c.getPlayer().getClient(), 4001116, (short) 1, "M " + c.getPlayer().getName());
-        c.getPlayer().getClient().getSession().write(CWvsContext.enableActions());
-        }    
+        public int execute(MapleClient c, String[] splitted) {
+            if (c.getPlayer().getMeso() >= 1000000000) {
+                if (c.getPlayer().getInventory(MapleInventoryType.ETC).isFull()) {
+                    c.getPlayer().dropMessage(1, "ETC inventory is full, can't make NEK");
+                } else {
+                    c.getPlayer().gainMeso(-1000000000, true);
+                    MapleInventoryManipulator.addById(c.getPlayer().getClient(), 4001116, (short) 1, "M " + c.getPlayer().getName());
+                    c.getPlayer().getClient().getSession().write(CWvsContext.enableActions());
+                }
+            }
+            return 1;
         }
-                  return 1;
-            }
-}
+    }
 
 
-      public static class nek2meso extends CommandExecute {
+    public static class nek2meso extends CommandExecute {
         @Override
-            public int execute(MapleClient c, String[] splitted) {
-                 if (c.getPlayer().haveItem(4001116, 1) && c.getPlayer().getMeso() <= 1100000000) {
-                 MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, 4001116, 1, true, true);
-                 c.getPlayer().gainMeso(1000000000, true);
-                 } else {
-                 c.getPlayer().dropMessage(5, "Too much mesos! Please have only 1100000000 mesos in your inventory, or less.");        
-                 }
-                  return 1;
+        public int execute(MapleClient c, String[] splitted) {
+            if (c.getPlayer().haveItem(4001116, 1) && c.getPlayer().getMeso() <= 1100000000) {
+                MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, 4001116, 1, true, true);
+                c.getPlayer().gainMeso(1000000000, true);
+            } else {
+                c.getPlayer().dropMessage(5, "Too much mesos! Please have only 1100000000 mesos in your inventory, or less.");
             }
-}
-
-
-  
-
+            return 1;
+        }
+    }
 
 
     private static ResultSet GMlist() {
@@ -184,8 +177,8 @@ public class PlayerCommand {
             return 1;
         }
     }
-    
-        public static class onlinedgms extends CommandExecute {
+
+    public static class onlinedgms extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -211,25 +204,23 @@ public class PlayerCommand {
             return 1;
         }
     }
-    
 
 
-            
-            public static class autonek extends CommandExecute {
+    public static class autonek extends CommandExecute {
         @Override
-            public int execute(MapleClient c, String[] splitted) {
-                 if (c.getPlayer().getGML() == 0) {
-                 c.getPlayer().setGML(1);
-                 c.getPlayer().dropMessage(5, "Auto NEK is now activate! When you gain over 1b mesos they will be converted to GML!");
-                 } else {
-                              c.getPlayer().setGML(0);
-                 c.getPlayer().dropMessage(5, "Auto NEK is now disabled!");        
-                 }
-                  return 1;
+        public int execute(MapleClient c, String[] splitted) {
+            if (c.getPlayer().getGML() == 0) {
+                c.getPlayer().setGML(1);
+                c.getPlayer().dropMessage(5, "Auto NEK is now activate! When you gain over 1b mesos they will be converted to GML!");
+            } else {
+                c.getPlayer().setGML(0);
+                c.getPlayer().dropMessage(5, "Auto NEK is now disabled!");
             }
+            return 1;
+        }
     }
 
-        public static class boop extends CommandExecute {
+    public static class boop extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -293,10 +284,10 @@ public class PlayerCommand {
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getMap().getId() == 100000000) {
-            c.getPlayer().setGender((byte) 0);
-            c.getPlayer().saveToDB(false, false);
-            c.getPlayer().reloadC();
-            c.getPlayer().dropMessage(5, "Done! now you can wear male equips!");
+                c.getPlayer().setGender((byte) 0);
+                c.getPlayer().saveToDB(false, false);
+                c.getPlayer().reloadC();
+                c.getPlayer().dropMessage(5, "Done! now you can wear male equips!");
             } else {
                 c.getPlayer().dropMessage(5, "You must be in HENESYS to use this command!");
             }
@@ -309,11 +300,11 @@ public class PlayerCommand {
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getMap().getId() == 100000000) {
-            c.getPlayer().setGender((byte) 1);
-            c.getPlayer().saveToDB(false, false);
-            c.getPlayer().reloadC();
-            c.getPlayer().dropMessage(5, "Done! now you can wear female equips!");
-                        } else {
+                c.getPlayer().setGender((byte) 1);
+                c.getPlayer().saveToDB(false, false);
+                c.getPlayer().reloadC();
+                c.getPlayer().dropMessage(5, "Done! now you can wear female equips!");
+            } else {
                 c.getPlayer().dropMessage(5, "You must be in HENESYS to use this command!");
             }
             return 1;
@@ -325,27 +316,27 @@ public class PlayerCommand {
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getMap().getId() == 100000000) {
-            c.getPlayer().setGender((byte) 2);
-            c.getPlayer().saveToDB(false, false);
-            c.getPlayer().reloadC();
-            c.getPlayer().dropMessage(5, "Done! now you can wear all equips!");
-                        } else {
+                c.getPlayer().setGender((byte) 2);
+                c.getPlayer().saveToDB(false, false);
+                c.getPlayer().reloadC();
+                c.getPlayer().dropMessage(5, "Done! now you can wear all equips!");
+            } else {
                 c.getPlayer().dropMessage(5, "You must be in HENESYS to use this command!");
             }
             return 1;
         }
     }
-    
+
     public static class buycube extends CommandExecute {
 
-          @Override
+        @Override
         public int execute(MapleClient c, String[] splitted) {
             if (splitted.length != 2) {
                 c.getPlayer().dropMessage(5, "Format: @buycube QUANTITY");
                 return 0;
             }
-                        if (c.getPlayer().isGM()) {
-                                return 0;
+            if (c.getPlayer().isGM()) {
+                return 0;
             }
             final int itemId = 5062002;
             final short quantity = (short) CommandProcessorUtil.getOptionalIntArg(splitted, 1, 1);
@@ -353,19 +344,19 @@ public class PlayerCommand {
                 c.getPlayer().dropMessage(5, "Quantity must be greater than 0. Quantity must be 50 or less than 50.");
                 return 0;
             }
-                Item item;
-                if (GameConstants.getInventoryType(itemId) == MapleInventoryType.CASH && c.getPlayer().getMeso() >= 25000000 * quantity && !c.getPlayer().getInventory(MapleInventoryType.CASH).isFull()) {
-                    c.getPlayer().gainMeso(-25000000 * quantity, true);
-                    item = new client.inventory.Item(itemId, (byte) 0, quantity, (byte) 0);
-                    item.setOwner("CUBE "+c.getPlayer().getName());
-                    item.setGMLog(c.getPlayer().getName() + " used @buycube");
-                    MapleInventoryManipulator.addbyItem(c, item);
-                    c.getPlayer().dropMessage(6, "You've lost " + 25000000 * quantity + " mesos! and have gained " + quantity + " cubes!");
-                } else {
-                    c.getPlayer().dropMessage(5, "Not enough mesos");
-                    return 0;
+            Item item;
+            if (GameConstants.getInventoryType(itemId) == MapleInventoryType.CASH && c.getPlayer().getMeso() >= 25000000 * quantity && !c.getPlayer().getInventory(MapleInventoryType.CASH).isFull()) {
+                c.getPlayer().gainMeso(-25000000 * quantity, true);
+                item = new client.inventory.Item(itemId, (byte) 0, quantity, (byte) 0);
+                item.setOwner("CUBE " + c.getPlayer().getName());
+                item.setGMLog(c.getPlayer().getName() + " used @buycube");
+                MapleInventoryManipulator.addbyItem(c, item);
+                c.getPlayer().dropMessage(6, "You've lost " + 25000000 * quantity + " mesos! and have gained " + quantity + " cubes!");
+            } else {
+                c.getPlayer().dropMessage(5, "Not enough mesos");
+                return 0;
 
-                }
+            }
             return 1;
         }
     }
@@ -378,7 +369,7 @@ public class PlayerCommand {
                 c.getPlayer().dropMessage(6, "Usage: @helpme message");
                 return 0;
             }
-                        if (c.getPlayer().getGMLevel() > 3) {
+            if (c.getPlayer().getGMLevel() > 3) {
                 c.getPlayer().dropMessage(6, "(D)GMs can't use @helpme");
                 return 0;
             }
@@ -389,7 +380,7 @@ public class PlayerCommand {
         }
     }
 
-   public static class gms extends CommandExecute {
+    public static class gms extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -403,7 +394,7 @@ public class PlayerCommand {
                         status = "GM";
                     } else if (rs.getInt("gm") == 7) {
                         status = "Supervisor";
-                   } else if (rs.getInt("gm") == 8) {
+                    } else if (rs.getInt("gm") == 8) {
                         status = "Co-Owner";
                     } else if (rs.getInt("gm") == 98) {
                         status = "The king";
@@ -417,7 +408,7 @@ public class PlayerCommand {
                 }
             } catch (SQLException se) {
             }
-            
+
             return 1;
         }
     }
@@ -493,7 +484,7 @@ public class PlayerCommand {
                 return 0;
             }
             if (c.getPlayer().isGM()) {
-                                return 0;
+                return 0;
             }
             final short quantity = (short) CommandProcessorUtil.getOptionalIntArg(splitted, 2, 1);
             if (quantity < 0) {
@@ -508,7 +499,7 @@ public class PlayerCommand {
                         return 0;
                     }
                 }
-                     
+
                 MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
                 if (GameConstants.isPet(itemId)) {
                     c.getPlayer().dropMessage(5, "Please purchase a pet from the cash shop instead.");
@@ -722,16 +713,16 @@ public class PlayerCommand {
 
         protected int npc = -1;
         private static int[] npcs = { //Ish yur job to make sure these are in order and correct ;(
-            9270035,
-            9900002,
-            9000000,
-            9000030,
-            9010000,
-            9000085,
-            9000018,
-            9900000,
-            9270034,
-            9270036};
+                9270035,
+                9900002,
+                9000000,
+                9000030,
+                9010000,
+                9000085,
+                9000018,
+                9900000,
+                9270034,
+                9270036};
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -909,7 +900,6 @@ public class PlayerCommand {
             gotomaps.put("future", 271000000);
 
 
-
         }
 
         @Override
@@ -1033,18 +1023,18 @@ public class PlayerCommand {
                     c.getPlayer().dropMessage(5, "Str: " + victim.getStat().getStr() + "  ||  Dex: " + victim.getStat().getDex() + "  ||  Int: " + victim.getStat().getInt() + "  ||  Luk: " + victim.getStat().getLuk());
                     c.getPlayer().dropMessage(5, "Player has " + victim.getMeso() + " mesos.");
                     c.getPlayer().dropMessage(5, "Hp: " + victim.getStat().getHp() + "/" + victim.getStat().getCurrentMaxHp() + "  ||  Mp: " + victim.getStat().getMp() + "/" + victim.getStat().getCurrentMaxMp(victim.getJob()));
-                   if (victim.gethiddenGM() == 0) {
-                                 c.getPlayer().dropMessage(5, "NX Cash: " + victim.getCSPoints(1) + "  ||  AP: " + victim.getRemainingAp() + " || MSI points: " + victim.getMSIPoints());
-                   } else {
-                                 c.getPlayer().dropMessage(5, "NX Cash: " + victim.getCSPoints(1) + "  ||  AP: " + victim.getRemainingAp() + " || MSI points: 0");          
-                   }
+                    if (victim.gethiddenGM() == 0) {
+                        c.getPlayer().dropMessage(5, "NX Cash: " + victim.getCSPoints(1) + "  ||  AP: " + victim.getRemainingAp() + " || MSI points: " + victim.getMSIPoints());
+                    } else {
+                        c.getPlayer().dropMessage(5, "NX Cash: " + victim.getCSPoints(1) + "  ||  AP: " + victim.getRemainingAp() + " || MSI points: 0");
+                    }
 
                     c.getPlayer().dropMessage(5, "Votepoints: " + victim.getVPoints());
                     victim.dropMessage(5, c.getPlayer().getName() + " has used @spy on you!");
                     if (victim.getGMLevel() == 2 && victim.gethiddenGM() == 0) {
                         c.getPlayer().dropMessage(5, "This player is a donator.");
                     } else if (victim.getDGM() == 1 && victim.gethiddenGM() == 0) {
-                         c.getPlayer().dropMessage(5, "This player is a DGM.");
+                        c.getPlayer().dropMessage(5, "This player is a DGM.");
                     } else if (victim.getGMLevel() == 3 && victim.gethiddenGM() == 0) {
                         c.getPlayer().dropMessage(5, "This player is a super donator.");
                     }
@@ -1069,11 +1059,11 @@ public class PlayerCommand {
              * <Confirm new password> ");
              */
             c.getPlayer().dropMessage(5, "@shop < A-I-O Shop >");
-            
+
             //c.getPlayer().dropMessage(5, "@jaira < Spawn jaira with 1000b hp >");
             c.getPlayer().dropMessage(5, "@meso2nek < 1b meso = 1 neck >");
-             c.getPlayer().dropMessage(5, "@nek2meso < 1 neck = 1b >");
-               c.getPlayer().dropMessage(5, "@autonek < 1 neck = 1b >");
+            c.getPlayer().dropMessage(5, "@nek2meso < 1 neck = 1b >");
+            c.getPlayer().dropMessage(5, "@autonek < 1 neck = 1b >");
             c.getPlayer().dropMessage(5, "@job < Job advancer >");
             c.getPlayer().dropMessage(5, "@dcash < Universal Cash Item Dropper >");
             c.getPlayer().dropMessage(5, "@tsmega < Toggle super megaphone on/off >");
@@ -1111,7 +1101,7 @@ public class PlayerCommand {
 
             c.getPlayer().dropMessage(5, "@srb2 < get a randomized ring with watk and matk 20k-32k stats >");
             c.getPlayer().dropMessage(5, "@top30 < shows top 30 players using rebirths >");
-           c.getPlayer().dropMessage(5, "@changename < changes your name, it will DC you. >");
+            c.getPlayer().dropMessage(5, "@changename < changes your name, it will DC you. >");
             c.getPlayer().dropMessage(5, "@voteitem < 10 points = item >");
             c.getPlayer().dropMessage(5, "@gms < Shows all REAL GMs >");
             c.getPlayer().dropMessage(5, "@unisx < Wear male AND female equips >");
@@ -1124,36 +1114,33 @@ public class PlayerCommand {
             return 1;
         }
     }
-    
-        public static class freepet extends CommandExecute {
+
+    public static class freepet extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
             final int itemId = Integer.parseInt(splitted[1]);
-          
+
             MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
             if (GameConstants.isPet(itemId)) {
-     
-           int uniqueid = MapleInventoryIdentifier.getInstance();
-        
+
+                int uniqueid = MapleInventoryIdentifier.getInstance();
 
 
-            Item item = new Item(itemId, (byte) 0, (short) 1, (byte) 0, uniqueid);
-          
+                Item item = new Item(itemId, (byte) 0, (short) 1, (byte) 0, uniqueid);
+
                 item.setExpiration(2475606994921L);
-           
-           
-           
-          
+
+
                 final MaplePet pet = MaplePet.createPet(itemId, uniqueid);
-                    item.setPet(pet);
-                
-            
-             MapleInventoryManipulator.addbyItem(c, item);
+                item.setPet(pet);
+
+
+                MapleInventoryManipulator.addbyItem(c, item);
             } else if (!ii.itemExists(itemId)) {
                 c.getPlayer().dropMessage(5, itemId + " does not exist");
             }
-            
+
             return 1;
         }
     }
@@ -1163,9 +1150,9 @@ public class PlayerCommand {
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getReborns() >= 500 && c.getPlayer().getLevel() >= 200) {
-              //  c.getPlayer().setReborns(c.getPlayer().getReborns() - 500);
+                //  c.getPlayer().setReborns(c.getPlayer().getReborns() - 500);
                 c.getPlayer().changeJob(900);
-              //  c.getPlayer().dropMessage(5, "Done! You've lost 500 reborns");
+                //  c.getPlayer().dropMessage(5, "Done! You've lost 500 reborns");
                 c.getPlayer().dropMessage(5, "Please take GM Roar and reborn, else you won't be able to log in to your character.");
             } else {
                 c.getPlayer().dropMessage(5, "You need above 500 reborns to get GM roar! (you also have to be level 200)");
@@ -1180,11 +1167,11 @@ public class PlayerCommand {
         public int execute(MapleClient c, String[] splitted) {
             c.lastsmegacompare = System.currentTimeMillis() - c.lastsmega;
             if (c.lastsmegacompare > 5000) {
-            c.lastsmega = System.currentTimeMillis();
-          //  c.getPlayer().saveToDB(false, false);
-            c.getPlayer().dropMessage(5, "Your progress has been saved! (Please don't spam this command)");
+                c.lastsmega = System.currentTimeMillis();
+                //  c.getPlayer().saveToDB(false, false);
+                c.getPlayer().dropMessage(5, "Your progress has been saved! (Please don't spam this command)");
             } else {
-              c.getPlayer().dropMessage(5, "Please don't spam this command");  
+                c.getPlayer().dropMessage(5, "Please don't spam this command");
             }
             return 1;
         }
@@ -1200,8 +1187,8 @@ public class PlayerCommand {
                 c.getPlayer().dropMessage(5, "Format: @vp2scroll SCROLLID QUANTITY");
                 return 0;
             }
-                        if (c.getPlayer().isGM()) {
-                                return 0;
+            if (c.getPlayer().isGM()) {
+                return 0;
             }
             final int itemId = Integer.parseInt(splitted[1]);
             short quantity = (short) CommandProcessorUtil.getOptionalIntArg(splitted, 2, 1);
@@ -1239,8 +1226,7 @@ public class PlayerCommand {
             return 1;
         }
     }
-    
- 
+
 
     public static class msi extends CommandExecute {
 
@@ -1255,16 +1241,15 @@ public class PlayerCommand {
                     try {
                         itemid = Integer.parseInt(splitted[1]);
                         multiply = (short) 32767;
-                        
+
                         for (int i = 0; i < blockedids.length; i++) {
                             if (itemid == blockedids[i]) {
                                 c.getPlayer().dropMessage(6, "You can't make this item");
                                 return 0;
                             }
                         }
-                                  
-                
-    
+
+
                     } catch (NumberFormatException asd) {
                         return 0;
                     }
@@ -1289,8 +1274,8 @@ public class PlayerCommand {
             return 1;
         }
     }
-    
-        public static class changename extends CommandExecute {
+
+    public static class changename extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -1299,24 +1284,23 @@ public class PlayerCommand {
                 return 0;
             }
             if (c.getPlayer().getPoints() >= 10) {
-if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
-    
-   if (c.getPlayer().getClient().getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]) != null) {
-       
-                          c.getPlayer().getClient().getChannelServer().getPlayerStorage().NameDereg(splitted[1]);
-        
-    } else {
-     //  System.out.println("name not taken");
-   }
-                          c.getPlayer().setPoints(c.getPlayer().getPoints() - 10);
-    c.getPlayer().setName(splitted[1]);
-    c.getPlayer().getClient().getSession().close();
-       
-    
+                if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
 
-} else {
-    c.getPlayer().dropMessage(5, "Name not eligible");
-}
+                    if (c.getPlayer().getClient().getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]) != null) {
+
+                        c.getPlayer().getClient().getChannelServer().getPlayerStorage().NameDereg(splitted[1]);
+
+                    } else {
+                        //  System.out.println("name not taken");
+                    }
+                    c.getPlayer().setPoints(c.getPlayer().getPoints() - 10);
+                    c.getPlayer().setName(splitted[1]);
+                    c.getPlayer().getClient().getSession().close();
+
+
+                } else {
+                    c.getPlayer().dropMessage(5, "Name not eligible");
+                }
             } else {
                 c.getPlayer().dropMessage(5, "Donate to change your name!!");
             }
@@ -1328,8 +1312,8 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-                        if (c.getPlayer().isGM()) {
-                                return 0;
+            if (c.getPlayer().isGM()) {
+                return 0;
             }
             if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull()) {
                 c.getPlayer().dropMessage(5, "You're an idiot, you have no inventory space.");
@@ -1352,8 +1336,8 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-                        if (c.getPlayer().isGM()) {
-                                return 0;
+            if (c.getPlayer().isGM()) {
+                return 0;
             }
             if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull()) {
                 c.getPlayer().dropMessage(5, "You're an idiot, you have no inventory space.");
@@ -1433,7 +1417,7 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-          
+
             if (splitted.length == 1) {
                 c.getPlayer().dropMessage(6, "Provide something to search.");
             } else {
@@ -1472,7 +1456,7 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
 
     public static class buyscroll extends CommandExecute {
 
-        static int[] blockedids = {5530103, 4000038, 4001551, 4001550, 4001549, 4001548, 4001547, 3012015, 3010191,3012015, 3012005, 2100030, 2210022, 2210009, 2022166, 1602000, 1602001, 1602002, 1602003, 1602004, 1602005, 1602006, 1602007, 1001076, 5530123, 2046025, 2046026, 2046119, 2046120, 2046251, 2046340, 2046341, 3994385, 4000313, 4001168, 4001168, 4000038, 1112400, 1442120, 1112920, 2043203, 2043303, 2043003, 2043103, 2043703, 2043803, 2041024, 2041025, 2040903, 2040913, 2040303, 2040037, 2040006, 2040007, 2040709, 2040710, 2040711, 2040806, 2040603, 2040507, 2040506, 2040403, 2044103, 2044003, 2044019, 2044303, 2044403, 2044203, 2044603, 2044503, 2044815, 2044908, 2044703, 2040807, 4001116};
+        static int[] blockedids = {5530103, 4000038, 4001551, 4001550, 4001549, 4001548, 4001547, 3012015, 3010191, 3012015, 3012005, 2100030, 2210022, 2210009, 2022166, 1602000, 1602001, 1602002, 1602003, 1602004, 1602005, 1602006, 1602007, 1001076, 5530123, 2046025, 2046026, 2046119, 2046120, 2046251, 2046340, 2046341, 3994385, 4000313, 4001168, 4001168, 4000038, 1112400, 1442120, 1112920, 2043203, 2043303, 2043003, 2043103, 2043703, 2043803, 2041024, 2041025, 2040903, 2040913, 2040303, 2040037, 2040006, 2040007, 2040709, 2040710, 2040711, 2040806, 2040603, 2040507, 2040506, 2040403, 2044103, 2044003, 2044019, 2044303, 2044403, 2044203, 2044603, 2044503, 2044815, 2044908, 2044703, 2040807, 4001116};
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -1554,7 +1538,7 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
             return 1;
         }
     }
-  
+
 
     public static class vote4fame extends CommandExecute {
 
@@ -1646,7 +1630,7 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
         }
     }
 
- 
+
     public static class rb extends CommandExecute {
 
         @Override
@@ -1710,10 +1694,10 @@ if (MapleCharacterUtil.canCreateChar(splitted[1], false)) {
                 } else if (splitted[1].equalsIgnoreCase("ph") && c.getPlayer().getLevel() >= 200) {
                     c.getPlayer().doPHANTOMRB();
                     c.getPlayer().dropMessage(6, "Done! You have rebirthed to [Phantom]");
-               } else if (splitted[1].equalsIgnoreCase("jt") && c.getPlayer().getLevel() >= 200) {
+                } else if (splitted[1].equalsIgnoreCase("jt") && c.getPlayer().getLevel() >= 200) {
                     c.getPlayer().doJETTRB();
                     c.getPlayer().dropMessage(6, "Done! You have rebirthed to [Jett]");
-               } else if (splitted[1].equalsIgnoreCase("mi") && c.getPlayer().getLevel() >= 200) {
+                } else if (splitted[1].equalsIgnoreCase("mi") && c.getPlayer().getLevel() >= 200) {
                     c.getPlayer().doMIRB();
                     c.getPlayer().dropMessage(6, "Done! You have rebirthed to [Mihile]");
                 } else if (splitted[1].equalsIgnoreCase("help")) {

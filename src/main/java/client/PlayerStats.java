@@ -26,9 +26,11 @@ import constants.GameConstants;
 import handling.world.World;
 import handling.world.guild.MapleGuild;
 import handling.world.guild.MapleGuildSkill;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+
 import server.*;
 import server.StructSetItem.SetItem;
 import server.life.Element;
@@ -208,7 +210,7 @@ public class PlayerStats implements Serializable {
     }
 
     public int getCurrentMaxHp() {
-        return localmaxhp;  
+        return localmaxhp;
     }
 
     public int getCurrentMaxMp(int job) {
@@ -354,8 +356,8 @@ public class PlayerStats implements Serializable {
         Iterator<Item> itera = chra.getInventory(MapleInventoryType.EQUIPPED).newList().iterator();
         while (itera.hasNext()) {
             Equip equip = (Equip) itera.next();
-         //   if (GameConstants.getAngelicSkill(equip.getItemId()) > 0) {
-           //     equippedSummon = PlayerStats.getSkillByJob(GameConstants.getAngelicSkill(equip.getItemId()), chra.getJob());
+            //   if (GameConstants.getAngelicSkill(equip.getItemId()) > 0) {
+            //     equippedSummon = PlayerStats.getSkillByJob(GameConstants.getAngelicSkill(equip.getItemId()), chra.getJob());
             //}
             if (equip.getPosition() == -11) {
                 if (GameConstants.isMagicWeapon(equip.getItemId())) {
@@ -396,7 +398,7 @@ public class PlayerStats implements Serializable {
             localstr += equip.getStr();
             localluk += equip.getLuk();
             magic += equip.getMatk();
-            watk += equip.getWatk(); 
+            watk += equip.getWatk();
             wdef += equip.getWdef();
             mdef += equip.getMdef();
             speed += equip.getSpeed();
@@ -431,7 +433,7 @@ public class PlayerStats implements Serializable {
                     }
                     break;
             } //slow, poison, darkness, seal, freeze
-            
+
             percent_hp += ii.getItemIncMHPr(equip.getItemId()); //裝備%HP
             percent_mp += ii.getItemIncMMPr(equip.getItemId()); //裝備%MP
 
@@ -593,15 +595,15 @@ public class PlayerStats implements Serializable {
                 }
             } else if (dropMod == 1 && item.getItemId() / 10000 == 536) {
                 if (item.getItemId() == 5360000
-                    || (item.getItemId() == 5360001 && hour > 6 && hour < 12)
-                    || (item.getItemId() == 5360002 && hour > 9 && hour < 15)
-                    || (item.getItemId() == 5360003 && hour > 12 && hour < 18)
-                    || (item.getItemId() == 5360004 && hour > 15 && hour < 21)
-                    || (item.getItemId() == 5360005 && hour > 18 && hour < 24)
-                    || (item.getItemId() == 5360006 && hour < 5)
-                    || (item.getItemId() == 5360007 && hour > 2 && hour < 8)
-                    || (item.getItemId() == 5360008 && hour > 5 && hour < 11)
-                    || item.getItemId() == 5360042) {
+                        || (item.getItemId() == 5360001 && hour > 6 && hour < 12)
+                        || (item.getItemId() == 5360002 && hour > 9 && hour < 15)
+                        || (item.getItemId() == 5360003 && hour > 12 && hour < 18)
+                        || (item.getItemId() == 5360004 && hour > 15 && hour < 21)
+                        || (item.getItemId() == 5360005 && hour > 18 && hour < 24)
+                        || (item.getItemId() == 5360006 && hour < 5)
+                        || (item.getItemId() == 5360007 && hour > 2 && hour < 8)
+                        || (item.getItemId() == 5360008 && hour > 5 && hour < 11)
+                        || item.getItemId() == 5360042) {
                     dropMod = 2;
                 }
             } else if (levelBonus == 0 && item.getItemId() == 5590000) {
@@ -635,9 +637,9 @@ public class PlayerStats implements Serializable {
                 sData.put(SkillFactory.getSkill(getSkillByJob(1179, chra.getJob())), new SkillEntry((byte) 1, (byte) 0, -1));
             }
         }
-        
+
         for (Pair ix : chra.getCharacterCard().getCardEffects()) {
-            MapleStatEffect e = SkillFactory.getSkill(((Integer)ix.getLeft()).intValue()).getEffect(((Integer)ix.getRight()).intValue());
+            MapleStatEffect e = SkillFactory.getSkill(((Integer) ix.getLeft()).intValue()).getEffect(((Integer) ix.getRight()).intValue());
             this.percent_wdef += e.getWDEFRate();
             this.watk += chra.getLevel();
             this.percent_hp += e.getPercentHP();
@@ -645,7 +647,7 @@ public class PlayerStats implements Serializable {
             this.magic += chra.getLevel();
             this.RecoveryUP += 132;
             this.percent_acc += 11;
-            this.passive_sharpeye_rate = (short)(this.passive_sharpeye_rate + e.getCr());
+            this.passive_sharpeye_rate = (short) (this.passive_sharpeye_rate + e.getCr());
             this.jump += e.getPassiveJump();
             this.speed += e.getPassiveSpeed();
             this.dodgeChance += 13;
@@ -656,7 +658,7 @@ public class PlayerStats implements Serializable {
 
             this.incMesoProp += 10;
 
-            this.passive_sharpeye_percent = (short)(this.passive_sharpeye_percent + e.getCriticalMax());
+            this.passive_sharpeye_percent = (short) (this.passive_sharpeye_percent + e.getCriticalMax());
             this.ignoreTargetDEF += e.getIgnoreMob();
             this.localstr += e.getStrX();
             this.localdex += e.getDexX();
@@ -2036,7 +2038,7 @@ public class PlayerStats implements Serializable {
             case 5100:
             case 5110:
             case 5111:
-            case 5112:{
+            case 5112: {
                 bx = SkillFactory.getSkill(51000000); //增加HP
                 bof = chra.getTotalSkillLevel(bx);
                 if (bof > 0) {
@@ -2600,12 +2602,12 @@ public class PlayerStats implements Serializable {
             }
         }
         chra.changeSkillLevel_Skip(sData, false);
-        
+
         //恶魔杀手的盾牌加的DF
         if (GameConstants.isDemon(chra.getJob())) {
             localmaxmp = 10;
             localmaxmp += incMaxDF;
-        }        
+        }
 
         CalcPassive_Mastery(chra);
         recalcPVPRank(chra);
@@ -2616,7 +2618,7 @@ public class PlayerStats implements Serializable {
             chra.enforceMaxHpMp();
         }
 
-       calculateMaxBaseDamage(Math.max(magic, watk), pvpDamage, chra);
+        calculateMaxBaseDamage(Math.max(magic, watk), pvpDamage, chra);
         trueMastery = Math.min(100, trueMastery);
         passive_sharpeye_min_percent = (short) Math.min(passive_sharpeye_min_percent, passive_sharpeye_percent);
         if (oldmaxhp != 0 && oldmaxhp != localmaxhp) {
@@ -2821,9 +2823,9 @@ public class PlayerStats implements Serializable {
             localmaxbasedamage = 1;
             localmaxbasepvpdamage = 1;
         } else if (watk >= Integer.MAX_VALUE) {
-                     localmaxbasedamage = Integer.MAX_VALUE - 1;
-            localmaxbasepvpdamage = Integer.MAX_VALUE - 1;   
-            
+            localmaxbasedamage = Integer.MAX_VALUE - 1;
+            localmaxbasepvpdamage = Integer.MAX_VALUE - 1;
+
         } else {
             Item weapon_item = chra.getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -11);
             Item weapon_item2 = chra.getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -10);
@@ -2981,6 +2983,7 @@ public class PlayerStats implements Serializable {
         mplew.writeInt(mp); // mp
         mplew.writeInt(maxmp); // maxmp
     }
+
     private static int[] allJobs = {0, 10000, 10000000, 20000000, 20010000, 20020000, 30000000, 30010000};
     public static int[] pvpSkills = {1000007, 2000007, 3000006, 4000010, 5000006, 5010004, 11000006, 12000006, 13000005, 14000006, 15000005, 21000005, 22000002, 23000004, 31000005, 32000012, 33000004, 35000005};
 

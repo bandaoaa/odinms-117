@@ -11,7 +11,9 @@ import constants.ServerConstants;
 import constants.ServerConstants.PlayerGMRank;
 import handling.channel.ChannelServer;
 import handling.world.World;
+
 import java.util.Calendar;
+
 import scripting.EventInstanceManager;
 import scripting.EventManager;
 import server.MapleCarnivalChallenge;
@@ -28,7 +30,6 @@ import tools.packet.CWvsContext;
 import tools.packet.CWvsContext.InventoryPacket;
 
 /**
- *
  * @author Emilyx3
  */
 public class GMCommand {
@@ -56,7 +57,7 @@ public class GMCommand {
         }
     }
 
-      public static class item extends CommandExecute {
+    public static class item extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -78,17 +79,17 @@ public class GMCommand {
 
                 }
                 if (c.getPlayer().getGMLevel() < 7 && c.getPlayer().getDGM() == 0) {
-                    item.setOwner("GM "+c.getPlayer().getName());
+                    item.setOwner("GM " + c.getPlayer().getName());
                     item.setGMLog(c.getPlayer().getName() + " used !item");
                 } else if (c.getPlayer().getDGM() == 1) {
-                                     item.setOwner("DGM "+c.getPlayer().getName());
-                    item.setGMLog(c.getPlayer().getName() + " used !item");   
+                    item.setOwner("DGM " + c.getPlayer().getName());
+                    item.setGMLog(c.getPlayer().getName() + " used !item");
                 } else if (c.getPlayer().getGMLevel() == 7) {
-                    item.setOwner("SV "+c.getPlayer().getName());
-                    item.setGMLog(c.getPlayer().getName() + " used !item");    
+                    item.setOwner("SV " + c.getPlayer().getName());
+                    item.setGMLog(c.getPlayer().getName() + " used !item");
                 } else if (c.getPlayer().getGMLevel() == 99) {
-                                        item.setOwner(c.getPlayer().getName());
-                    item.setGMLog(c.getPlayer().getName() + " used !item"); 
+                    item.setOwner(c.getPlayer().getName());
+                    item.setGMLog(c.getPlayer().getName() + " used !item");
                 }
                 MapleInventoryManipulator.addbyItem(c, item);
             }
@@ -96,69 +97,68 @@ public class GMCommand {
         }
     }
 
-    
- 
-    
-       public static class Mute extends CommandExecute {
+
+    public static class Mute extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-			if (splitted.length >= 3) {
-				final MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
-                                if (victim.getGMLevel() == 99) {
-                                    c.getPlayer().ban("Trying to mute the owner", true, true);
-                                    return 0;
-                                }
-				int time = Integer.parseInt(splitted[2]);
-				Calendar unmuteTime = Calendar.getInstance();
-				unmuteTime.add(Calendar.MINUTE, time);
-				victim.setMuted(true);
-				victim.setUnmuteTime(unmuteTime);
-				c.getPlayer().dropMessage(5, victim.getName() + "has been muted for " + time + " minutes.");
-				victim.dropMessage(5, "You have been muted for " + time + " minutes");
+            if (splitted.length >= 3) {
+                final MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+                if (victim.getGMLevel() == 99) {
+                    c.getPlayer().ban("Trying to mute the owner", true, true);
+                    return 0;
+                }
+                int time = Integer.parseInt(splitted[2]);
+                Calendar unmuteTime = Calendar.getInstance();
+                unmuteTime.add(Calendar.MINUTE, time);
+                victim.setMuted(true);
+                victim.setUnmuteTime(unmuteTime);
+                c.getPlayer().dropMessage(5, victim.getName() + "has been muted for " + time + " minutes.");
+                victim.dropMessage(5, "You have been muted for " + time + " minutes");
 
-			} else {
-				c.getPlayer().dropMessage(5, "!mute <player name> <minutes>");
-			}
-                        return 1;
-        }
-                    }
-    
-      public static class checkplayermsi extends CommandExecute {
-
-        @Override
-        public int execute(MapleClient c, String[] splitted) {
-			if (splitted.length >= 2) {
-				c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]).setMuted(false);
-			} else {
-				c.getPlayer().dropMessage(5, "Please enter the character name that you want to unmute.");
-			}
-                        return 1;
+            } else {
+                c.getPlayer().dropMessage(5, "!mute <player name> <minutes>");
+            }
+            return 1;
         }
     }
-    
+
+    public static class checkplayermsi extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length >= 2) {
+                c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]).setMuted(false);
+            } else {
+                c.getPlayer().dropMessage(5, "Please enter the character name that you want to unmute.");
+            }
+            return 1;
+        }
+    }
+
     public static class UnMute extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-			if (splitted.length >= 2) {
-				c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]).setMuted(false);
-			} else {
-				c.getPlayer().dropMessage(5, "Please enter the character name that you want to unmute.");
-			}
-                        return 1;
+            if (splitted.length >= 2) {
+                c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]).setMuted(false);
+            } else {
+                c.getPlayer().dropMessage(5, "Please enter the character name that you want to unmute.");
+            }
+            return 1;
         }
     }
-        public static class MuteMap extends CommandExecute {
+
+    public static class MuteMap extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-			MapleMap map = c.getPlayer().getMap();
-			map.setMuted(!map.getMuted());
-			map.broadcastMessage(CWvsContext.serverNotice(5, map.getMapName() + " has been " + (map.getMuted() ? "muted." : "unmuted.")));
-              return 1;
+            MapleMap map = c.getPlayer().getMap();
+            map.setMuted(!map.getMuted());
+            map.broadcastMessage(CWvsContext.serverNotice(5, map.getMapName() + " has been " + (map.getMuted() ? "muted." : "unmuted.")));
+            return 1;
         }
-        }
+    }
 
 
     public static class Invincible extends CommandExecute {
@@ -298,21 +298,22 @@ public class GMCommand {
             return 1;
         }
     }
-        public static class CloseEntry extends CommandExecute {
+
+    public static class CloseEntry extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
 
             if (c.getPlayer().getClient().getChannelServer().eventOn == true && c.getPlayer().getClient().getChannelServer().eventClosed == false) {
 
-               c.getPlayer().getClient().getChannelServer().eventClosed = true;
-                    World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, c.getChannel(), "[Event] The event has been closed. No more participants allowed to join."));
+                c.getPlayer().getClient().getChannelServer().eventClosed = true;
+                World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, c.getChannel(), "[Event] The event has been closed. No more participants allowed to join."));
             }
             return 1;
         }
-        }
-        
-        public static class CloseEvent extends CommandExecute {
+    }
+
+    public static class CloseEvent extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -320,13 +321,13 @@ public class GMCommand {
             if (c.getPlayer().getClient().getChannelServer().eventOn == true && c.getPlayer().getClient().getChannelServer().eventClosed == true) {
 
                 c.getPlayer().getClient().getChannelServer().eventOn = false;
-                    World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, c.getChannel(), "[Event] The event has ended. Thanks to all of those who participated."));
+                World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, c.getChannel(), "[Event] The event has ended. Thanks to all of those who participated."));
             }
             return 1;
         }
-        }
-    
-        public static class OpenEvent extends CommandExecute {
+    }
+
+    public static class OpenEvent extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -337,15 +338,15 @@ public class GMCommand {
                 c.getPlayer().getClient().getChannelServer().eventClosed = false;
                 c.getPlayer().getClient().getChannelServer().eventMap = mapid;
                 World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, c.getChannel(), "[Event] The event has started in Channel " + c.getChannel() + " in " + c.getPlayer().getMapId() + "! Use @gotoevent to join it. Note: You must be in Channel " + c.getChannel() + " for it to work."));
-              //  c.getPlayer().setEventDone(1);   
+                //  c.getPlayer().setEventDone(1);
             } else {
-               c.getPlayer().dropMessage(5, "An event is going on already...");
+                c.getPlayer().dropMessage(5, "An event is going on already...");
             }
             return 1;
         }
-        }
+    }
 
-    
+
     public static class RemoveItem extends CommandExecute {
 
         @Override
@@ -419,10 +420,10 @@ public class GMCommand {
         public int execute(MapleClient c, String[] splitted) {
             MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
             if (victim.getGMLevel() == 99) {
-              World.Broadcast.broadcastSmega(CWvsContext.serverNotice(3, c.getPlayer() == null ? c.getChannel() : c.getPlayer().getClient().getChannel(), c.getPlayer() == null ? splitted[1] : c.getPlayer().getName() + " : " + StringUtil.joinStringFrom(splitted, 2), true));
-        
+                World.Broadcast.broadcastSmega(CWvsContext.serverNotice(3, c.getPlayer() == null ? c.getChannel() : c.getPlayer().getClient().getChannel(), c.getPlayer() == null ? splitted[1] : c.getPlayer().getName() + " : " + StringUtil.joinStringFrom(splitted, 2), true));
+
             } else {
-            World.Broadcast.broadcastSmega(CWvsContext.serverNotice(3, victim == null ? c.getChannel() : victim.getClient().getChannel(), victim == null ? splitted[1] : victim.getName() + " : " + StringUtil.joinStringFrom(splitted, 2), true));
+                World.Broadcast.broadcastSmega(CWvsContext.serverNotice(3, victim == null ? c.getChannel() : victim.getClient().getChannel(), victim == null ? splitted[1] : victim.getName() + " : " + StringUtil.joinStringFrom(splitted, 2), true));
             }
             return 1;
         }
@@ -438,17 +439,17 @@ public class GMCommand {
                 return 0;
             } else {
                 if (victim.gethiddenGM() == 1) {
-                     victim.getMap().broadcastMessage(CField.getChatText(victim.getId(), StringUtil.joinStringFrom(splitted, 2), false, 0));  
-                   
+                    victim.getMap().broadcastMessage(CField.getChatText(victim.getId(), StringUtil.joinStringFrom(splitted, 2), false, 0));
+
                 } else {
                     if (victim.getGMLevel() == 99) {
-                          c.getPlayer().getMap().broadcastMessage(CField.getChatText(c.getPlayer().getId(), StringUtil.joinStringFrom(splitted, 2), c.getPlayer().isGM(), 0));
+                        c.getPlayer().getMap().broadcastMessage(CField.getChatText(c.getPlayer().getId(), StringUtil.joinStringFrom(splitted, 2), c.getPlayer().isGM(), 0));
                     } else {
-                         victim.getMap().broadcastMessage(CField.getChatText(victim.getId(), StringUtil.joinStringFrom(splitted, 2), victim.isGM(), 0));    
+                        victim.getMap().broadcastMessage(CField.getChatText(victim.getId(), StringUtil.joinStringFrom(splitted, 2), victim.isGM(), 0));
                     }
-               
+
                 }
-               
+
             }
             return 1;
         }
@@ -511,7 +512,7 @@ public class GMCommand {
             } else {
                 for (MapleCharacter victim : c.getPlayer().getMap().getCharactersThreadsafe()) {
                     if (!victim.isGM()) {
-                    victim.disease(type, CommandProcessorUtil.getOptionalIntArg(splitted, 3, 1));
+                        victim.disease(type, CommandProcessorUtil.getOptionalIntArg(splitted, 3, 1));
                     }
                 }
             }
@@ -519,7 +520,6 @@ public class GMCommand {
         }
     }
 
- 
 
     public static class SetInstanceProperty extends CommandExecute {
 
@@ -572,20 +572,20 @@ public class GMCommand {
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (splitted.length >= 2) {
-            MapleMap victim = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(Integer.parseInt(splitted[1]));
-            StringBuilder builder = new StringBuilder("Players on Map: ").append(victim.getCharactersThreadsafe().size()).append(", ");
-            for (MapleCharacter chr : victim.getCharactersThreadsafe()) {
-                if (builder.length() > 150) { // wild guess :o
-                    builder.setLength(builder.length() - 2);
-                    c.getPlayer().dropMessage(6, builder.toString());
-                    builder = new StringBuilder();
+                MapleMap victim = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(Integer.parseInt(splitted[1]));
+                StringBuilder builder = new StringBuilder("Players on Map: ").append(victim.getCharactersThreadsafe().size()).append(", ");
+                for (MapleCharacter chr : victim.getCharactersThreadsafe()) {
+                    if (builder.length() > 150) { // wild guess :o
+                        builder.setLength(builder.length() - 2);
+                        c.getPlayer().dropMessage(6, builder.toString());
+                        builder = new StringBuilder();
+                    }
+                    builder.append(MapleCharacterUtil.makeMapleReadable(chr.getName()));
+                    builder.append(", ");
                 }
-                builder.append(MapleCharacterUtil.makeMapleReadable(chr.getName()));
-                builder.append(", ");
-            }
-            builder.setLength(builder.length() - 2);
-            c.getPlayer().dropMessage(6, builder.toString());
-               } else {
+                builder.setLength(builder.length() - 2);
+                c.getPlayer().dropMessage(6, builder.toString());
+            } else {
                 c.getPlayer().dropMessage(5, "!whosthere mapid");
             }
             return 1;
@@ -756,8 +756,6 @@ public class GMCommand {
     }
 
 
-
-
     public static class TDrops extends CommandExecute {
 
         @Override
@@ -766,6 +764,6 @@ public class GMCommand {
             return 1;
         }
     }
-    
+
 
 }

@@ -32,20 +32,20 @@ import java.util.TimeZone;
 public class FileoutputUtil {
 
     // Logging output file
-    public static final String Acc_Stuck = "Log_AccountStuck.rtf",
-            Login_Error = "Log_Login_Error.rtf",
+    public static final String Acc_Stuck = "logs/Log_AccountStuck.rtf",
+            Login_Error = "logs/Log_Login_Error.rtf",
             // IP_Log = "Log_AccountIP.rtf",
             //GMCommand_Log = "Log_GMCommand.rtf",
-           // Zakum_Log = "Log_Zakum.rtf",
+            // Zakum_Log = "Log_Zakum.rtf",
             //Horntail_Log = "Log_Horntail.rtf",
-            Pinkbean_Log = "Log_Pinkbean.rtf",
-            ScriptEx_Log = "Log_Script_Except.rtf",
-            PacketEx_Log = "Log_Packet_Except.rtf", // I cba looking for every error, adding this back in.
-            Donator_Log = "Log_Donator.rtf",
-            Hacker_Log = "Log_Hacker.rtf",
-			Movement_Log = "Log_Movement.rtf",
-            CommandEx_Log = "Log_Command_Except.rtf"
-	    //PQ_Log = "Log_PQ.rtf"
+            Pinkbean_Log = "logs/Log_Pinkbean.rtf",
+            ScriptEx_Log = "logs/Log_Script_Except.rtf",
+            PacketEx_Log = "logs/Log_Packet_Except.rtf", // I cba looking for every error, adding this back in.
+            Donator_Log = "logs/Log_Donator.rtf",
+            Hacker_Log = "logs/Log_Hacker.rtf",
+            Movement_Log = "logs/Log_Movement.rtf",
+            CommandEx_Log = "logs/Log_Command_Except.rtf"
+            //PQ_Log = "Log_PQ.rtf"
             ;
     // End
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -53,7 +53,7 @@ public class FileoutputUtil {
     private static final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyy-MM-dd");
 
     static {
-	sdfGMT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        sdfGMT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     public static void log(final String file, final String msg) {

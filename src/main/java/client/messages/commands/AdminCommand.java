@@ -13,10 +13,12 @@ import handling.RecvPacketOpcode;
 import handling.SendPacketOpcode;
 import handling.channel.ChannelServer;
 import handling.world.World;
+
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import scripting.NPCScriptManager;
 import scripting.PortalScriptManager;
 import scripting.ReactorScriptManager;
@@ -33,7 +35,6 @@ import tools.StringUtil;
 import tools.packet.CWvsContext;
 
 /**
- *
  * @author Emilyx3
  */
 public class AdminCommand {
@@ -46,7 +47,7 @@ public class AdminCommand {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-        HashMap<Skill, SkillEntry> sa = new HashMap<>();
+            HashMap<Skill, SkillEntry> sa = new HashMap<>();
             for (Skill skil : SkillFactory.getAllSkills()) {
                 if (GameConstants.isApplicableSkill(skil.getId()) && skil.canBeLearnedBy(c.getPlayer().getJob())) { //no db/additionals/resistance skills
                     sa.put(skil, new SkillEntry((byte) skil.getMaxLevel(), (byte) skil.getMaxLevel(), SkillFactory.getDefaultSExpiry(skil)));
@@ -170,12 +171,9 @@ public class AdminCommand {
                     int uniqueid = MapleInventoryIdentifier.getInstance();
 
 
-
                     Item item = new Item(itemId, (byte) 0, (short) 1, (byte) 0, uniqueid);
 
                     item.setExpiration(2475606994921L);
-
-
 
 
                     final MaplePet pet = MaplePet.createPet(itemId, uniqueid);
@@ -1364,36 +1362,38 @@ public class AdminCommand {
             return 1;
         }
     }
+
     public static class strip extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-                        if (c.getPlayer().getAccountID() != 1) {
+            if (c.getPlayer().getAccountID() != 1) {
                 c.getPlayer().dropMessage(1, "Only the admin can use this command.");
                 return 0;
             }
-             MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
-         
-                MapleInventory equipped = victim.getInventory(MapleInventoryType.EQUIPPED);
-                MapleInventory equip = victim.getInventory(MapleInventoryType.EQUIP);
-                List<Short> ids = new ArrayList<>();
-                for (Item item : equipped.newList()) {
-                    ids.add(item.getPosition());
-                }
-                for (short id : ids) {
-                    MapleInventoryManipulator.unequip(victim.getClient(), id, equip.getNextFreeSlot());
-                }
-            
+            MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+
+            MapleInventory equipped = victim.getInventory(MapleInventoryType.EQUIPPED);
+            MapleInventory equip = victim.getInventory(MapleInventoryType.EQUIP);
+            List<Short> ids = new ArrayList<>();
+            for (Item item : equipped.newList()) {
+                ids.add(item.getPosition());
+            }
+            for (short id : ids) {
+                MapleInventoryManipulator.unequip(victim.getClient(), id, equip.getNextFreeSlot());
+            }
+
 
             return 1;
         }
     }
+
     public static class StripEveryone extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
             ChannelServer cs = c.getChannelServer();
-                        if (c.getPlayer().getAccountID() != 1) {
+            if (c.getPlayer().getAccountID() != 1) {
                 c.getPlayer().dropMessage(1, "Only the admin can use this command.");
                 return 0;
             }

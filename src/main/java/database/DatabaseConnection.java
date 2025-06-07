@@ -28,8 +28,7 @@ import java.util.LinkedList;
 
 /**
  * All OdinMS servers maintain a Database Connection. This class therefore "singletonices" the connection per process.
- * 
- * 
+ *
  * @author Frz
  */
 public class DatabaseConnection {
@@ -86,9 +85,9 @@ public class DatabaseConnection {
 
     public static void closeAll() throws SQLException {
         for (final Connection con : DatabaseConnection.ThreadLocalConnection.allConnections) {
-	    if (con != null) {
-            	con.close();
-	    }
+            if (con != null) {
+                con.close();
+            }
         }
     }
 
@@ -104,7 +103,7 @@ public class DatabaseConnection {
                 System.err.println("ERROR" + e);
             }
             try {
-                  Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/v117?autoReconnect=true","root", "root");
+                Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/v117?autoReconnect=true", "root", "root");
                 allConnections.add(con);
                 return con;
             } catch (SQLException e) {

@@ -61,7 +61,7 @@ public class ServerConstants {
     public static final int MTS_BASE = 0; //+amount to everything, GMS = 500, MSEA = 1000
     public static final int MTS_TAX = 5; //+% to everything, GMS = 10
     public static final int MTS_MESO = 10000; //mesos needed, GMS = 5000
-    
+
     //master login is only used in GMS: fake account for localhost only
     //master and master2 is to bypass all accounts passwords only if you are under the IPs below
 

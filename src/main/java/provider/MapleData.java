@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -53,6 +54,7 @@ public class MapleData implements MapleDataEntity, Iterable<MapleData> {
         }
         this.imageDataDir = imageDataDir;
     }
+
     public MapleData getChildByPath(final String path) {
         final String segments[] = path.split("/");
         if (segments[0].equals("..")) {

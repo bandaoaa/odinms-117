@@ -1,11 +1,13 @@
 package server;
 
 import database.DatabaseConnection;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -57,8 +59,8 @@ public class CashItemFactory {
 
         try {
             Connection con = DatabaseConnection.getConnection();
-            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM cashshop_modified_items"); 
-                    ResultSet rs = ps.executeQuery()) {
+            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM cashshop_modified_items");
+                 ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) { //添加数据库加值道具
                     CashModInfo ret = new CashModInfo(rs.getInt("serial"), rs.getInt("discount_price"), rs.getInt("mark"), rs.getInt("showup") > 0, rs.getInt("itemid"), rs.getInt("priority"), rs.getInt("package") > 0, rs.getInt("period"), rs.getInt("gender"), rs.getInt("count"), rs.getInt("meso"), rs.getInt("unk_1"), rs.getInt("unk_2"), rs.getInt("unk_3"), rs.getInt("extra_flags"));
                     itemMods.put(ret.sn, ret);

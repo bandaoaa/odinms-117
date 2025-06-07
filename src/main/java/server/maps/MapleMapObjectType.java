@@ -32,7 +32,7 @@ public enum MapleMapObjectType {
     MIST,
     REACTOR,
     EXTRACTOR,
-	FAMILIAR,
-        POKEMON,
+    FAMILIAR,
+    POKEMON,
     HIRED_MERCHANT;
 }

@@ -26,10 +26,12 @@ import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import constants.GameConstants;
 import handling.channel.ChannelServer;
+
 import java.awt.Point;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import server.MapleCarnivalFactory;
 import server.MapleCarnivalFactory.MCSkill;
 import server.MapleItemInformationProvider;
@@ -96,8 +98,8 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         for (final ReactorDropEntry d : items) {
             try {
-                    Thread.sleep(200); //反應堆物品掉落延時
-                } catch (Exception e) {
+                Thread.sleep(200); //反應堆物品掉落延時
+            } catch (Exception e) {
 
             }
             if (d.itemId == 0) {
@@ -211,7 +213,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
     }
 
     public void doHarvest() { //TODO LEGEND
-        if (getPlayer().getFatigue() >=  (GameConstants.GMS ? 200 : 100) || getPlayer().getStat().harvestingTool <= 0 || getReactor().getTruePosition().distanceSq(getPlayer().getTruePosition()) > 10000) {
+        if (getPlayer().getFatigue() >= (GameConstants.GMS ? 200 : 100) || getPlayer().getStat().harvestingTool <= 0 || getReactor().getTruePosition().distanceSq(getPlayer().getTruePosition()) > 10000) {
             return;
         }
         final int pID = getReactor().getReactorId() < 200000 ? 92000000 : 92010000;
@@ -243,17 +245,17 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
             dropItems();
             if (getReactor().getReactorId() < 200000) {
                 addTrait("sense", 5);
-				if (Randomizer.nextInt(10) == 0) {
-					dropSingleItem(2440000);
-				}
-				if (Randomizer.nextInt(100) == 0) {
-					dropSingleItem(4032933);
-				}
+                if (Randomizer.nextInt(10) == 0) {
+                    dropSingleItem(2440000);
+                }
+                if (Randomizer.nextInt(100) == 0) {
+                    dropSingleItem(4032933);
+                }
             } else {
                 addTrait("insight", 5);
-				if (Randomizer.nextInt(10) == 0) {
-					dropSingleItem(2440001); //IMP
-				}
+                if (Randomizer.nextInt(10) == 0) {
+                    dropSingleItem(2440001); //IMP
+                }
             }
         }
         cancelHarvest(succ);

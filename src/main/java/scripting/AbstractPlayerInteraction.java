@@ -29,10 +29,12 @@ import handling.world.MapleParty;
 import handling.world.MaplePartyCharacter;
 import handling.world.World;
 import handling.world.guild.MapleGuild;
+
 import java.awt.Point;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.Randomizer;
@@ -372,7 +374,7 @@ public abstract class AbstractPlayerInteraction {
         MapleQuest.getInstance(id).forceComplete(getPlayer(), 0);
     }
 
-    public final void startportalScript(final String portalId) {  
+    public final void startportalScript(final String portalId) {
         NPCScriptManager.getInstance().startportalScript(c, 9010000, portalId);
     }
 

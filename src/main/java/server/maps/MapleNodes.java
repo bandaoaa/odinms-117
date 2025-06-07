@@ -21,9 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.maps;
 
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
+
 import tools.Pair;
 
 public class MapleNodes {

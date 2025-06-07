@@ -22,9 +22,11 @@ package server.maps;
 
 import client.*;
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
+
 import scripting.EventManager;
 import scripting.NPCScriptManager;
 import server.MapleItemInformationProvider;
@@ -70,7 +72,9 @@ public class MapScriptMethods {
                 return NULL;
             }
         }
-    };
+    }
+
+    ;
 
     private static enum onUserEnter {
 
@@ -84,7 +88,9 @@ public class MapScriptMethods {
                 return NULL;
             }
         }
-    };
+    }
+
+    ;
 
     public static void startScript_FirstUser(MapleClient c, String scriptName) {
         if (c.getPlayer() == null) {

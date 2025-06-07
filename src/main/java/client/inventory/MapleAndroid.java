@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client.inventory;
 
 import database.DatabaseConnection;
+
 import java.awt.Point;
 import java.io.Serializable;
 import java.sql.Connection;
@@ -28,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import server.MapleItemInformationProvider;
 import server.Randomizer;
 import server.movement.AbsoluteLifeMovement;
@@ -91,9 +93,9 @@ public class MapleAndroid implements Serializable {
 
     public static MapleAndroid create(final int itemid, final int uniqueid) {
         Pair<List<Integer>, List<Integer>> aInfo = MapleItemInformationProvider.getInstance().getAndroidInfo(itemid == 1662006 ? 5 : (itemid - 1661999));
-	if (aInfo == null) {
-	    return null;
-	}
+        if (aInfo == null) {
+            return null;
+        }
         return create(itemid, uniqueid, aInfo.left.get(Randomizer.nextInt(aInfo.left.size())), aInfo.right.get(Randomizer.nextInt(aInfo.right.size())), 0);
     }
 
@@ -101,7 +103,8 @@ public class MapleAndroid implements Serializable {
         if (uniqueid <= -1) { //wah
             uniqueid = MapleInventoryIdentifier.getInstance();
         }
-        try { try (PreparedStatement pse = DatabaseConnection.getConnection().prepareStatement("INSERT INTO androids (uniqueid, hair, face, name, skin) VALUES (?, ?, ?, ?, ?)")) {
+        try {
+            try (PreparedStatement pse = DatabaseConnection.getConnection().prepareStatement("INSERT INTO androids (uniqueid, hair, face, name, skin) VALUES (?, ?, ?, ?, ?)")) {
                 pse.setInt(1, uniqueid);
                 pse.setInt(2, hair);
                 pse.setInt(3, face);
@@ -115,7 +118,7 @@ public class MapleAndroid implements Serializable {
         final MapleAndroid pet = new MapleAndroid(itemid, uniqueid);
         pet.setHair(hair);
         pet.setFace(face);
-		pet.setName("Android");
+        pet.setName("Android");
 
         return pet;
     }
@@ -139,7 +142,7 @@ public class MapleAndroid implements Serializable {
     public final int getFace() {
         return face;
     }
-    
+
     public final void setSkin(final int s) {
         this.skin = s;
     }
@@ -151,7 +154,7 @@ public class MapleAndroid implements Serializable {
     public String getName() {
         return name;
     }
-	
+
     public void setName(String n) {
         this.name = n;
     }

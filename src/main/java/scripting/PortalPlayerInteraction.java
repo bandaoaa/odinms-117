@@ -47,6 +47,7 @@ public class PortalPlayerInteraction extends AbstractPlayerInteraction {
             }
         }
     }
+
     public final void inArdentmill() {
         if (getMapId() != 910001000) {
             if (getPlayer().getLevel() >= 10) {

@@ -42,6 +42,7 @@ public class MonsterGlobalDropEntry {
         this.Maximum = Maximum;
         this.onlySelf = onlySelf;
     }
+
     public byte dropType;
     public int itemId, chance, Minimum, Maximum, continent, questid;
     public boolean onlySelf = false;

@@ -31,8 +31,10 @@ import handling.login.LoginInformationProvider.JobType;
 import handling.login.LoginServer;
 import handling.login.LoginWorker;
 import handling.world.World;
+
 import java.util.*;
 import java.util.Map.Entry;
+
 import server.MapleItemInformationProvider;
 import server.quest.MapleQuest;
 import tools.Pair;
@@ -56,7 +58,7 @@ public class CharLoginHandler {
     性別設定相關
     */
     public static final void SetGenderRequest(final LittleEndianAccessor slea, final MapleClient c) {
-            byte type = slea.readByte(); //?
+        byte type = slea.readByte(); //?
         if (type == 0x01 && c.getGender() == 10) { //Packet shouldn't come if Gender isn't 10.
             c.setGender(slea.readByte());
 
@@ -64,7 +66,7 @@ public class CharLoginHandler {
             c.getSession().write(LoginPacket.getGenderChanged(c)); //選擇性別回饋
             //c.getSession().write(LoginPacket.getLoginFailed(23)); //楓之谷協議
         }
-        if (c.getGender()== 10) {
+        if (c.getGender() == 10) {
             c.updateLoginState(MapleClient.LOGIN_NOTLOGGEDIN, c.getSessionIPAddress()); //防止卡帳號
         }
     }
@@ -76,7 +78,7 @@ public class CharLoginHandler {
         }
         Map<Integer, Integer> cids = new LinkedHashMap();
         for (int i = 1; i <= 6; i++) {
-        int charId = slea.readInt();
+            int charId = slea.readInt();
             if (((!c.login_Auth(charId)) && (charId != 0)) || (ChannelServer.getInstance(c.getChannel()) == null) || (c.getWorld() != 0)) {
                 c.getSession().close();
                 return;
@@ -240,7 +242,7 @@ public class CharLoginHandler {
 
         final int shoes = slea.readInt();
         final int weapon = slea.readInt();
-        
+
         if (jett || phantom) {
             weapon3 = slea.readInt();
         }
@@ -556,49 +558,76 @@ public class CharLoginHandler {
         }
     }
 
-    /*     */ public static void PartTimeJob(LittleEndianAccessor slea, MapleClient c) {
-        /* 234 */ boolean complete = slea.readByte() == 2;
-        /* 235 */ int charId = slea.readInt();
-        /* 236 */ int type = slea.readByte();
+    /*     */
+    public static void PartTimeJob(LittleEndianAccessor slea, MapleClient c) {
+        /* 234 */
+        boolean complete = slea.readByte() == 2;
+        /* 235 */
+        int charId = slea.readInt();
+        /* 236 */
+        int type = slea.readByte();
 
-        /* 241 */ Pair info = c.getPartTimeJob(charId);
-        /* 242 */ if (complete) {
-            /* 243 */ if ((((Byte) info.getLeft()).byteValue() <= 0) || (((Long) info.getRight()).longValue() <= -2)) {
+        /* 241 */
+        Pair info = c.getPartTimeJob(charId);
+        /* 242 */
+        if (complete) {
+            /* 243 */
+            if ((((Byte) info.getLeft()).byteValue() <= 0) || (((Long) info.getRight()).longValue() <= -2)) {
                 System.out.println("7");
-                /* 244 */ c.getSession().write(LoginPacket.partTimeJobRequest(charId, 3, 0, 0, false, false));
-                /* 245 */ return;
-                /*     */            }
-            /* 247 */ int hoursFromLogin = Math.min((int) ((System.currentTimeMillis() - ((Long) info.getRight()).longValue()) / 3600000L), 6);
-            /* 248 */ boolean insert = c.updatePartTimeJob(charId, (byte) (hoursFromLogin > 0 ? -((Byte) info.getLeft()).byteValue() : 0), hoursFromLogin > 0 ? -hoursFromLogin - 10 : -2);
-            /* 249 */ if (insert) {
+                /* 244 */
+                c.getSession().write(LoginPacket.partTimeJobRequest(charId, 3, 0, 0, false, false));
+                /* 245 */
+                return;
+                /*     */
+            }
+            /* 247 */
+            int hoursFromLogin = Math.min((int) ((System.currentTimeMillis() - ((Long) info.getRight()).longValue()) / 3600000L), 6);
+            /* 248 */
+            boolean insert = c.updatePartTimeJob(charId, (byte) (hoursFromLogin > 0 ? -((Byte) info.getLeft()).byteValue() : 0), hoursFromLogin > 0 ? -hoursFromLogin - 10 : -2);
+            /* 249 */
+            if (insert) {
                 System.out.println("6");
                 c.getSession().write(LoginPacket.partTimeJobRequest(charId, 0, 0, ((Long) info.getRight()).longValue(), hoursFromLogin != 0, hoursFromLogin == 6));
             } /*     */ else {
                 System.out.println("5");
                 c.getSession().write(LoginPacket.partTimeJobRequest(charId, 2, 0, 0, false, false));
             }
-            /*     */        } /*     */ else {
-            /* 255 */ if ((((Byte) info.getLeft()).byteValue() > 0) || (((Long) info.getRight()).longValue() > 0L) || (!c.canMakePartTimeJob())) {
+            /*     */
+        } /*     */ else {
+            /* 255 */
+            if ((((Byte) info.getLeft()).byteValue() > 0) || (((Long) info.getRight()).longValue() > 0L) || (!c.canMakePartTimeJob())) {
                 System.out.println("1");
-                /* 256 */ c.getSession().write(LoginPacket.partTimeJobRequest(charId, 3, 0, 0, false, false));
-                /* 257 */ return;
-                /*     */            }
-            /* 259 */ if (((Byte) info.getLeft()).byteValue() < 0) {
+                /* 256 */
+                c.getSession().write(LoginPacket.partTimeJobRequest(charId, 3, 0, 0, false, false));
+                /* 257 */
+                return;
+                /*     */
+            }
+            /* 259 */
+            if (((Byte) info.getLeft()).byteValue() < 0) {
                 System.out.println("2");
-                /* 260 */ c.getSession().write(LoginPacket.partTimeJobRequest(charId, 1, 0, 0, false, false));
-                /* 261 */ return;
-                /*     */            }
-            /* 263 */ long start = System.currentTimeMillis();
-            /* 264 */ boolean insert = c.updatePartTimeJob(charId, (byte) type, start);
-            /* 265 */ if (insert) {
+                /* 260 */
+                c.getSession().write(LoginPacket.partTimeJobRequest(charId, 1, 0, 0, false, false));
+                /* 261 */
+                return;
+                /*     */
+            }
+            /* 263 */
+            long start = System.currentTimeMillis();
+            /* 264 */
+            boolean insert = c.updatePartTimeJob(charId, (byte) type, start);
+            /* 265 */
+            if (insert) {
                 System.out.println("3");
                 c.getSession().write(LoginPacket.partTimeJobRequest(charId, 0, type, start, false, false));
             } /*     */ else {
                 System.out.println("4");
                 c.getSession().write(LoginPacket.partTimeJobRequest(charId, 2, 0, 0, false, false));
             }
-            /*     */        }
-        /*     */    }
+            /*     */
+        }
+        /*     */
+    }
 
     public static void ViewChar(LittleEndianAccessor slea, MapleClient c) {
         Map<Byte, ArrayList<MapleCharacter>> worlds = new HashMap<>();

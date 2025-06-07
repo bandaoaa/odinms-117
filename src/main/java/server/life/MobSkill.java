@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Map;
@@ -32,7 +33,9 @@ import java.util.LinkedList;
 import client.MapleCharacter;
 import client.MapleDisease;
 import client.status.MonsterStatus;
+
 import java.util.EnumMap;
+
 import server.Randomizer;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
@@ -43,23 +46,23 @@ public class MobSkill {
     private int skillId, skillLevel, mpCon, spawnEffect, hp, x, y;
     private long duration, cooltime;
     private float prop;
-//    private short effect_delay;
+    //    private short effect_delay;
     private short limit;
     private List<Integer> toSummon = new ArrayList<Integer>();
     private Point lt, rb;
-	private boolean summonOnce;
+    private boolean summonOnce;
 
     public MobSkill(int skillId, int level) {
         this.skillId = skillId;
         this.skillLevel = level;
     }
-	
+
     public void setOnce(boolean o) {
-	this.summonOnce = o;
+        this.summonOnce = o;
     }
-	
+
     public boolean onlyOnce() {
-	return summonOnce;
+        return summonOnce;
     }
 
     public void setMpCon(int mpCon) {
@@ -146,7 +149,7 @@ public class MobSkill {
                 stop = player.getMap().getNumMonsters() >= limit;
                 break;
         }
-	stop |= monster.isBuffed(MonsterStatus.MAGIC_CRASH);
+        stop |= monster.isBuffed(MonsterStatus.MAGIC_CRASH);
         return stop;
     }
 
@@ -185,7 +188,7 @@ public class MobSkill {
             case 155:
                 stats.put(MonsterStatus.AVOID, Integer.valueOf(x));
                 break;
-	    case 115:
+            case 115:
             case 156:
                 stats.put(MonsterStatus.SPEED, Integer.valueOf(x));
                 break;
@@ -207,11 +210,11 @@ public class MobSkill {
                 if (lt != null && rb != null && skill && monster != null) {
                     List<MapleMapObject> objects = getObjectsInRange(monster, MapleMapObjectType.MONSTER);
                     for (MapleMapObject mons : objects) {
-			if (mons.getObjectId() != monster.getObjectId()) {
-                            player.getMap().killMonster((MapleMonster) mons, player, true, false, (byte)1, 0);
-			    monster.heal(getX(), getY(), true);
-			    break;
-			}
+                        if (mons.getObjectId() != monster.getObjectId()) {
+                            player.getMap().killMonster((MapleMonster) mons, player, true, false, (byte) 1, 0);
+                            monster.heal(getX(), getY(), true);
+                            break;
+                        }
                     }
                 } else if (monster != null) {
                     monster.heal(getX(), getY(), true);
@@ -237,9 +240,9 @@ public class MobSkill {
                     if (info != null) {
                         if (lt != null && rb != null && skill && player != null) {
                             for (MapleCharacter chr : getPlayersInRange(monster, player)) {
-				if (!chr.hasBlockedInventory()) {
+                                if (!chr.hasBlockedInventory()) {
                                     chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
-				}
+                                }
                             }
                         } else if (player != null && !player.hasBlockedInventory()) {
                             player.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
@@ -253,31 +256,31 @@ public class MobSkill {
                 }
                 break;
             case 140:
-                    stats.put(MonsterStatus.WEAPON_IMMUNITY, Integer.valueOf(x));
+                stats.put(MonsterStatus.WEAPON_IMMUNITY, Integer.valueOf(x));
                 break;
             case 141:
-                    stats.put(MonsterStatus.MAGIC_IMMUNITY, Integer.valueOf(x));
+                stats.put(MonsterStatus.MAGIC_IMMUNITY, Integer.valueOf(x));
                 break;
             case 142: // Weapon / Magic Immunity
-                    stats.put(MonsterStatus.DAMAGE_IMMUNITY, Integer.valueOf(x));
+                stats.put(MonsterStatus.DAMAGE_IMMUNITY, Integer.valueOf(x));
                 break;
             case 143: // Weapon Reflect
-                    stats.put(MonsterStatus.WEAPON_DAMAGE_REFLECT, Integer.valueOf(x));
-                    stats.put(MonsterStatus.WEAPON_IMMUNITY, Integer.valueOf(x));
-                    reflection.add(x);
+                stats.put(MonsterStatus.WEAPON_DAMAGE_REFLECT, Integer.valueOf(x));
+                stats.put(MonsterStatus.WEAPON_IMMUNITY, Integer.valueOf(x));
+                reflection.add(x);
                 break;
             case 144: // Magic Reflect
-                    stats.put(MonsterStatus.MAGIC_DAMAGE_REFLECT, Integer.valueOf(x));
-                    stats.put(MonsterStatus.MAGIC_IMMUNITY, Integer.valueOf(x));
-                    reflection.add(x);
+                stats.put(MonsterStatus.MAGIC_DAMAGE_REFLECT, Integer.valueOf(x));
+                stats.put(MonsterStatus.MAGIC_IMMUNITY, Integer.valueOf(x));
+                reflection.add(x);
                 break;
             case 145: // Weapon / Magic reflect
-                    stats.put(MonsterStatus.WEAPON_DAMAGE_REFLECT, Integer.valueOf(x));
-                    stats.put(MonsterStatus.WEAPON_IMMUNITY, Integer.valueOf(x));
-                    stats.put(MonsterStatus.MAGIC_DAMAGE_REFLECT, Integer.valueOf(x));
-                    stats.put(MonsterStatus.MAGIC_IMMUNITY, Integer.valueOf(x));
-                    reflection.add(x);
-                    reflection.add(x);
+                stats.put(MonsterStatus.WEAPON_DAMAGE_REFLECT, Integer.valueOf(x));
+                stats.put(MonsterStatus.WEAPON_IMMUNITY, Integer.valueOf(x));
+                stats.put(MonsterStatus.MAGIC_DAMAGE_REFLECT, Integer.valueOf(x));
+                stats.put(MonsterStatus.MAGIC_IMMUNITY, Integer.valueOf(x));
+                reflection.add(x);
+                reflection.add(x);
                 break;
             case 200: //怪物召喚怪物
                 if (monster == null) {

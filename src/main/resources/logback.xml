@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 控制台输出配置 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 日志格式：
+                 %d：时间戳（精确到毫秒）
+                 [%thread]：线程名
+                 %-5level：日志级别，宽度为5（自动对齐）
+                 %logger{36}：logger 名称，最长36个字符，超过会截断
+                 %msg：日志消息内容
+                 %n：换行 -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件输出配置，带日志滚动 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志输出文件路径 -->
+        <file>logs/application.log</file>
+
+        <!-- 滚动策略：按时间滚动日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天生成一个新文件，文件名带日期 -->
+            <fileNamePattern>logs/application.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 最多保留30天的历史日志文件 -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <!-- 文件日志格式（包含完整日期） -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 日志等级说明：
+         OFF   （关闭所有日志）
+         ERROR （只记录严重错误）
+         WARN  （警告 + 错误）
+         INFO  （信息 + 警告 + 错误）
+         DEBUG （调试 + 信息 + 警告 + 错误）
+         TRACE （最详细的日志，包含所有）
+         ALL   （输出所有等级日志，等同于 TRACE） -->
+
+    <!-- 根日志配置（全局日志等级） -->
+    <root level="OFF">
+        <!-- 同时输出到控制台和文件 -->
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+    <!-- 可选：为某些包单独设置日志级别
+         示例：设置 com.yourpackage 包的日志级别为 DEBUG
+         这样该包内的类会输出 DEBUG 及以上的日志 -->
+    <!-- 
+    <logger name="com.yourpackage" level="DEBUG" />
+    -->
+
+</configuration>

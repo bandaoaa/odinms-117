@@ -22,8 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.events;
 
 import client.MapleCharacter;
+
 import java.util.LinkedList;
 import java.util.List;
+
 import server.Timer.EventTimer;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
@@ -37,7 +39,7 @@ public class MapleCoconut extends MapleEvent {
     private int countStopped = 0;
 
     public MapleCoconut(final int channel, final MapleEventType type) {
-	super(channel,type);
+        super(channel, type);
     }
 
     @Override
@@ -59,14 +61,14 @@ public class MapleCoconut extends MapleEvent {
 
     @Override
     public void onMapLoad(MapleCharacter chr) {
-	super.onMapLoad(chr);
+        super.onMapLoad(chr);
         chr.getClient().getSession().write(CField.coconutScore(getCoconutScore()));
     }
 
     public MapleCoconuts getCoconut(int id) {
-	if (id >= coconuts.size()) {
-	    return null;
-	}
+        if (id >= coconuts.size()) {
+            return null;
+        }
         return coconuts.get(id);
     }
 
@@ -205,7 +207,7 @@ public class MapleCoconut extends MapleEvent {
                     if ((getMapleScore() > getStoryScore() && chr.getTeam() == 0) || (getStoryScore() > getMapleScore() && chr.getTeam() == 1)) {
                         givePrize(chr);
                     }
-		    warpBack(chr);
+                    warpBack(chr);
                 }
                 unreset();
             }

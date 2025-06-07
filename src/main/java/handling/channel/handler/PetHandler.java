@@ -31,11 +31,13 @@ import client.inventory.MaplePet;
 import client.inventory.PetCommand;
 import constants.GameConstants;
 import handling.world.MaplePartyCharacter;
+
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
+
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.Randomizer;
@@ -67,7 +69,7 @@ public class PetHandler {
         Skill buffId = SkillFactory.getSkill(skillId);
         if ((chr.getSkillLevel(buffId) > 0) || (skillId == 0)) {
             pet.setBuffSkill(skillId);
-            c.getSession().write(PetPacket.updatePet(pet, chr.getInventory(MapleInventoryType.CASH).getItem((short)(byte)pet.getInventoryPosition()), true));
+            c.getSession().write(PetPacket.updatePet(pet, chr.getInventory(MapleInventoryType.CASH).getItem((short) (byte) pet.getInventoryPosition()), true));
         }
         c.getSession().write(CWvsContext.enableActions());
     }
@@ -222,7 +224,7 @@ public class PetHandler {
                 return;
             }
             pet.updatePosition(res);
-			chr.getMap().broadcastMessage(chr, PetPacket.movePet(chr.getId(), petId, chr.getPetIndex(petId), res), false);
+            chr.getMap().broadcastMessage(chr, PetPacket.movePet(chr.getId(), petId, chr.getPetIndex(petId), res), false);
          /*   if (chr.hasBlockedInventory() || chr.getStat().pickupRange <= 0.0 || chr.inPVP()) {
                 return;
             }

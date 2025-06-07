@@ -33,7 +33,7 @@ public enum FieldLimitType {
     Mount(0x200),
     PotionUse(0x400), //or 0x40000
     Event(0x2000),
-	Pet(0x8000), //needs confirmation
+    Pet(0x8000), //needs confirmation
     Event2(0x10000),
     DropDown(0x20000),
     ;

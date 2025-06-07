@@ -22,14 +22,15 @@ package tools;
 
 import java.util.Date;
 import java.util.SimpleTimeZone;
+
 import tools.packet.PacketHelper;
 
 /**
  * Provides a suite of tools for manipulating Korean Timestamps.
  *
  * @author Frz
- * @since Revision 746
  * @version 1.0
+ * @since Revision 746
  */
 public class KoreanDateUtil {
 

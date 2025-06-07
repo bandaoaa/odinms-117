@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import java.util.concurrent.ScheduledFuture;
+
 import server.MapleStatEffect;
 
 public class MapleBuffStatValueHolder {
@@ -36,7 +37,7 @@ public class MapleBuffStatValueHolder {
         this.startTime = startTime;
         this.schedule = schedule;
         this.value = value;
-	this.localDuration = localDuration;
-	this.cid = cid;
+        this.localDuration = localDuration;
+        this.cid = cid;
     }
 }

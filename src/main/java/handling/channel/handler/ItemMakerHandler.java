@@ -26,11 +26,13 @@ import client.SkillFactory.CraftingEntry;
 import client.inventory.MapleImp.ImpFlag;
 import client.inventory.*;
 import constants.GameConstants;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import server.ItemMakerFactory.GemCreateEntry;
 import server.ItemMakerFactory.ItemMakerCreateEntry;
 import server.*;
@@ -438,7 +440,7 @@ public class ItemMakerHandler {
             c.getSession().write(CWvsContext.enableActions());
             return;
         }
-       slea.readInt();
+        slea.readInt();
         final byte slot = (byte) slea.readShort();
         final int itemId = slea.readInt();
         final Item toUse = chr.getInventory(MapleInventoryType.ETC).getItem(slot);
@@ -605,7 +607,7 @@ public class ItemMakerHandler {
             }
             if (Randomizer.nextInt(30) == 0 && reqLevel >= 105) {
                 int hyunja = 4021021;
-            MapleInventoryManipulator.addById(c, hyunja, (short) 1, "Made by disassemble " + itemId + " on " + FileoutputUtil.CurrentReadable_Date());
+                MapleInventoryManipulator.addById(c, hyunja, (short) 1, "Made by disassemble " + itemId + " on " + FileoutputUtil.CurrentReadable_Date());
             }
             fatigue = 3;
             MapleInventoryManipulator.addById(c, toGet, quantity, "Made by disassemble " + itemId + " on " + FileoutputUtil.CurrentReadable_Date());

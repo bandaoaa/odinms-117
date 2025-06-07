@@ -9,6 +9,7 @@ import client.messages.CommandProcessor;
 import constants.GameConstants;
 import constants.ServerConstants;
 import constants.ServerConstants.CommandType;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
 import tools.packet.CField.InteractionPacket;
 import tools.packet.CWvsContext;
 import tools.packet.PlayerShopPacket;
@@ -226,11 +228,11 @@ public class MapleTrade {
         if (GameConstants.isThrowingStar(item.getItemId()) || GameConstants.isBullet(item.getItemId())) {
             tradeItem.setQuantity(item.getQuantity());
             MapleInventoryManipulator.removeFromSlot(c, GameConstants.getInventoryType(item.getItemId()), item.getPosition(), item.getQuantity(), true);
-            c.getPlayer().saveToDB(false, false); 
+            c.getPlayer().saveToDB(false, false);
         } else {
             tradeItem.setQuantity((short) quantity);
             MapleInventoryManipulator.removeFromSlot(c, GameConstants.getInventoryType(item.getItemId()), item.getPosition(), (short) quantity, true);
-            c.getPlayer().saveToDB(false, false); 
+            c.getPlayer().saveToDB(false, false);
         }
         if (targetSlot < 0) {
             targetSlot = (byte) target;
@@ -244,7 +246,7 @@ public class MapleTrade {
         }
         tradeItem.setPosition(targetSlot);
         addItem(tradeItem);
-        c.getPlayer().saveToDB(false, false); 
+        c.getPlayer().saveToDB(false, false);
         return true;
     }
 

@@ -39,14 +39,14 @@ public class MapleFoothold implements Comparable<MapleFoothold> {
     public boolean isWall() {
         return p1.x == p2.x;
     }
-	
-	public Point getPoint1() {
-		return p1;
-	}
-	
-	public Point getPoint2() {
-		return p2;
-	}
+
+    public Point getPoint1() {
+        return p1;
+    }
+
+    public Point getPoint2() {
+        return p2;
+    }
 
     public int getX1() {
         return p1.x;

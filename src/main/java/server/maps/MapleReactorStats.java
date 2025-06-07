@@ -23,6 +23,7 @@ package server.maps;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
+
 import tools.Pair;
 
 public class MapleReactorStats {
@@ -30,7 +31,7 @@ public class MapleReactorStats {
     private Point tl;
     private Point br;
     private Map<Byte, StateData> stateInfo = new HashMap<>();
-	
+
     public void setTL(Point tl) {
         this.tl = tl;
     }
@@ -86,7 +87,7 @@ public class MapleReactorStats {
             return -1;
         }
     }
-	
+
     public byte canTouch(byte state) {
         StateData nextState = stateInfo.get(state);
         if (nextState != null) {
@@ -107,7 +108,7 @@ public class MapleReactorStats {
             this.reactItem = reactItem;
             this.nextState = nextState;
             this.timeOut = timeOut;
-			this.canTouch = canTouch;
+            this.canTouch = canTouch;
         }
 
         private int getType() {
@@ -125,9 +126,9 @@ public class MapleReactorStats {
         private int getTimeOut() {
             return timeOut;
         }
-		
-		private byte canTouch() {
-			return canTouch;
-		}
+
+        private byte canTouch() {
+            return canTouch;
+        }
     }
 }

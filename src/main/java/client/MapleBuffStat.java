@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import handling.Buffstat;
+
 import java.io.Serializable;
 
 public enum MapleBuffStat implements Serializable, Buffstat {
@@ -120,7 +121,7 @@ public enum MapleBuffStat implements Serializable, Buffstat {
     MAGIC_RESISTANCE(0x10000, 3), //魔法抵抗．改
     SOUL_STONE(0x20000, 3), //靈魂之石
     SOARING(0x40000, 3),
-   // SOARING2(0x80000, 3),
+    // SOARING2(0x80000, 3),
     //8 - debuff
 
     LIGHTNING_CHARGE(0x100000, 3),
@@ -273,7 +274,7 @@ public enum MapleBuffStat implements Serializable, Buffstat {
     // 0x200000 idk
     // 0x400000  true
     // 0x800000 idk
-    
+
     BadLuckWard(0x2000000, 7, true),
 
 
@@ -281,7 +282,7 @@ public enum MapleBuffStat implements Serializable, Buffstat {
     SHROUD_WALK(0x8, 8),
 
     Relentless(0x20, 8, true),
-    
+
     LeechAura(0x100, 8),
 
     ENERGY_CHARGE(0x2000000, 8),

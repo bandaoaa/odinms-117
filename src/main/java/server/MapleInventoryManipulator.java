@@ -5,11 +5,13 @@ import client.*;
 import client.inventory.EquipAdditions.RingSet;
 import client.inventory.*;
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import scripting.EventManager;
 import scripting.NPCScriptManager;
 import server.maps.AramiaFireWorks;
@@ -363,7 +365,7 @@ public class MapleInventoryManipulator {
                 c.getPlayer().getMap().broadcastMessage(tools.packet.CField.environmentChange("Party1/Clear", 4));
 
                 for (MapleCharacter ddd : c.getPlayer().getMap().getCharactersThreadsafe()) {
-                    if (ddd.getQuestNAdd(MapleQuest.getInstance(1200)).getStatus() < 2){
+                    if (ddd.getQuestNAdd(MapleQuest.getInstance(1200)).getStatus() < 2) {
                         MapleQuest.getInstance(1200).forceComplete(ddd, 0);
                         ddd.getClient().getSession().write(tools.packet.CWvsContext.getShowQuestCompletion(1200));
                     }
@@ -969,7 +971,7 @@ public class MapleInventoryManipulator {
         }
         if (source.getItemId() / 10000 == 166) { //佩戴机器人
             Equip target2 = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem((short) -54);
-            if(target2 == null) {
+            if (target2 == null) {
                 c.getPlayer().dropMessage(1, "The Android is not powered. Please insert a Mechanical Heart.");
                 c.getSession().write(CWvsContext.enableActions());
                 return;

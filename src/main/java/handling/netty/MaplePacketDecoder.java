@@ -8,8 +8,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.AttributeKey;
+
 import java.util.Arrays;
 import java.util.List;
+
 import tools.FileoutputUtil;
 import tools.HexTool;
 import tools.MapleAESOFB;
@@ -29,12 +31,12 @@ public class MaplePacketDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> message) throws Exception {
         final DecoderState decoderState = ctx.channel().attr(DECODER_STATE_KEY).get();
         final MapleClient client = ctx.channel().attr(MapleClient.CLIENT_KEY).get();
-         
+
         if (decoderState.packetlength == -1) {
             if (in.readableBytes() >= 4) {
                 final int packetHeader = in.readInt();
                 if (!client.getReceiveCrypto().checkPacket(packetHeader)) {
-                     ctx.channel().disconnect();
+                    ctx.channel().disconnect();
                     return;
                 }
                 decoderState.packetlength = MapleAESOFB.getPacketLength(packetHeader);
@@ -52,20 +54,20 @@ public class MaplePacketDecoder extends ByteToMessageDecoder {
             message.add(decryptedPacket);
             int packetLen = decryptedPacket.length;
             short pHeader = new GenericLittleEndianAccessor(new tools.data.input.ByteArrayByteStream(decryptedPacket)).readShort();
-	    if (ServerConstants.DEBUG) {
-	        String pHeaderStr = Integer.toHexString(pHeader).toUpperCase();
+            if (ServerConstants.DEBUG) {
+                String pHeaderStr = Integer.toHexString(pHeader).toUpperCase();
 
-	        String op = nameOf(pHeader);
+                String op = nameOf(pHeader);
                 String tab = "";
                 for (int i = 4; i > op.length() / 8; i--) {
                     tab += "\t";
                 }
-	        String Recv = "Recv " + op + " [" + pHeaderStr + "] (" + packetLen + ")\r\n";
-	        if (packetLen <= 6000) {
-	          //String SendTo = Recv + HexTool.toString(decryptedPacket) + "\r\n" + HexTool.toStringFromAscii(decryptedPacket);
-	            System.out.println(Recv + "\r\n");
-	          }
-	      }
+                String Recv = "Recv " + op + " [" + pHeaderStr + "] (" + packetLen + ")\r\n";
+                if (packetLen <= 6000) {
+                    //String SendTo = Recv + HexTool.toString(decryptedPacket) + "\r\n" + HexTool.toStringFromAscii(decryptedPacket);
+                    System.out.println(Recv + "\r\n");
+                }
+            }
         }
     }
 

@@ -23,7 +23,9 @@ package handling.channel.handler;
 import client.MapleClient;
 import handling.world.World;
 import handling.world.guild.MapleBBSThread;
+
 import java.util.List;
+
 import tools.data.LittleEndianAccessor;
 import tools.packet.CWvsContext.GuildPacket;
 
@@ -118,7 +120,7 @@ public class BBSHandler {
             return; // expelled while viewing?
         }
         displayThread(c, World.Guild.addBBSThread(c.getPlayer().getGuildId(), title, text, icon, bNotice, c.getPlayer().getId()));
-	listBBSThreads(c, 0);
+        listBBSThreads(c, 0);
     }
 
     private static void deleteBBSThread(final MapleClient c, final int localthreadid) {

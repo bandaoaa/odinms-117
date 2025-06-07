@@ -25,7 +25,9 @@ import client.MapleClient;
 import client.inventory.Item;
 import constants.GameConstants;
 import handling.SendPacketOpcode;
+
 import java.util.List;
+
 import server.MerchItemPackage;
 import server.shops.AbstractPlayerStore.BoughtItem;
 import server.shops.*;
@@ -128,8 +130,8 @@ public class PlayerShopPacket {
         mplew.write(-1);
         mplew.writeShort(merch.getMessages().size());
         for (int i = 0; i < merch.getMessages().size(); i++) {
-                mplew.writeMapleAsciiString(merch.getMessages().get(i).getLeft());
-                mplew.write(merch.getMessages().get(i).getRight());
+            mplew.writeMapleAsciiString(merch.getMessages().get(i).getLeft());
+            mplew.write(merch.getMessages().get(i).getRight());
         }
         mplew.writeMapleAsciiString(merch.getOwnerName());
         if (merch.isOwner(chr)) {
@@ -265,7 +267,7 @@ public class PlayerShopPacket {
             mplew.writeInt(item.price);
             PacketHelper.addItemInfo(mplew, item.item);
         }
-		mplew.writeShort(0);
+        mplew.writeShort(0);
 
         return mplew.getPacket();
     }
@@ -307,7 +309,7 @@ public class PlayerShopPacket {
     /*
     關閉精靈商店
     */
-    public static byte [] hiredMerchantOwnerLeave() {
+    public static byte[] hiredMerchantOwnerLeave() {
         tools.data.output.MaplePacketLittleEndianWriter mplew = new tools.data.output.MaplePacketLittleEndianWriter(4);
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(34);
@@ -459,7 +461,7 @@ public class PlayerShopPacket {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
         mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
         mplew.write(0x45);
-        mplew.write((int)((slot != 1) ? 1 : 0));
+        mplew.write((int) ((slot != 1) ? 1 : 0));
         return mplew.getPacket();
     }
 

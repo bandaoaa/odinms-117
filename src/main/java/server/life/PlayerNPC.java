@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import client.inventory.Item;
 import client.MapleCharacter;
 import client.MapleClient;
@@ -39,7 +40,9 @@ import database.DatabaseConnection;
 import handling.channel.ChannelServer;
 import handling.world.MapleCharacterLook;
 import handling.world.World;
+
 import java.util.ArrayList;
+
 import server.maps.*;
 import tools.packet.CField.NPCPacket;
 import tools.packet.CWvsContext;
@@ -98,7 +101,7 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
     }
 
     public static void loadAll() {
-	List<PlayerNPC> toAdd = new ArrayList<PlayerNPC>();
+        List<PlayerNPC> toAdd = new ArrayList<PlayerNPC>();
         Connection con = DatabaseConnection.getConnection();
         try {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM playernpcs");
@@ -111,9 +114,9 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
         } catch (Exception se) {
             se.printStackTrace();
         }
-	for (PlayerNPC npc : toAdd) {
-	    npc.addToServer();
-	}
+        for (PlayerNPC npc : toAdd) {
+            npc.addToServer();
+        }
     }
 
     public static void updateByCharId(MapleCharacter chr) {
@@ -159,7 +162,7 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
 
     public void destroy() {
         destroy(false); //just sql
-        }
+    }
 
     public void destroy(boolean remove) {
         Connection con = DatabaseConnection.getConnection();
@@ -226,11 +229,11 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
             se.printStackTrace();
         }
     }
-    
+
     public short getJob() {
         return 0; // we'll do this later,
     }
-    
+
     public int getDemonMarking() {
         return 0; // player npcs should have demon mark? ..idk, we'll see later
     }
@@ -310,7 +313,7 @@ public class PlayerNPC extends MapleNPC implements MapleCharacterLook {
 
 
     public boolean isElf(MapleCharacter chr) {
-               if (chr.containsAreaInfo(7784, "sw=")) {
+        if (chr.containsAreaInfo(7784, "sw=")) {
             return chr.containsAreaInfo(7784, GameConstants.isMercedes(getJob()) ? "sw=0" : "sw=1");
         }
         return GameConstants.isMercedes(getJob());

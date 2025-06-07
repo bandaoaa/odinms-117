@@ -2,14 +2,17 @@ package server;
 
 import client.MapleCharacter;
 import handling.channel.ChannelServer;
+
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
+
 import server.maps.MapleMap;
 import tools.packet.CField;
 
 /**
  * Note for this class : MapleCharacter reference must be removed immediately after cpq or upon dc.
+ *
  * @author Rob
  */
 public class MapleCarnivalParty {

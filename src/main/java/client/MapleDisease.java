@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import handling.Buffstat;
+
 import java.io.Serializable;
+
 import server.Randomizer;
 
 public enum MapleDisease implements Serializable, Buffstat {

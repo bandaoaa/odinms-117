@@ -13,7 +13,6 @@ import server.life.OverrideMonsterStats;
 import tools.packet.CWvsContext;
 
 /**
- *
  * @author Emilyx3
  */
 public class SuperGMCommand {
@@ -293,60 +292,60 @@ public class SuperGMCommand {
             }
             final int mid = Integer.parseInt(splitted[1]);
             if (mid != 9304005) {
-            final int num = Math.min(CommandProcessorUtil.getOptionalIntArg(splitted, 2, 1), 50);
-            Integer level = CommandProcessorUtil.getNamedIntArg(splitted, 1, "lvl");
-            Long hp = CommandProcessorUtil.getNamedLongArg(splitted, 1, "hp");
-            Integer exp = CommandProcessorUtil.getNamedIntArg(splitted, 1, "exp");
-            Double php = CommandProcessorUtil.getNamedDoubleArg(splitted, 1, "php");
-            Double pexp = CommandProcessorUtil.getNamedDoubleArg(splitted, 1, "pexp");
+                final int num = Math.min(CommandProcessorUtil.getOptionalIntArg(splitted, 2, 1), 50);
+                Integer level = CommandProcessorUtil.getNamedIntArg(splitted, 1, "lvl");
+                Long hp = CommandProcessorUtil.getNamedLongArg(splitted, 1, "hp");
+                Integer exp = CommandProcessorUtil.getNamedIntArg(splitted, 1, "exp");
+                Double php = CommandProcessorUtil.getNamedDoubleArg(splitted, 1, "php");
+                Double pexp = CommandProcessorUtil.getNamedDoubleArg(splitted, 1, "pexp");
 
-            MapleMonster onemob;
-            try {
-                onemob = MapleLifeFactory.getMonster(mid);
-            } catch (RuntimeException e) {
-                c.getPlayer().dropMessage(5, "Error: " + e.getMessage());
-                return 0;
-            }
-            if (onemob == null) {
-                c.getPlayer().dropMessage(5, "Mob does not exist");
-                return 0;
-            }
-            long newhp;
-            int newexp;
-            if (hp != null) {
-                newhp = hp.longValue();
-            } else if (php != null) {
-                newhp = (long) (onemob.getMobMaxHp() * (php.doubleValue() / 100));
-            } else {
-                newhp = onemob.getMobMaxHp();
-            }
-            if (exp != null) {
-                newexp = exp.intValue();
-            } else if (pexp != null) {
-                newexp = (int) (onemob.getMobExp() * (pexp.doubleValue() / 100));
-            } else {
-                newexp = onemob.getMobExp();
-            }
-            if (newhp < 1) {
-                newhp = 1;
-            }
-
-            final OverrideMonsterStats overrideStats = new OverrideMonsterStats(newhp, onemob.getMobMaxMp(), newexp, false);
-            for (int i = 0; i < num; i++) {
-                MapleMonster mob = MapleLifeFactory.getMonster(mid);
-                mob.setHp(newhp);
-                if (level != null) {
-                    mob.changeLevel(level.intValue(), false);
-                } else {
-                    mob.setOverrideStats(overrideStats);
+                MapleMonster onemob;
+                try {
+                    onemob = MapleLifeFactory.getMonster(mid);
+                } catch (RuntimeException e) {
+                    c.getPlayer().dropMessage(5, "Error: " + e.getMessage());
+                    return 0;
                 }
-                c.getPlayer().getMap().spawnMonsterOnGroundBelow(mob, c.getPlayer().getPosition());
-            }
+                if (onemob == null) {
+                    c.getPlayer().dropMessage(5, "Mob does not exist");
+                    return 0;
+                }
+                long newhp;
+                int newexp;
+                if (hp != null) {
+                    newhp = hp.longValue();
+                } else if (php != null) {
+                    newhp = (long) (onemob.getMobMaxHp() * (php.doubleValue() / 100));
+                } else {
+                    newhp = onemob.getMobMaxHp();
+                }
+                if (exp != null) {
+                    newexp = exp.intValue();
+                } else if (pexp != null) {
+                    newexp = (int) (onemob.getMobExp() * (pexp.doubleValue() / 100));
+                } else {
+                    newexp = onemob.getMobExp();
+                }
+                if (newhp < 1) {
+                    newhp = 1;
+                }
+
+                final OverrideMonsterStats overrideStats = new OverrideMonsterStats(newhp, onemob.getMobMaxMp(), newexp, false);
+                for (int i = 0; i < num; i++) {
+                    MapleMonster mob = MapleLifeFactory.getMonster(mid);
+                    mob.setHp(newhp);
+                    if (level != null) {
+                        mob.changeLevel(level.intValue(), false);
+                    } else {
+                        mob.setOverrideStats(overrideStats);
+                    }
+                    c.getPlayer().getMap().spawnMonsterOnGroundBelow(mob, c.getPlayer().getPosition());
+                }
             } else {
                 c.getPlayer().dropMessage(5, "Can't spawn Jaira");
             }
             return 1;
-        } 
+        }
     }
 
     public static class GainCash extends CommandExecute {
@@ -375,5 +374,5 @@ public class SuperGMCommand {
         }
     }
 
- 
+
 }

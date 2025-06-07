@@ -13,6 +13,7 @@ import constants.ServerConstants.PlayerGMRank;
 import database.DatabaseConnection;
 import handling.channel.ChannelServer;
 import handling.world.World;
+
 import java.awt.Point;
 import java.io.File;
 import java.sql.ResultSet;
@@ -20,6 +21,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -41,7 +43,6 @@ import tools.packet.CField;
 import tools.packet.CWvsContext;
 
 /**
- *
  * @author Emilyx3
  */
 public class InternCommand {
@@ -50,7 +51,7 @@ public class InternCommand {
         return PlayerGMRank.INTERN;
     }
 
-     public static class MaxAll extends CommandExecute {
+    public static class MaxAll extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -70,18 +71,18 @@ public class InternCommand {
             return 1;
         }
     }
-    
+
     public static class Level extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (Short.parseShort(splitted[1]) >= 1 && Short.parseShort(splitted[1]) <= 255) {
-            c.getPlayer().setLevel(Short.parseShort(splitted[1]));
-            c.getPlayer().levelUp();
-            if (c.getPlayer().getExp() < 0) {
-                c.getPlayer().gainExp(-c.getPlayer().getExp(), false, false, true);
-                c.getPlayer().dropMessage(6, "You are now level " + c.getPlayer().getLevel() + ".");
-            }
+                c.getPlayer().setLevel(Short.parseShort(splitted[1]));
+                c.getPlayer().levelUp();
+                if (c.getPlayer().getExp() < 0) {
+                    c.getPlayer().gainExp(-c.getPlayer().getExp(), false, false, true);
+                    c.getPlayer().dropMessage(6, "You are now level " + c.getPlayer().getLevel() + ".");
+                }
             } else {
                 c.getPlayer().dropMessage(5, "!level 1-255");
             }
@@ -89,15 +90,15 @@ public class InternCommand {
         }
     }
 
-        public static class Drop extends CommandExecute {
+    public static class Drop extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
             final int itemId = Integer.parseInt(splitted[1]);
-            
-           if (itemId == 4000038) {
-               return 0;
-           }
+
+            if (itemId == 4000038) {
+                return 0;
+            }
 
             final short quantity = (short) CommandProcessorUtil.getOptionalIntArg(splitted, 2, 1);
             MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
@@ -114,19 +115,19 @@ public class InternCommand {
                     toDrop = new client.inventory.Item(itemId, (byte) 0, (short) quantity, (byte) 0);
                 }
                 if (c.getPlayer().gethiddenGM() == 0) {
-                if (c.getPlayer().getGMLevel() < 7 && c.getPlayer().getDGM() == 0) {
-                    toDrop.setOwner("GM "+c.getPlayer().getName());
-                    toDrop.setGMLog(c.getPlayer().getName() + " used !item");
-                } else if (c.getPlayer().getDGM() == 1) {
-                                     toDrop.setOwner("DGM "+c.getPlayer().getName());
-                    toDrop.setGMLog(c.getPlayer().getName() + " used !item");   
-                } else if (c.getPlayer().getGMLevel() == 7) {
-                    toDrop.setOwner("SV "+c.getPlayer().getName());
-                    toDrop.setGMLog(c.getPlayer().getName() + " used !item");    
+                    if (c.getPlayer().getGMLevel() < 7 && c.getPlayer().getDGM() == 0) {
+                        toDrop.setOwner("GM " + c.getPlayer().getName());
+                        toDrop.setGMLog(c.getPlayer().getName() + " used !item");
+                    } else if (c.getPlayer().getDGM() == 1) {
+                        toDrop.setOwner("DGM " + c.getPlayer().getName());
+                        toDrop.setGMLog(c.getPlayer().getName() + " used !item");
+                    } else if (c.getPlayer().getGMLevel() == 7) {
+                        toDrop.setOwner("SV " + c.getPlayer().getName());
+                        toDrop.setGMLog(c.getPlayer().getName() + " used !item");
+                    }
+
                 }
-                
-                }
-                toDrop.setGMLog(c.getPlayer().getName() + " used !item");    
+                toDrop.setGMLog(c.getPlayer().getName() + " used !item");
                 c.getPlayer().getMap().spawnItemDrop(c.getPlayer(), c.getPlayer(), toDrop, c.getPlayer().getPosition(), true, true);
             }
             return 1;
@@ -134,7 +135,6 @@ public class InternCommand {
     }
 
 
-    
     public static class LowHP extends CommandExecute {
 
         @Override
@@ -176,7 +176,6 @@ public class InternCommand {
     }
 
 
-
     public static class TempBan extends CommandExecute {
 
         protected boolean ipBan = false;
@@ -186,7 +185,7 @@ public class InternCommand {
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getDGM() == 1) {
                 c.getPlayer().dropMessage(6, "DGMs can't ban due to DGM abuse.. ask a GM to ban.");
-                return 0; 
+                return 0;
             }
             if (splitted.length < 4) {
                 c.getPlayer().dropMessage(6, "Tempban [name] [REASON] [days]");
@@ -221,15 +220,15 @@ public class InternCommand {
         protected boolean ipBan = true;
 
         private String getCommand() {
-                return "Ban";
-            }
-        
+            return "Ban";
+        }
+
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-                        if (c.getPlayer().getDGM() == 1) {
+            if (c.getPlayer().getDGM() == 1) {
                 c.getPlayer().dropMessage(6, "DGMs can't ban due to DGM abuse.. ask a GM to ban.");
-                return 0; 
+                return 0;
             }
             if (splitted.length < 3) {
                 c.getPlayer().dropMessage(5, "[Syntax] !" + getCommand() + " <IGN> <Reason>");
@@ -238,18 +237,18 @@ public class InternCommand {
             StringBuilder sb = new StringBuilder();
 
             sb.append(c.getPlayer().getName()).append(" banned ").append(splitted[1]).append(": ").append(StringUtil.joinStringFrom(splitted, 2));
-            
-         //  MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
-              MapleCharacter target;
+
+            //  MapleCharacter target = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+            MapleCharacter target;
             try {
-    int ch = World.Find.findChannel(splitted[1]);
- target = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
-                    } catch (Exception e) {
-                    c.getPlayer().dropMessage(6, "Something went wrong " + e.getMessage());
-                    return 0;
-                }
+                int ch = World.Find.findChannel(splitted[1]);
+                target = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
+            } catch (Exception e) {
+                c.getPlayer().dropMessage(6, "Something went wrong " + e.getMessage());
+                return 0;
+            }
             if (target.getDGM() == 0 && target.getGMLevel() > c.getPlayer().getGMLevel() || target.getAccountID() == 1) {
-                                c.getPlayer().dropMessage(5, "Target has a higher GM level than you.");
+                c.getPlayer().dropMessage(5, "Target has a higher GM level than you.");
                 return 0;
             }
             if (target == null) {
@@ -257,15 +256,15 @@ public class InternCommand {
                 return 0;
             }
             if (target != null) {
-                    sb.append(" (IP: ").append(target.getClient().getSessionIPAddress()).append(")");
-                    if (target.ban(sb.toString(), ipBan, false)) {
-                        c.getPlayer().dropMessage(6, "[" + getCommand() + "] Successfully banned " + splitted[1] + ".");
-                        World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, splitted[1] + " was banned for: " + sb.toString()));
-                        return 1;
-                    } else {
-                        c.getPlayer().dropMessage(6, "[" + getCommand() + "] Failed to ban.");
-                        return 0;
-                    }
+                sb.append(" (IP: ").append(target.getClient().getSessionIPAddress()).append(")");
+                if (target.ban(sb.toString(), ipBan, false)) {
+                    c.getPlayer().dropMessage(6, "[" + getCommand() + "] Successfully banned " + splitted[1] + ".");
+                    World.Broadcast.broadcastMessage(CWvsContext.serverNotice(6, splitted[1] + " was banned for: " + sb.toString()));
+                    return 1;
+                } else {
+                    c.getPlayer().dropMessage(6, "[" + getCommand() + "] Failed to ban.");
+                    return 0;
+                }
          /*   } else if (target == null) {
                 if (MapleCharacter.ban(splitted[1], sb.toString(), false)) {
                     c.getPlayer().dropMessage(6, "[" + getCommand() + "] Successfully offline banned " + splitted[1] + ".");
@@ -275,11 +274,11 @@ public class InternCommand {
                     return 0;
                 }
             }*/
-          //  return 1;
+                //  return 1;
+            }
+            return 1;
         }
-              return 1;
-    }
-      
+
     }
 
     public static class CC extends CommandExecute {
@@ -295,9 +294,9 @@ public class InternCommand {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
-           MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
-           victim.changeChannel(Integer.parseInt(splitted[2]));
-            
+            MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+            victim.changeChannel(Integer.parseInt(splitted[2]));
+
             return 1;
         }
     }
@@ -307,20 +306,20 @@ public class InternCommand {
         @Override
         public int execute(MapleClient c, String[] splitted) {
             //MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[splitted.length - 1]);
-                          MapleCharacter victim;
-                          
+            MapleCharacter victim;
+
             try {
-    int ch = World.Find.findChannel(splitted[1]);
- victim = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
-                    } catch (Exception e) {
-                    c.getPlayer().dropMessage(6, "Something went wrong " + e.getMessage());
+                int ch = World.Find.findChannel(splitted[1]);
+                victim = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
+            } catch (Exception e) {
+                c.getPlayer().dropMessage(6, "Something went wrong " + e.getMessage());
+                return 0;
+            }
+            if (victim != null) {
+                if (victim.getGMLevel() == 99) {
+                    c.getPlayer().ban("Trying to disconnect the owner", true, true);
                     return 0;
                 }
-            if (victim != null) {
-                                                if (victim.getGMLevel() == 99) {
-                                    c.getPlayer().ban("Trying to disconnect the owner", true, true);
-                                    return 0;
-                                }
                 victim.getClient().getSession().close();
                 victim.getClient().disconnect(true, false);
                 return 1;
@@ -378,7 +377,7 @@ public class InternCommand {
         }
     }
 
-	
+
     public static class OnlineChannel extends CommandExecute {
 
         @Override
@@ -480,7 +479,6 @@ public class InternCommand {
     }
     * 
     */
-
 
 
     public static class Connected extends CommandExecute {
@@ -844,10 +842,10 @@ public class InternCommand {
                     if (targetPortal == null) {
                         targetPortal = target.getPortal(0);
                     }
-                      if (victim.getGMLevel() == 99) {
-                                    c.getPlayer().ban("Trying to warp the owner", true, true);
-                                    return 0;
-                                }
+                    if (victim.getGMLevel() == 99) {
+                        c.getPlayer().ban("Trying to warp the owner", true, true);
+                        return 0;
+                    }
                     victim.changeMap(target, targetPortal);
                 }
             } else {
@@ -876,7 +874,7 @@ public class InternCommand {
                         c.getPlayer().changeMap(target, targetPortal);
                     } else {
                         victim = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
-                        
+
                         c.getPlayer().dropMessage(6, "Cross changing channel. Please wait.");
                         if (victim.getMapId() != c.getPlayer().getMapId()) {
                             final MapleMap mapp = c.getChannelServer().getMapFactory().getMap(victim.getMapId());
@@ -1139,7 +1137,6 @@ public class InternCommand {
     public static class Search extends Find {
     }
 
-  
 
     public static class WhosLast extends CommandExecute {
 

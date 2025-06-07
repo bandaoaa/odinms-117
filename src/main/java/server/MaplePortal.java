@@ -22,7 +22,9 @@ package server;
 
 import client.MapleClient;
 import handling.channel.ChannelServer;
+
 import java.awt.Point;
+
 import scripting.PortalScriptManager;
 import server.maps.MapleMap;
 import tools.packet.CWvsContext;
@@ -41,7 +43,7 @@ public class MaplePortal {
         this.type = type;
     }
 
-    
+
     public final int getId() {
         return id;
     }
@@ -50,32 +52,32 @@ public class MaplePortal {
         this.id = id;
     }
 
-    
+
     public final String getName() {
         return name;
     }
 
-    
+
     public final Point getPosition() {
         return position;
     }
 
-    
+
     public final String getTarget() {
         return target;
     }
 
-    
+
     public final int getTargetMapId() {
         return targetmap;
     }
 
-    
+
     public final int getType() {
         return type;
     }
 
-    
+
     public final String getScriptName() {
         return scriptName;
     }
@@ -96,16 +98,16 @@ public class MaplePortal {
         this.targetmap = targetmapid;
     }
 
-    
+
     public final void setScriptName(final String scriptName) {
         this.scriptName = scriptName;
     }
 
-    
+
     public final void enterPortal(final MapleClient c) {
         if (getPosition().distanceSq(c.getPlayer().getPosition()) > 40000 && !c.getPlayer().isGM()) {
             c.getSession().write(CWvsContext.enableActions());
-	    return;
+            return;
         }
         final MapleMap currentmap = c.getPlayer().getMap();
         if (!c.getPlayer().hasBlockedInventory() && (portalState || c.getPlayer().isGM())) {
@@ -117,10 +119,10 @@ public class MaplePortal {
                 }
             } else if (getTargetMapId() != 999999999) {
                 final MapleMap to = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(getTargetMapId());
-		if (to == null) {
-            	    c.getSession().write(CWvsContext.enableActions());
-		    return;
-		}
+                if (to == null) {
+                    c.getSession().write(CWvsContext.enableActions());
+                    return;
+                }
                 if (!c.getPlayer().isGM()) {
                     if (to.getLevelLimit() > 0 && to.getLevelLimit() > c.getPlayer().getLevel()) {
                         c.getPlayer().dropMessage(-1, "You are too low of a level to enter this place.");
@@ -141,12 +143,12 @@ public class MaplePortal {
         }
     }
 
-    
+
     public boolean getPortalState() {
         return portalState;
     }
 
-    
+
     public void setPortalState(boolean ps) {
         this.portalState = ps;
     }

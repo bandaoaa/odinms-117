@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling;
 
 import constants.GameConstants;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+
 import tools.HexTool;
 
 public enum SendPacketOpcode implements WritableIntValueHolder {
@@ -58,7 +60,7 @@ public enum SendPacketOpcode implements WritableIntValueHolder {
     UPDATE_STOLEN_SKILLS,
     SKILL_SWIPE_WINDOW,
     FREE_CASH_ITEM,
-    ONE_A_DAY,    
+    ONE_A_DAY,
     // CHANNEL
     CHANGE_CHANNEL, SHOW_TITLE,
     UPDATE_STATS,
@@ -460,8 +462,8 @@ public enum SendPacketOpcode implements WritableIntValueHolder {
     static {
         reloadValues();
     }
-    
-       public static String getOpcodeName(int value) {
+
+    public static String getOpcodeName(int value) {
         for (SendPacketOpcode opcode : SendPacketOpcode.values()) {
             if (opcode.getValue() == value) {
                 return opcode.name();

@@ -25,6 +25,7 @@ import client.*;
 import client.inventory.InventoryException;
 import client.inventory.MapleInventoryType;
 import constants.GameConstants;
+
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import server.MapleInventoryManipulator;
 import server.MapleItemInformationProvider;
 import server.RandomRewards;
@@ -54,7 +56,9 @@ public class MapleQuestAction implements Serializable {
     private List<Triple<Integer, Integer, Integer>> skill = null;
     private List<Pair<Integer, Integer>> state = null;
 
-    /** Creates a new instance of MapleQuestAction */
+    /**
+     * Creates a new instance of MapleQuestAction
+     */
     public MapleQuestAction(MapleQuestActionType type, ResultSet rse, MapleQuest quest, PreparedStatement pss, PreparedStatement psq, PreparedStatement psi) throws SQLException {
         this.type = type;
         this.quest = quest;
@@ -170,7 +174,7 @@ public class MapleQuestAction implements Serializable {
                         continue;
                     }
                     final int id = item.itemid;
-                        if (id == 1112400) {
+                    if (id == 1112400) {
                         System.out.println("hax sfuk323");
                         return;
                     }
@@ -433,7 +437,7 @@ public class MapleQuestAction implements Serializable {
                         continue;
                     }
                     final int id = item.itemid;
-                                        if (id == 1112400) {
+                    if (id == 1112400) {
                         System.out.println("hax sfukdsdsd");
                         return;
                     }

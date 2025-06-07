@@ -13,11 +13,11 @@ import java.util.Map;
 
 public class MapleCoreAura implements Serializable {
     private static final long serialVersionUID = 7179541546283738569L;
-    
+
     private int dataId, str, dex, int_, luk, watk, matk, maxlevel, rank;
     private long timestamp;
     private boolean changed = false, thirdParty = false, solid = false;
-    
+
     private static final int RARE = 10;
     private static final int EPIC = 11;
     private static final int UNIQUE = 12;
@@ -176,12 +176,12 @@ public class MapleCoreAura implements Serializable {
         this.solid = false;
         changed();
     }
-    
+
     public MapleCoreAura(Map<Byte, Integer> data, long timestamp) {
         for (Map.Entry<Byte, Integer> ii : data.entrySet()) {
             byte key = ii.getKey();
             int value = ii.getValue();
-            
+
             switch (key) {
                 case 0:
                     this.dataId = value;
@@ -250,20 +250,20 @@ public class MapleCoreAura implements Serializable {
     public static MapleCoreAura loadData(int charid, boolean others) throws SQLException {
         long currenttime = System.currentTimeMillis();
         MapleCoreAura mca = new MapleCoreAura(0, 3, 3, 3, 3, 3, 3, 5, 10, currenttime + 86400000L, false);
-        
+
         Connection con = DatabaseConnection.getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
-        
+
         try {
             ps = con.prepareStatement("SELECT * FROM `skills_core_aura` WHERE characterid = ?");
             ps.setInt(1, charid);
             rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 int core = rs.getInt("id");
                 long timestp = rs.getLong("timestamp");
-                
+
                 if (currenttime > timestp) {
                     mca = new MapleCoreAura(core, 3, 3, 3, 3, 3, 3, 20, 10, currenttime + 86400000L, false);
                     mca.resetFluxField(0, true);
@@ -275,13 +275,19 @@ public class MapleCoreAura implements Serializable {
             }
         } finally {
             if (rs != null) {
-                try { rs.close(); } catch (SQLException ignored) {}
+                try {
+                    rs.close();
+                } catch (SQLException ignored) {
+                }
             }
             if (ps != null) {
-                try { ps.close(); } catch (SQLException ignored) {}
+                try {
+                    ps.close();
+                } catch (SQLException ignored) {
+                }
             }
         }
-        
+
         mca.setThirdParty(others);
         return mca;
     }

@@ -23,7 +23,9 @@ package server.maps;
 import client.MapleCharacter;
 import client.MapleClient;
 import constants.GameConstants;
+
 import java.awt.Point;
+
 import server.MapleStatEffect;
 import tools.packet.CField.SummonPacket;
 
@@ -60,7 +62,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
             lastSummonTickCount = 0;
             Summon_tickResetCount = 0;
             Server_ClientSummonTickDiff = 0;
-			lastAttackTime = 0;
+            lastAttackTime = 0;
         }
     }
 
@@ -105,20 +107,20 @@ public class MapleSummon extends AnimatedMapleMapObject {
         return movementType;
     }
 
-    public long getSpawnTime(){
+    public long getSpawnTime() {
         return SpawnTime;
     }
 
-    public void setSpawnTime(long now){
-        SpawnTime=now;
+    public void setSpawnTime(long now) {
+        SpawnTime = now;
     }
 
     public final boolean isPuppet() {
         switch (skill) {
             case 3111002: //替身術
-	    case 3120012: //精銳替身術
+            case 3120012: //精銳替身術
             case 3211002: //替身術
-	    case 3220012: //精銳替身術
+            case 3220012: //精銳替身術
             case 4341006: //幻影替身
             case 13111004: //替身術
             case 33111003: //瘋狂陷阱
@@ -126,11 +128,11 @@ public class MapleSummon extends AnimatedMapleMapObject {
         }
         return isAngel();
     }
-	
+
     public final boolean isAngel() {
         return GameConstants.isAngel(skill);
     }
-	
+
     public final boolean isMultiAttack() { //賽特拉特 磁場 地雷(hidden 自動爆炸) 戰鬥機器 : 巨人錘
         if (skill != 35111002 && skill != 35121003 && (skill == 33101008 || skill >= 35000000) && skill != 35111009 && skill != 35111010 && skill != 35111001) {
             return false;
@@ -143,7 +145,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
     }
 
     public final boolean isReaper() { //甦醒
-        return skill == 32111006; 
+        return skill == 32111006;
     }
 
     public final boolean isMultiSummon() {
@@ -157,7 +159,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
     public final int getSummonType() {
         if (isAngel()) {
             return 2;
-            
+
             // 精銳替身術(弓) 精銳替身術(弩)  瘋狂陷阱 地雷(hidden 自動爆炸)  磁場
         } else if ((skill != 3120012 && skill != 3220012 && skill != 33111003 && isPuppet()) || skill == 33101008 || skill == 35111002) {
             return 0;
@@ -175,7 +177,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
                 return 6; //charge
             case 4111007: //黑暗殺
             case 4211007: //黑暗殺
-            	return 7; //attacks what you get hit by
+                return 7; //attacks what you get hit by
         }
         return 1;
     }
@@ -196,7 +198,7 @@ public class MapleSummon extends AnimatedMapleMapObject {
         }
         lastSummonTickCount = tickcount;
     }
-	
+
     public final void CheckPVPSummonAttackFrequency(final MapleCharacter chr) {
         final long tickdifference = (System.currentTimeMillis() - lastAttackTime);
         lastAttackTime = System.currentTimeMillis();

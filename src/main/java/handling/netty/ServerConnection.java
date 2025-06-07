@@ -16,7 +16,6 @@ import server.ServerProperties;
 import tools.FileoutputUtil;
 
 /**
- *
  * @author wubin
  */
 public class ServerConnection {
@@ -33,7 +32,7 @@ public class ServerConnection {
         this.port = port;
         this.world = world;
         this.channels = channels;
-         this.cs = cs;
+        this.cs = cs;
     }
 
     public void run() {

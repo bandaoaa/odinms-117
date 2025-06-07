@@ -21,12 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package scripting;
 
 import client.MapleClient;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+
 import server.life.MapleNPC;
 import server.quest.MapleQuest;
 import tools.FileoutputUtil;
@@ -44,13 +46,13 @@ public class NPCScriptManager extends AbstractScriptManager {
         final Lock lock = c.getNPCLock();
         lock.lock();
         try {
-              if (cms.containsKey(c)) {
-            dispose(c);
-        }  
+            if (cms.containsKey(c)) {
+                dispose(c);
+            }
             if (!cms.containsKey(c) && c.canClickNPC()) {
                 if (c.getPlayer().isGM()) {
                     c.getPlayer().dropMessage(6, "NPC ID : " + npc + "");
-                    }
+                }
                 Invocable iv = getInvocable("npc/" + npc + ".js", c, true);
                 if (iv == null) {
                     iv = getInvocable("npc/notcoded.js", c, true); //safe disposal
@@ -65,7 +67,7 @@ public class NPCScriptManager extends AbstractScriptManager {
                 scriptengine.put("cm", cm);
 
                 c.getPlayer().setConversation(1);
-		c.setClickedNPC();
+                c.setClickedNPC();
                 //System.out.println("NPCID started: " + npc);
                 try {
                     iv.invokeFunction("start"); // Temporary until I've removed all of start
@@ -95,7 +97,7 @@ public class NPCScriptManager extends AbstractScriptManager {
                 if (cm.pendingDisposal) {
                     dispose(c);
                 } else {
-		    c.setClickedNPC();
+                    c.setClickedNPC();
                     cm.getIv().invokeFunction("action", mode, type, selection);
                 }
             } catch (final ScriptException | NoSuchMethodException e) {
@@ -127,7 +129,7 @@ public class NPCScriptManager extends AbstractScriptManager {
                 scriptengine.put("qm", cm);
 
                 c.getPlayer().setConversation(1);
-		c.setClickedNPC();
+                c.setClickedNPC();
                 //System.out.println("NPCID started: " + npc + " startquest " + quest);
                 iv.invokeFunction("start", (byte) 1, (byte) 0, 0); // start it off as something
             }
@@ -151,7 +153,7 @@ public class NPCScriptManager extends AbstractScriptManager {
             if (cm.pendingDisposal) {
                 dispose(c);
             } else {
-		c.setClickedNPC();
+                c.setClickedNPC();
                 cm.getIv().invokeFunction("start", mode, type, selection);
             }
         } catch (ScriptException | NoSuchMethodException e) {
@@ -182,7 +184,7 @@ public class NPCScriptManager extends AbstractScriptManager {
                 scriptengine.put("qm", cm);
 
                 c.getPlayer().setConversation(1);
-		c.setClickedNPC();
+                c.setClickedNPC();
                 //System.out.println("NPCID started: " + npc + " endquest " + quest);
                 iv.invokeFunction("end", (byte) 1, (byte) 0, 0); // start it off as something
             }
@@ -206,7 +208,7 @@ public class NPCScriptManager extends AbstractScriptManager {
             if (cm.pendingDisposal) {
                 dispose(c);
             } else {
-		c.setClickedNPC();
+                c.setClickedNPC();
                 cm.getIv().invokeFunction("end", mode, type, selection);
             }
         } catch (ScriptException | NoSuchMethodException e) {
@@ -217,18 +219,18 @@ public class NPCScriptManager extends AbstractScriptManager {
             lock.unlock();
         }
     }
-    
+
     public final void startItemScript(final MapleClient c, final int npc, final String item) {
         final Lock lock = c.getNPCLock();
         lock.lock();
         try {
             if (c.getPlayer().isGM()) {
-                    c.getPlayer().dropMessage(6, "TIEM ID : " + item + "");
-                }
+                c.getPlayer().dropMessage(6, "TIEM ID : " + item + "");
+            }
             if (!cms.containsKey(c) && c.canClickNPC()) {
                 final Invocable iv = getInvocable("item/" + item + ".js", c, true);
                 if (iv == null) {
-                    System.out.println("New scripted item : "  + item + "\r\n");
+                    System.out.println("New scripted item : " + item + "\r\n");
                     dispose(c);
                     return;
                 }
@@ -263,8 +265,8 @@ public class NPCScriptManager extends AbstractScriptManager {
         }
         try {
             if (c.getPlayer().isGM()) {
-                    System.err.println("map/" + type + scriptName + ".js" + "   " + c.getPlayer().getMap().getId());
-                }
+                System.err.println("map/" + type + scriptName + ".js" + "   " + c.getPlayer().getMap().getId());
+            }
             NPCScriptManager.getInstance().dispose(c);//關閉已連接的NPC
             c.removeClickedNPC();
             if (!cms.containsKey(c) && c.canClickNPC()) {
@@ -301,12 +303,12 @@ public class NPCScriptManager extends AbstractScriptManager {
         lock.lock();
         try {
             if (c.getPlayer().isGM()) {
-                    c.getPlayer().dropMessage(6, "portal ID : " + portal + "");
-                }
+                c.getPlayer().dropMessage(6, "portal ID : " + portal + "");
+            }
             if (!cms.containsKey(c) && c.canClickNPC()) {
                 final Invocable iv = getInvocable("portal/" + portal + ".js", c, true);
                 if (iv == null) {
-                    System.out.println("New scripted portal : "  + portal + "\r\n");
+                    System.out.println("New scripted portal : " + portal + "\r\n");
                     dispose(c);
                     return;
                 }
@@ -347,9 +349,11 @@ public class NPCScriptManager extends AbstractScriptManager {
             c.getPlayer().setConversation(0);
         }
     }
-public void reloadScripts() {
-            cms.clear();
-        }
+
+    public void reloadScripts() {
+        cms.clear();
+    }
+
     public final NPCConversationManager getCM(final MapleClient c) {
         return cms.get(c);
     }

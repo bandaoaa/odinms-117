@@ -21,11 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.login;
 
 import constants.GameConstants;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -85,6 +87,7 @@ public class LoginInformationProvider {
             return Adventurer;
         }
     }
+
     private final static LoginInformationProvider instance = new LoginInformationProvider();
     protected final List<String> ForbiddenName = new ArrayList<>();
     //gender, val, job
@@ -136,7 +139,7 @@ public class LoginInformationProvider {
                         int val;
                         if (d.getName().endsWith("female")) {
                             val = 1;
-			} else if (d.getName().endsWith("male")) {
+                        } else if (d.getName().endsWith("male")) {
                             val = 0;
                         } else {
                             continue;
@@ -187,7 +190,7 @@ public class LoginInformationProvider {
         final Triple<Integer, Integer, Integer> key = new Triple<>(gender, val, job);
         final List<Integer> our = makeCharInfo.get(key);
         if (our == null) {
-	return false;
+            return false;
         }
         return our.contains(item);
     }

@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import constants.GameConstants;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+
 import tools.Pair;
 
 public class MapleMonsterStats {
@@ -42,14 +44,14 @@ public class MapleMonsterStats {
     private List<BanishInfo> banish = new ArrayList<>();
     private boolean patrol;
     private int patrolRange, patrolDetectX, patrolSenseX;
-	
-	public MapleMonsterStats(int id) {
-		this.id = id;
-	}
-	
-	public int getId() {
-		return id;
-	}
+
+    public MapleMonsterStats(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 
     public int getExp() {
         return exp;
@@ -123,7 +125,7 @@ public class MapleMonsterStats {
         return pushed;
     }
 
-	
+
     public void setPhysicalAttack(final int PhysicalAttack) {
         this.PhysicalAttack = PhysicalAttack;
     }
@@ -252,7 +254,7 @@ public class MapleMonsterStats {
     public boolean isFfaLoot() {
         return ffaLoot;
     }
-	
+
     public void setEscort(boolean ffaL) {
         this.escort = ffaL;
     }
@@ -334,7 +336,7 @@ public class MapleMonsterStats {
     }
 
     public EnumMap<Element, ElementalEffectiveness> getElements() {
-	return resistance;
+        return resistance;
     }
 
     public void setEffectiveness(Element e, ElementalEffectiveness ee) {
@@ -448,7 +450,7 @@ public class MapleMonsterStats {
     public boolean isInvincible() {
         return invincible;
     }
-	
+
     public void setChange(boolean invin) {
         this.changeable = invin;
     }
@@ -498,18 +500,18 @@ public class MapleMonsterStats {
     }
 
     public void addMobAttack(MobAttackInfo ma) {
-	this.mai.add(ma);
+        this.mai.add(ma);
     }
 
     public MobAttackInfo getMobAttack(int attack) {
-	if (attack >= this.mai.size() || attack < 0) {
-	    return null;
-	}
-	return this.mai.get(attack);
+        if (attack >= this.mai.size() || attack < 0) {
+            return null;
+        }
+        return this.mai.get(attack);
     }
 
     public List<MobAttackInfo> getMobAttacks() {
-	return this.mai;
+        return this.mai;
     }
 
     /*

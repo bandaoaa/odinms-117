@@ -21,9 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.world;
 
 import client.MapleCharacter;
+
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.List;
+
 import server.maps.MapleDoor;
 
 public class MaplePartyCharacter implements Serializable {

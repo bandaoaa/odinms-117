@@ -27,6 +27,7 @@ import client.inventory.MapleInventoryType;
 import client.inventory.MapleRing;
 import client.status.MonsterStatus;
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import scripting.EventInstanceManager;
 import scripting.EventManager;
 import scripting.ReactorScriptManager;
@@ -342,10 +344,10 @@ public class PlayersHandler {
                 int id[] = {2001000, 2001001, 2006001, 2008000, 2008001, 2008004, 2008005, 2512001, 2519000, 2519001, 2519002, 2519003, 2618000, 2618001, 2618002, 3002000, 3009000, 9108000, 9108001, 9108002, 9108003, 9108004, 9108005, 9218000};
                 int item[] = {4001053, 4001053, 4001055, 4001046, 4001049, 4001048, 4001045, 4031437, 4001117, 4001117, 4001117, 4001117, 4001132, 4001133, 4001133, 4001161, 4001162, 4001453, 4001453, 4001453, 4001453, 4001453, 4001453, 4001528};
                 for (int i = 0; i < id.length; i++)
-                if (reactor.getReactorId() == id[i]) {
-                    int y = i;
-                    MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, item[i], 1, true, false);//觸發品扣除
-                }
+                    if (reactor.getReactorId() == id[i]) {
+                        int y = i;
+                        MapleInventoryManipulator.removeById(c, MapleInventoryType.ETC, item[i], 1, true, false);//觸發品扣除
+                    }
                 reactor.hitReactor(c);
             }
         }
@@ -595,7 +597,7 @@ public class PlayersHandler {
     */
     public static void Report(final LittleEndianAccessor slea, final MapleClient c) {
         //0 = success 1 = unable to locate 2 = once a day 3 = you've been reported 4+ = unknown reason
-     /*
+        /*
          * MapleCharacter other; ReportType type; /* if (!GameConstants.GMS) {
          * other = c.getPlayer().getMap().getCharacterById(slea.readInt()); type
          * = ReportType.getById(slea.readByte()); } else { type =
@@ -901,7 +903,7 @@ public class PlayersHandler {
             move = skil.isMovement();
             push = skil.isPush();
             pull = skil.isPull();
-            
+
             //PVP冰騎士相關
             if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
                 if (!GameConstants.isIceKnightSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
@@ -1079,8 +1081,8 @@ public class PlayersHandler {
                             } else if (shad != null && i >= originalAttackCount) {
                                 ourDamage *= shad.getX() / 100.0;
                             }
-                            
-                             // 暴風雪箭 楓幣炸彈 隱??鎖鏈地獄
+
+                            // 暴風雪箭 楓幣炸彈 隱??鎖鏈地獄
                             if (ourDamage > 0 && skillid != 3211003 && skillid != 4211006 && (skillid == 4221001 || skillid == 4331006 || Randomizer.nextInt(100) < critRate)) {
                                 ourDamage *= (100.0 + (Randomizer.nextInt(Math.max(2, chr.getStat().passive_sharpeye_percent() - chr.getStat().passive_sharpeye_min_percent())) + chr.getStat().passive_sharpeye_min_percent())) / 100.0;
                                 critical_ = true;
@@ -1164,7 +1166,7 @@ public class PlayersHandler {
                     }
                     if ((chr.getJob() / 100) % 10 == 2) {
 
-                         //自然力變弱 魔法強化
+                        //自然力變弱 魔法強化
                         int[] skills = {2000007, 12000006, 22000002, 32000012};
                         ThreadLock.lock();
                         try {

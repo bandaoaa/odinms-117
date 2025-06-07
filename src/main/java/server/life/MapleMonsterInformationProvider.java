@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import constants.GameConstants;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,8 +33,10 @@ import java.util.Map;
 
 import client.inventory.MapleInventoryType;
 import database.DatabaseConnection;
+
 import java.io.File;
 import java.util.Map.Entry;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -69,13 +72,13 @@ public class MapleMonsterInformationProvider {
             while (rs.next()) {
                 globaldrops.add(
                         new MonsterGlobalDropEntry(
-                        rs.getInt("itemid"),
-                        rs.getInt("chance"),
-                        rs.getInt("continent"),
-                        rs.getByte("dropType"),
-                        rs.getInt("minimum_quantity"),
-                        rs.getInt("maximum_quantity"),
-                        rs.getInt("questid")));
+                                rs.getInt("itemid"),
+                                rs.getInt("chance"),
+                                rs.getInt("continent"),
+                                rs.getByte("dropType"),
+                                rs.getInt("minimum_quantity"),
+                                rs.getInt("maximum_quantity"),
+                                rs.getInt("questid")));
             }
             rs.close();
             ps.close();

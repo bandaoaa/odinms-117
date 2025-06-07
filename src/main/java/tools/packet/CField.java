@@ -29,6 +29,7 @@ import constants.ServerConstants;
 import handling.SendPacketOpcode;
 import handling.world.World;
 import handling.world.guild.MapleGuild;
+
 import java.awt.Point;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import server.MapleDueyActions;
 import server.MapleShop;
 import server.MapleTrade;
@@ -56,7 +58,6 @@ import tools.Triple;
 import tools.data.MaplePacketLittleEndianWriter;
 
 /**
- *
  * @author AlphaEta
  */
 public class CField {
@@ -75,7 +76,7 @@ public class CField {
 
     public static byte[] getPacketFromHexString(final String hex) {
         return HexTool.getByteArrayFromHexString(hex);
-        
+
     }
 
     public static byte[] getServerIP(final MapleClient c, final int port, final int clientId) {
@@ -93,7 +94,7 @@ public class CField {
         mplew.writeShort(port);
         mplew.writeInt(clientId);
         mplew.writeZeroBytes(10);
-        
+
         return mplew.getPacket();
     }
 
@@ -569,11 +570,11 @@ public class CField {
 
             mplew.writeShort(SendPacketOpcode.OPEN_UI_OPTION.getValue());
             /*
-            * 0x03 連接技能視窗
-            * 0x15 組隊搜索視窗
-            * 0x21 道具修理視窗
-            * 0x2A 專業技術視窗
-            */
+             * 0x03 連接技能視窗
+             * 0x15 組隊搜索視窗
+             * 0x21 道具修理視窗
+             * 0x2A 專業技術視窗
+             */
             mplew.writeInt(op);
             mplew.writeInt(npc);
             mplew.writeInt(0); //V.114新增 未知
@@ -982,7 +983,7 @@ public class CField {
         */
         public static byte[] setNPCSpecialAction(final int oid, final String action) {
             final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-            mplew.writeShort((int)SendPacketOpcode.NPC_SET_SPECIAL_ACTION.getValue());
+            mplew.writeShort((int) SendPacketOpcode.NPC_SET_SPECIAL_ACTION.getValue());
             mplew.writeInt(oid);
             mplew.writeMapleAsciiString(action);
             mplew.writeInt(0);
@@ -995,7 +996,7 @@ public class CField {
         */
         public static byte[] NPCSpecialAction(final int oid, final int value, final int x, final int y) {
             final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-            mplew.writeShort((int)SendPacketOpcode.NPC_UPDATE_LIMITED_INFO.getValue());
+            mplew.writeShort((int) SendPacketOpcode.NPC_UPDATE_LIMITED_INFO.getValue());
             mplew.writeInt(oid);
             mplew.writeInt(value);
             mplew.writeInt(x);
@@ -1036,7 +1037,7 @@ public class CField {
             }
             mplew.writeMapleAsciiString(talk);
             mplew.write(HexTool.getByteArrayFromHexString(endBytes));
-                
+
             return mplew.getPacket();
         }
 
@@ -1093,7 +1094,7 @@ public class CField {
             }
             return mplew.getPacket();
         }
-        
+
         public static byte[] getAndroidTalkStyle(int npc, String talk, int... args) {
             MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
@@ -1156,7 +1157,7 @@ public class CField {
             mplew.writeMapleAsciiString(data);
 
             return mplew.getPacket();
-        }       
+        }
 
         /*
         NPC商店
@@ -2408,7 +2409,7 @@ public class CField {
         }
 
         Triple<List<MapleRing>, List<MapleRing>, List<MapleRing>> rings = chr.getRings(false);
-    //   mplew.writeLong(0);
+        //   mplew.writeLong(0);
         addRingInfo(mplew, rings.getLeft());
         addRingInfo(mplew, rings.getMid());
         addMRingInfo(mplew, rings.getRight(), chr);
@@ -2503,8 +2504,8 @@ public class CField {
 
         return mplew.getPacket();
     }
-	
-	public static byte[] useNebuliteFusion(int cid, int itemId, boolean success) {
+
+    public static byte[] useNebuliteFusion(int cid, int itemId, boolean success) {
         MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
         mplew.writeShort(SendPacketOpcode.SHOW_FUSION_EFFECT.getValue());
@@ -2515,7 +2516,7 @@ public class CField {
         return mplew.getPacket();
     }
 
-      public static byte[] pvpAttack(int cid, int playerLevel, int skill, int skillLevel, int speed, int mastery, int projectile, int attackCount, int chargeTime, int stance, int direction, int range, int linkSkill, int linkSkillLevel, boolean movementSkill, boolean pushTarget, boolean pullTarget, List<AttackPair> attack) {
+    public static byte[] pvpAttack(int cid, int playerLevel, int skill, int skillLevel, int speed, int mastery, int projectile, int attackCount, int chargeTime, int stance, int direction, int range, int linkSkill, int linkSkillLevel, boolean movementSkill, boolean pushTarget, boolean pullTarget, List<AttackPair> attack) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
 
         mplew.writeShort(SendPacketOpcode.PVP_ATTACK.getValue());
@@ -2547,7 +2548,7 @@ public class CField {
         mplew.writeInt(0);
         mplew.write(attackCount);
         mplew.write(0); //idk: probably does something like immobilize target	
-       
+
         for (AttackPair p : attack) {
             mplew.writeInt(p.objectid);
             mplew.writeInt(0);
@@ -2564,9 +2565,7 @@ public class CField {
 
         return mplew.getPacket();
     }
-        
 
-    
 
     public static byte[] getPVPMist(int cid, int mistSkill, int mistLevel, int damage) {
         final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
@@ -3076,7 +3075,7 @@ public class CField {
         if (damage <= 0 || fake > 0) { // supposed to be -1
             mplew.writeInt(fake);
         }
-mplew.writeZeroBytes(30);
+        mplew.writeZeroBytes(30);
         return mplew.getPacket();
     }
 
@@ -3503,7 +3502,7 @@ mplew.writeZeroBytes(30);
                 mplew.writeInt(slot);
             }
         }
-         mplew.writeZeroBytes(50);
+        mplew.writeZeroBytes(50);
         return mplew.getPacket();
     }
 

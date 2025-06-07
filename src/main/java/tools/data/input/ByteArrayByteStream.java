@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package tools.data.input;
 
 import java.io.IOException;
+
 import tools.HexTool;
 
 /**
  * Provides for an abstraction layer for an array of bytes.
- * 
+ *
  * @author Frz
  * @version 1.0
  * @since Revision 326

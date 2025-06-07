@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.events;
 
 import database.DatabaseConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +30,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import server.Randomizer;
 import tools.Pair;
 
@@ -38,7 +40,7 @@ public class MapleOxQuizFactory {
     private static final MapleOxQuizFactory instance = new MapleOxQuizFactory();
 
     public MapleOxQuizFactory() {
-	initialize();
+        initialize();
     }
 
     public static MapleOxQuizFactory getInstance() {
@@ -46,21 +48,21 @@ public class MapleOxQuizFactory {
     }
 
     public Entry<Pair<Integer, Integer>, MapleOxQuizEntry> grabRandomQuestion() {
-	final int size = questionCache.size();
-	while(true) {
-	    for (Entry<Pair<Integer, Integer>, MapleOxQuizEntry> oxquiz : questionCache.entrySet()) {
-		if (Randomizer.nextInt(size) == 0) {
-		    return oxquiz;
-		}
-	    }
-	}
+        final int size = questionCache.size();
+        while (true) {
+            for (Entry<Pair<Integer, Integer>, MapleOxQuizEntry> oxquiz : questionCache.entrySet()) {
+                if (Randomizer.nextInt(size) == 0) {
+                    return oxquiz;
+                }
+            }
+        }
     }
 
     private void initialize() {
         try {
             Connection con = DatabaseConnection.getConnection();
-            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM wz_oxdata"); 
-                    ResultSet rs = ps.executeQuery()) {
+            try (PreparedStatement ps = con.prepareStatement("SELECT * FROM wz_oxdata");
+                 ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     questionCache.put(new Pair<>(rs.getInt("questionset"), rs.getInt("questionid")), get(rs));
                 }

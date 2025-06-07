@@ -23,6 +23,7 @@ package client;
 import java.awt.Point;
 import java.io.Serializable;
 import java.util.List;
+
 import server.MapleItemInformationProvider;
 import server.Randomizer;
 import server.life.MapleLifeFactory;
@@ -49,7 +50,7 @@ public final class MonsterFamiliar extends AnimatedMapleMapObject implements Ser
         this.familiar = familiar;
         this.characterid = characterid;
         this.expiry = expiry;
-		this.vitality = vitality;
+        this.vitality = vitality;
         this.id = id;
         this.name = name;
         this.fatigue = fatigue;

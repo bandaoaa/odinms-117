@@ -25,10 +25,12 @@ import client.MapleClient;
 import constants.ServerConstants;
 import handling.SendPacketOpcode;
 import handling.login.LoginServer;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import server.Randomizer;
 import tools.HexTool;
 import tools.Pair;
@@ -270,17 +272,17 @@ public class LoginPacket {
     */
     public static byte[] getLoginWelcome() {
         List<Pair<String, Integer>> flags = new LinkedList<>();
-        
+
         final int rand = Randomizer.nextInt(3);
 
         if (rand == 1) {
             flags.add(new Pair<>("20120808", 0));
-            }
+        }
         if (rand == 2) {
             flags.add(new Pair<>("20120808", 0));
             flags.add(new Pair<>("20120815", 0));
-            }
-            return CField.spawnFlags(flags);
+        }
+        return CField.spawnFlags(flags);
     }
 
     public static byte[] getServerStatus(final int status) {
@@ -390,18 +392,29 @@ public class LoginPacket {
         return mplew.getPacket();
     }
 
- /*     */   public static byte[] partTimeJobRequest(int cid, int mode, int jobType, long time, boolean finish, boolean bonus) {
-/* 466 */     MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
-/*     */ 
-/* 468 */     mplew.writeShort(SendPacketOpcode.PART_TIME_JOB.getValue());
-/* 469 */     mplew.writeInt(cid);
-/* 470 */     mplew.write(mode);
-/*     */ 
-/* 475 */     mplew.write(jobType);
-/* 476 */     mplew.writeReversedLong(PacketHelper.getTime(time));
-/* 477 */     mplew.writeInt(finish ? 1 : 0);
-/* 478 */     mplew.write(bonus ? 1 : 0);
-/*     */ 
-/* 482 */     return mplew.getPacket();
-/*     */   }
+    /*     */
+    public static byte[] partTimeJobRequest(int cid, int mode, int jobType, long time, boolean finish, boolean bonus) {
+        /* 466 */
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        /*     */
+        /* 468 */
+        mplew.writeShort(SendPacketOpcode.PART_TIME_JOB.getValue());
+        /* 469 */
+        mplew.writeInt(cid);
+        /* 470 */
+        mplew.write(mode);
+        /*     */
+        /* 475 */
+        mplew.write(jobType);
+        /* 476 */
+        mplew.writeReversedLong(PacketHelper.getTime(time));
+        /* 477 */
+        mplew.writeInt(finish ? 1 : 0);
+        /* 478 */
+        mplew.write(bonus ? 1 : 0);
+        /*     */
+        /* 482 */
+        return mplew.getPacket();
+        /*     */
+    }
 }

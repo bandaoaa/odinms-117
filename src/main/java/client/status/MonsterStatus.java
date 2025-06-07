@@ -23,6 +23,7 @@ package client.status;
 import client.MapleDisease;
 import constants.GameConstants;
 import handling.Buffstat;
+
 import java.io.Serializable;
 
 public enum MonsterStatus implements Serializable, Buffstat {

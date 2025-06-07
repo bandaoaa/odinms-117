@@ -35,6 +35,7 @@ import handling.world.World;
 import handling.world.exped.ExpeditionType;
 import handling.world.guild.MapleGuild;
 import handling.world.guild.MapleGuildAlliance;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,6 +43,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.script.Invocable;
+
 import server.*;
 import server.Timer.WorldTimer;
 import server.life.MapleMonsterInformationProvider;
@@ -74,7 +76,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     public NPCConversationManager(MapleClient c, int npc, int questid, byte type, Invocable iv) {
         super(c, npc, questid);
         this.type = type;
-        this.iv = iv; 
+        this.iv = iv;
     }
 
     public NPCConversationManager(MapleClient c, int npc, MapleNPC npcob, int questid, byte type, Invocable iv) {
@@ -111,10 +113,10 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         NPCScriptManager.getInstance().dispose(c);
     }
 
-    public static void dispose(MapleClient c){
+    public static void dispose(MapleClient c) {
         c.announce(CWvsContext.enableActions());
         NPCScriptManager.getInstance().getCM(c).dispose();
-    }  
+    }
 
     public void askMapSelection(final String sel) {
         if (lastMsg > -1) {
@@ -474,8 +476,8 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         getPlayer().updateSingleStat(MapleStat.HAIR, hair);
         getPlayer().equipChanged();
     }
-    
-        @Override
+
+    @Override
     public final MapleCharacter getChar() {
         return getPlayer();
     }
@@ -1287,7 +1289,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     public boolean isCash(final int itemId) {
         return MapleItemInformationProvider.getInstance().isCash(itemId);
     }
-    
+
     public void clearDrops() {
         MapleMap map = c.getPlayer().getMap();
         double range = Double.POSITIVE_INFINITY;
@@ -1684,7 +1686,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
             return false;
         }
     }
-    
+
     /*Start of Custom Features*/
     public void gainAPS(int gain) {
         getPlayer().gainAPS(gain);

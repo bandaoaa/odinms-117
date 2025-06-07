@@ -30,7 +30,7 @@ public enum ItemFlag {
     KARMA_USE(0x02),
     CHARM_EQUIPPED(0x20),
     ANDROID_ACTIVATED(0x40),
-    CRAFTED(0x80), 
+    CRAFTED(0x80),
     CRAFTED_USE(0x10),
     SHIELD_WARD(0x100), //shield icon
     LUCKS_KEY(0x200), //this has some clover leaf thing at bottomleft

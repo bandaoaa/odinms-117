@@ -8,11 +8,13 @@ import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import constants.GameConstants;
 import database.DatabaseConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
 import tools.FileoutputUtil;
 import tools.Pair;
 import tools.packet.CField.NPCPacket;
@@ -57,7 +59,9 @@ public class MapleShop {
         rechargeableItems.add(2332000);
     }
 
-    /** Creates a new instance of MapleShop */
+    /**
+     * Creates a new instance of MapleShop
+     */
     private MapleShop(int id, int npcId) {
         this.id = id;
         this.npcId = npcId;
@@ -103,9 +107,9 @@ public class MapleShop {
         if (index >= 0) {
             final Item i = c.getPlayer().getRebuy().get(index);
             final int price = (int) Math.max(Math.ceil(ii.getPrice(itemId) * (GameConstants.isRechargable(itemId) ? 1 : i.getQuantity())), 0);
-            final int price2 = (int) Math.max(Math.ceil(ii.getPrice(itemId) * i.getQuantity() + ii.getWholePrice(itemId)) ,0);
+            final int price2 = (int) Math.max(Math.ceil(ii.getPrice(itemId) * i.getQuantity() + ii.getWholePrice(itemId)), 0);
             if (price >= 0 && c.getPlayer().getMeso() >= price) {
-            if (MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner()) && GameConstants.isRechargable(itemId) || MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner()) && GameConstants.isBullet(itemId) ) {
+                if (MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner()) && GameConstants.isRechargable(itemId) || MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner()) && GameConstants.isBullet(itemId)) {
                     c.getPlayer().gainMeso(-price2, false);
                     MapleInventoryManipulator.addbyItem(c, i);
                     c.getPlayer().getRebuy().remove(index);
@@ -216,7 +220,7 @@ public class MapleShop {
             if (price != -1.0 && recvMesos > 0 && GameConstants.isThrowingStar(item.getItemId()) || price != -1.0 && recvMesos > 0 && GameConstants.isBullet(item.getItemId())) {
                 c.getPlayer().gainMeso(recvMesos2, false);
             } else {
-               c.getPlayer().gainMeso(recvMesos, false);
+                c.getPlayer().gainMeso(recvMesos, false);
             }
             c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0x4, this, c, -1));
         }

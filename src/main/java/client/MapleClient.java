@@ -32,6 +32,7 @@ import handling.world.*;
 import handling.world.family.MapleFamilyCharacter;
 import handling.world.guild.MapleGuildCharacter;
 import io.netty.util.AttributeKey;
+
 import java.io.Serializable;
 import java.sql.*;
 import java.util.*;
@@ -163,11 +164,13 @@ public class MapleClient implements Serializable {
                 ps.setInt(1, cid);
                 ps.setInt(2, this.accId);
                 ResultSet rs = ps.executeQuery();
-                /*      */ try {
+                /*      */
+                try {
                     if (rs.next()) {
                         data = new Pair(Byte.valueOf(rs.getByte("partTime_id")), Long.valueOf(rs.getLong("partTime_start")));
                     }
-                    /*      */                } catch (SQLException e) {
+                    /*      */
+                } catch (SQLException e) {
                     System.out.println(e.toString());
                 }
             }
@@ -189,11 +192,13 @@ public class MapleClient implements Serializable {
             try (PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) FROM `characters` WHERE `accountid` = ? AND `partTime_id` > 0 LIMIT 1")) {
                 ps.setInt(1, this.accId);
                 ResultSet rs = ps.executeQuery();
-                /*      */ try {
+                /*      */
+                try {
                     if (rs.next()) {
                         ret = rs.getInt(1) < 3;
                     }
-                    /*      */                } catch (SQLException e) {
+                    /*      */
+                } catch (SQLException e) {
                     System.out.println(e.toString());
                 }
             }
@@ -203,19 +208,26 @@ public class MapleClient implements Serializable {
         return ret;
     }
 
-    /*      */ public boolean updatePartTimeJob(int cid, byte type, long time) {
-        /*  206 */ boolean ret = false;
+    /*      */
+    public boolean updatePartTimeJob(int cid, byte type, long time) {
+        /*  206 */
+        boolean ret = false;
 
 
         Connection con = DatabaseConnection.getConnection();
         try {
             try (PreparedStatement ps = con.prepareStatement("UPDATE `characters` SET `partTime_id` = ?, `partTime_start` = ? WHERE `id` = ? AND `accountid` = ?")) {
-                /*      */ try {
+                /*      */
+                try {
                     ps.setByte(1, type);
-                    /*  229 */ ps.setLong(2, time);
-                    /*  230 */ ps.setInt(3, cid);
-                    /*  231 */ ps.setInt(4, this.accId);
-                    /*  232 */ if (ps.executeUpdate() > 0) {
+                    /*  229 */
+                    ps.setLong(2, time);
+                    /*  230 */
+                    ps.setInt(3, cid);
+                    /*  231 */
+                    ps.setInt(4, this.accId);
+                    /*  232 */
+                    if (ps.executeUpdate() > 0) {
                         ret = true;
                     }
                 } catch (SQLException e) {
@@ -234,33 +246,51 @@ public class MapleClient implements Serializable {
         return ret;
     }
 
-    /*      */ public final void updateCharacterCards(Map<Integer, Integer> cids) {
-        /*  167 */ if (this.charInfo.isEmpty()) {
+    /*      */
+    public final void updateCharacterCards(Map<Integer, Integer> cids) {
+        /*  167 */
+        if (this.charInfo.isEmpty()) {
             return;
         }
-        /*      */ try /*      */ {
-            /*  171 */ Connection con = DatabaseConnection.getConnection();
+        /*      */
+        try /*      */ {
+            /*  171 */
+            Connection con = DatabaseConnection.getConnection();
             try (PreparedStatement ps = con.prepareStatement("DELETE FROM `character_cards` WHERE `accid` = ?")) {
                 ps.setInt(1, this.accId);
-                /*  174 */ ps.executeUpdate();
+                /*  174 */
+                ps.executeUpdate();
             }
             try (PreparedStatement psu = con.prepareStatement("INSERT INTO `character_cards` (accid, worldid, characterid, position) VALUES (?, ?, ?, ?)")) {
                 for (Map.Entry ii : cids.entrySet()) {
-                    /*  179 */ Pair info = (Pair) this.charInfo.get(ii.getValue());
-                    /*  180 */ if ((info == null) || (((Integer) ii.getValue()).intValue() == 0) || (!CharacterCardFactory.getInstance().canHaveCard(((Short) info.getLeft()).shortValue(), ((Short) info.getRight()).shortValue()))) {
-                        /*      */ continue;
-                        /*      */                    }
-                    /*  183 */ psu.setInt(1, this.accId);
-                    /*  184 */ psu.setInt(2, this.world);
-                    /*  185 */ psu.setInt(3, ((Integer) ii.getValue()).intValue());
-                    /*  186 */ psu.setInt(4, ((Integer) ii.getKey()).intValue());
-                    /*  187 */ psu.executeUpdate();
-                    /*      */                }
+                    /*  179 */
+                    Pair info = (Pair) this.charInfo.get(ii.getValue());
+                    /*  180 */
+                    if ((info == null) || (((Integer) ii.getValue()).intValue() == 0) || (!CharacterCardFactory.getInstance().canHaveCard(((Short) info.getLeft()).shortValue(), ((Short) info.getRight()).shortValue()))) {
+                        /*      */
+                        continue;
+                        /*      */
+                    }
+                    /*  183 */
+                    psu.setInt(1, this.accId);
+                    /*  184 */
+                    psu.setInt(2, this.world);
+                    /*  185 */
+                    psu.setInt(3, ((Integer) ii.getValue()).intValue());
+                    /*  186 */
+                    psu.setInt(4, ((Integer) ii.getKey()).intValue());
+                    /*  187 */
+                    psu.executeUpdate();
+                    /*      */
+                }
             }
         } catch (SQLException sqlE) {
-            /*  191 */ System.out.println(new StringBuilder().append("Failed to update character cards. Reason: ").append(sqlE.toString()).toString());
-            /*      */        }
-        /*      */    }
+            /*  191 */
+            System.out.println(new StringBuilder().append("Failed to update character cards. Reason: ").append(sqlE.toString()).toString());
+            /*      */
+        }
+        /*      */
+    }
 
     public boolean canMakeCharacter(int serverId) {
         return loadCharactersSize(serverId) < 15;

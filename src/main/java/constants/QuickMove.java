@@ -8,10 +8,10 @@ import java.util.Map;
 
 public class QuickMove {
     private static Map<Integer, List<QuickMoveEntry>> quickmoves = new HashMap<Integer, List<QuickMoveEntry>>();
-    
+
     public static void QuickMoveLoad() {
         List<QuickMoveNpc> QuickMap = new ArrayList<QuickMoveNpc>();
-                                                //萬能, 公園, 碼頭, 市場, 技術, 計程, 商店, 商店, 商店, 大亂鬥, 會計小姐
+        //萬能, 公園, 碼頭, 市場, 技術, 計程, 商店, 商店, 商店, 大亂鬥, 會計小姐
         QuickMap.add(new QuickMoveNpc(100000000, true, true, true, true, true, true, true, true, true, true, true));
         QuickMap.add(new QuickMoveNpc(101000000, true, true, true, false, true, true, true, true, true, true, true));
         QuickMap.add(new QuickMoveNpc(102000000, true, true, true, true, true, true, true, true, true, true, true));
@@ -69,25 +69,26 @@ public class QuickMove {
             quickmoves.put(qmtp.mapid, asd);
         }
     }
-    
-    
+
+
     public static List<QuickMoveEntry> getQuickMoves(int mapid) {
         return quickmoves.get(mapid);
     }
-    
+
     public static class QuickMoveNpc {
         boolean npc1, npc2, npc3, npc4, npc5, npc6, npc7, npc8, npc9, npc10, npc11;
         int mapid;
-        public QuickMoveNpc (int map, boolean npc1, boolean npc2, boolean npc3, boolean npc4, boolean npc5, boolean npc6, boolean npc7, boolean npc8, boolean npc9, boolean npc10, boolean npc11) {
-            this.mapid = map; 
-            this.npc1 = npc1; 
-            this.npc2 = npc2; 
-            this.npc3 = npc3; 
-            this.npc4 = npc4 ; 
-            this.npc5 = npc5 ; 
-            this.npc6 = npc6; 
-            this.npc7 = npc7; 
-            this.npc8 = npc8; 
+
+        public QuickMoveNpc(int map, boolean npc1, boolean npc2, boolean npc3, boolean npc4, boolean npc5, boolean npc6, boolean npc7, boolean npc8, boolean npc9, boolean npc10, boolean npc11) {
+            this.mapid = map;
+            this.npc1 = npc1;
+            this.npc2 = npc2;
+            this.npc3 = npc3;
+            this.npc4 = npc4;
+            this.npc5 = npc5;
+            this.npc6 = npc6;
+            this.npc7 = npc7;
+            this.npc8 = npc8;
             this.npc9 = npc9;
             this.npc10 = npc10;
             this.npc11 = npc11;

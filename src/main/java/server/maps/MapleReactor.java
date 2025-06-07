@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.maps;
 
 import client.MapleClient;
+
 import java.awt.Rectangle;
+
 import scripting.ReactorScriptManager;
 import server.Timer.MapTimer;
 import tools.Pair;
@@ -41,11 +43,11 @@ public class MapleReactor extends MapleMapObject {
         this.stats = stats;
         this.rid = rid;
     }
-	
+
     public void setCustom(boolean c) {
         this.custom = c;
     }
-	
+
     public boolean isCustom() {
         return custom;
     }
@@ -102,7 +104,7 @@ public class MapleReactor extends MapleMapObject {
     public int getReactorType() {
         return stats.getType(state);
     }
-	
+
     public byte getTouch() {
         return stats.canTouch(state);
     }
@@ -163,7 +165,7 @@ public class MapleReactor extends MapleMapObject {
     */
     public void hitReactor(int charPos, short stance, MapleClient c) {
         if (c.getPlayer().isGM()) {
-                c.getPlayer().dropMessage(6, "Reactor ID" + rid + "");
+            c.getPlayer().dropMessage(6, "Reactor ID" + rid + "");
         }
         if (stats.getType(state) < 999 && stats.getType(state) != -1) {
             //type 2 = only hit from right (kerning swamp plants), 00 is air left 02 is ground left
@@ -178,7 +180,7 @@ public class MapleReactor extends MapleMapObject {
                         map.broadcastMessage(CField.triggerReactor(this, stance));
                     }
                     //if (rid > 200011) {
-                        ReactorScriptManager.getInstance().act(c, this);
+                    ReactorScriptManager.getInstance().act(c, this);
                     //}
                 } else { //reactor not broken yet
                     boolean done = false;

@@ -41,7 +41,7 @@ public class MapleGuildCharacter implements java.io.Serializable { // alias for 
         jobid = c.getJob();
         guildrank = c.getGuildRank();
         guildid = c.getGuildId();
-	guildContribution = c.getGuildContribution();
+        guildContribution = c.getGuildContribution();
         allianceRank = c.getAllianceRank();
         online = true;
     }
@@ -58,7 +58,7 @@ public class MapleGuildCharacter implements java.io.Serializable { // alias for 
         this.online = on;
         this.guildrank = rank;
         this.allianceRank = allianceRank;
-	this.guildContribution = guildContribution;
+        this.guildContribution = guildContribution;
         this.guildid = gid;
     }
 
@@ -107,11 +107,11 @@ public class MapleGuildCharacter implements java.io.Serializable { // alias for 
     }
 
     public void setGuildContribution(int c) {
-	this.guildContribution = c;
+        this.guildContribution = c;
     }
 
     public int getGuildContribution() {
-	return guildContribution;
+        return guildContribution;
     }
 
     public boolean isOnline() {

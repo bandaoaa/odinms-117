@@ -24,9 +24,11 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.Skill;
 import client.SkillFactory;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.concurrent.ScheduledFuture;
+
 import server.MapleStatEffect;
 import server.life.MapleMonster;
 import server.life.MobSkill;
@@ -61,11 +63,11 @@ public class MapleMist extends MapleMapObject {
         this.skilllevel = owner.getTotalSkillLevel(SkillFactory.getSkill(source.getSourceId()));
 
         switch (source.getSourceId()) {
-	    case 4221006: //煙幕彈
-	    case 32121006: //魔法屏障
+            case 4221006: //煙幕彈
+            case 32121006: //魔法屏障
                 isPoisonMist = 2;
                 break;
-	    case 1076: //奧茲的火牢術屏障
+            case 1076: //奧茲的火牢術屏障
             case 2111003: //致命毒霧
             case 12111005: //火牢術屏障
             case 14111006: //毒炸彈
@@ -104,19 +106,19 @@ public class MapleMist extends MapleMapObject {
     }
 
     public void setSchedule(ScheduledFuture<?> s) {
-	this.schedule = s;
+        this.schedule = s;
     }
 
     public ScheduledFuture<?> getSchedule() {
-	return schedule;
+        return schedule;
     }
 
     public void setPoisonSchedule(ScheduledFuture<?> s) {
-	this.poisonSchedule = s;
+        this.poisonSchedule = s;
     }
 
     public ScheduledFuture<?> getPoisonSchedule() {
-	return poisonSchedule;
+        return poisonSchedule;
     }
 
     public boolean isMobMist() {

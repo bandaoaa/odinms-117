@@ -24,9 +24,8 @@ package tools;
  * Provides a suite of utilities for manipulating strings.
  *
  * @author Frz
- * @since Revision 336
  * @version 1.0
- *
+ * @since Revision 336
  */
 public class StringUtil {
 
@@ -34,9 +33,9 @@ public class StringUtil {
      * Gets a string padded from the left to <code>length</code> by
      * <code>padchar</code>.
      *
-     * @param in The input string to be padded.
+     * @param in      The input string to be padded.
      * @param padchar The character to pad with.
-     * @param length The length to pad to.
+     * @param length  The length to pad to.
      * @return The padded string.
      */
     public static String getLeftPaddedStr(final String in, final char padchar, final int length) {
@@ -52,9 +51,9 @@ public class StringUtil {
      * Gets a string padded from the right to <code>length</code> by
      * <code>padchar</code>.
      *
-     * @param in The input string to be padded.
+     * @param in      The input string to be padded.
      * @param padchar The character to pad with.
-     * @param length The length to pad to.
+     * @param length  The length to pad to.
      * @return The padded string.
      */
     public static String getRightPaddedStr(final String in, final char padchar, final int length) {
@@ -69,7 +68,7 @@ public class StringUtil {
      * Joins an array of strings starting from string <code>start</code> with
      * a space.
      *
-     * @param arr The array of strings to join.
+     * @param arr   The array of strings to join.
      * @param start Starting from which string.
      * @return The joined strings.
      */
@@ -81,7 +80,7 @@ public class StringUtil {
      * Joins an array of strings starting from string <code>start</code> with
      * <code>sep</code> as a seperator.
      *
-     * @param arr The array of strings to join.
+     * @param arr   The array of strings to join.
      * @param start Starting from which string.
      * @return The joined strings.
      */
@@ -201,8 +200,8 @@ public class StringUtil {
         }
         return sb.toString();
     }
-	
-	public static int getDaysAmount(long startMillis, long endMillis) {
+
+    public static int getDaysAmount(long startMillis, long endMillis) {
         double elapsedSeconds = (endMillis - startMillis) / 1000.0;
         int elapsedMinutes = (int) (elapsedSeconds / 60.0);
         int elapsedHrs = elapsedMinutes / 60;

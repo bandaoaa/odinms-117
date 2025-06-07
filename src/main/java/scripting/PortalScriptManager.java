@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package scripting;
 
 import client.MapleClient;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.script.*;
+
 import server.MaplePortal;
 import tools.FileoutputUtil;
 
@@ -80,9 +82,9 @@ public class PortalScriptManager {
         if (script != null) {
             try {
                 script.enter(new PortalPlayerInteraction(c, portal));
-            if (c.getPlayer().isGM()) {
-                c.getPlayer().dropMessage(6, "Portal : " + portal.getScriptName()+ " Map : " + c.getPlayer().getMapId() + " - " + c.getPlayer().getMap().getMapName());
-            }
+                if (c.getPlayer().isGM()) {
+                    c.getPlayer().dropMessage(6, "Portal : " + portal.getScriptName() + " Map : " + c.getPlayer().getMapId() + " - " + c.getPlayer().getMap().getMapName());
+                }
             } catch (Exception e) {
                 System.err.println("Error entering Portalscript: " + portal.getScriptName() + " : " + e);
             }

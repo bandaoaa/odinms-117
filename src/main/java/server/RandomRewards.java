@@ -1,6 +1,7 @@
 package server;
 
 import constants.GameConstants;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,25 +68,25 @@ public class RandomRewards {
 
         returnArray = new ArrayList<>();
 
-	processRewardsSimple(returnArray, GameConstants.normalDrops);
-	
-	compiledDrops = returnArray;
+        processRewardsSimple(returnArray, GameConstants.normalDrops);
+
+        compiledDrops = returnArray;
 
         returnArray = new ArrayList<>();
 
-	processRewardsSimple(returnArray, GameConstants.rareDrops);
-	
-	compiledDropsB = returnArray;
+        processRewardsSimple(returnArray, GameConstants.rareDrops);
+
+        compiledDropsB = returnArray;
 
         returnArray = new ArrayList<>();
 
-	processRewardsSimple(returnArray, GameConstants.superDrops);
+        processRewardsSimple(returnArray, GameConstants.superDrops);
 
-	compiledDropsA = returnArray;
+        compiledDropsA = returnArray;
 
         returnArray = new ArrayList<>();
         processRewardsSimple(returnArray, GameConstants.tenPercent);
-	tenPercent = returnArray;
+        tenPercent = returnArray;
 
         //神奇服飾箱相關內容
         returnArray = new ArrayList<>();
@@ -166,7 +167,7 @@ public class RandomRewards {
     }
 
     public static List<Integer> getTenPercent() {
-	return tenPercent;
+        return tenPercent;
     }
 
     static void load() {

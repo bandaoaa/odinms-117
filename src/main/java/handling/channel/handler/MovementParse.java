@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package handling.channel.handler;
 
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,9 +97,9 @@ public class MovementParse {
                     res.add(rlm);
                     break;
                 }
-		case 17: // special?...final charge aran
+                case 17: // special?...final charge aran
                 case 22: // idk
-		case 23:
+                case 23:
                 case 24:
                 case 25:
                 case 26:

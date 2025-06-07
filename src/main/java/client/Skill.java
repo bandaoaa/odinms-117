@@ -21,8 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package client;
 
 import constants.GameConstants;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import provider.MapleData;
 import provider.MapleDataTool;
 import server.MapleStatEffect;
@@ -277,7 +279,7 @@ public class Skill {
                 case 80001000: //怪物騎乘
                 case 80001140: //光之守護
                 case 80001089: //飛天騎乘
-               // case 9101004: // hide is a buff -.- atleast for us o.o"
+                    // case 9101004: // hide is a buff -.- atleast for us o.o"
                     isBuff = true;
                     break;
             }
@@ -479,35 +481,35 @@ public class Skill {
 
     public boolean isFourthJob() {
         switch (this.id) {
-        case 1120012: //戰鬥精通
-        case 4320005: //飛毒殺
-        case 4340010: //疾速
-        case 4340012: //致命的飛毒殺
-        case 5120011: //反擊姿態
-        case 5120012: //雙倍幸運骰子
-        case 5220012: //反擊
-        case 5220014: //雙倍幸運骰子
-        case 5321006: //楓葉淨化
-        case 5720008: //蒼龍之力
-        case 5720012: //反擊
-        case 21120011: //快速移動
-        case 22171004: //楓葉淨化
-        case 22181004: //歐尼斯的意志
-        case 23120011: //旋風月光翻轉
-        case 23121008: //楓葉淨化
-        case 33120010: //狂暴天性
-        case 33121005: //化學彈丸
-            return false;
+            case 1120012: //戰鬥精通
+            case 4320005: //飛毒殺
+            case 4340010: //疾速
+            case 4340012: //致命的飛毒殺
+            case 5120011: //反擊姿態
+            case 5120012: //雙倍幸運骰子
+            case 5220012: //反擊
+            case 5220014: //雙倍幸運骰子
+            case 5321006: //楓葉淨化
+            case 5720008: //蒼龍之力
+            case 5720012: //反擊
+            case 21120011: //快速移動
+            case 22171004: //楓葉淨化
+            case 22181004: //歐尼斯的意志
+            case 23120011: //旋風月光翻轉
+            case 23121008: //楓葉淨化
+            case 33120010: //狂暴天性
+            case 33121005: //化學彈丸
+                return false;
         }
         switch (this.id / 10000) {
-        case 2217:
-        case 2218:
-        case 2312:
-        case 2412:
-        case 2512:
-        case 2712:
-        case 3122:
-            return true;
+            case 2217:
+            case 2218:
+            case 2312:
+            case 2412:
+            case 2512:
+            case 2712:
+            case 3122:
+                return true;
         }
         if ((getMaxLevel() <= 15) && (!this.invisible) && (getMasterLevel() <= 0)) {
             return false;

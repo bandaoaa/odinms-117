@@ -1,9 +1,11 @@
 package server;
 
 import client.MapleDisease;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
 import provider.MapleData;
 import provider.MapleDataProvider;
 import provider.MapleDataProviderFactory;
@@ -20,7 +22,7 @@ public class MapleCarnivalFactory {
 
     public MapleCarnivalFactory() {
         //whoosh
-	initialize();
+        initialize();
     }
 
     public static MapleCarnivalFactory getInstance() {

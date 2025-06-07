@@ -7,12 +7,14 @@ import client.inventory.MapleInventoryType;
 import constants.GameConstants;
 import database.DatabaseConnection;
 import database.DatabaseException;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
 import tools.Pair;
 import tools.packet.CField.NPCPacket;
 
@@ -177,7 +179,7 @@ public class MapleStorage implements Serializable {
 
     public void sendStorage(MapleClient c, int npcId) {
         // sort by inventorytype to avoid confusion
-	lastNPC = npcId;
+        lastNPC = npcId;
         Collections.sort(items, new Comparator<Item>() {
 
             @Override

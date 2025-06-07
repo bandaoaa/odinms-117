@@ -3,7 +3,7 @@
 Color 0
 
 :StartServer
-PATH=jdk-1.8\bin;%PATH%;
+PATH=ms-21.0.7\bin;%PATH%;
 set CLASSPATH=.;target\*
-java -Xms128m -Xmx4g -server -XX:+UseG1GC -Dnet.sf.odinms.wzpath=wz server.Start
+java -Xms128m -Xmx512m -server -XX:+UseG1GC -Dfile.encoding=GBK -Dgraalvm.js.allowMultiThreaded=true -Dnet.sf.odinms.wzpath=wz server.Start
 pause

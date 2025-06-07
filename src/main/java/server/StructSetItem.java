@@ -15,7 +15,7 @@ public class StructSetItem {
     public static class SetItem {
 
         public int incPDD, incMDD, incSTR, incDEX, incINT, incLUK, incACC, incPAD, incMAD, incSpeed, incMHP, incMMP, incMHPr, incMMPr, incAllStat,
-		option1, option2, option1Level, option2Level;
+                option1, option2, option1Level, option2Level;
     }
 
     public Map<Integer, SetItem> getItems() {

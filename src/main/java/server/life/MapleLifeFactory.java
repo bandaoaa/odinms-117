@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import constants.GameConstants;
+
 import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
@@ -99,21 +100,21 @@ public class MapleLifeFactory {
                 }
             }
         }
-	for (MapleData c : npcStringData) {
-	    int nid = Integer.parseInt(c.getName());
-	    String n = StringUtil.getLeftPaddedStr(nid + ".img", '0', 11);
-	    try {
-	    	if (npcData.getData(n) != null) {//only thing we really have to do is check if it exists. if we wanted to, we could get the script as well :3
-            	    String name = MapleDataTool.getString("name", c, "MISSINGNO");
-		    if (name.contains("Baby Moon Bunny")) {
-		        continue;
-		    }
-		    npcNames.put(nid, name);
-	    	}
-	    } catch (NullPointerException e) {
-	    } catch (RuntimeException e) { //swallow, don't add if 
-	    }
-	}
+        for (MapleData c : npcStringData) {
+            int nid = Integer.parseInt(c.getName());
+            String n = StringUtil.getLeftPaddedStr(nid + ".img", '0', 11);
+            try {
+                if (npcData.getData(n) != null) {//only thing we really have to do is check if it exists. if we wanted to, we could get the script as well :3
+                    String name = MapleDataTool.getString("name", c, "MISSINGNO");
+                    if (name.contains("Baby Moon Bunny")) {
+                        continue;
+                    }
+                    npcNames.put(nid, name);
+                }
+            } catch (NullPointerException e) {
+            } catch (RuntimeException e) { //swallow, don't add if
+            }
+        }
     }
 
     public static final List<Integer> getQuestCount(final int id) {
@@ -122,8 +123,8 @@ public class MapleLifeFactory {
 
     public static MapleMonster getMonster(int mid) {
         MapleMonsterStats stats = getMonsterStats(mid);
-		if (stats == null) {
-			return null;
+        if (stats == null) {
+            return null;
         }
         return new MapleMonster(mid, stats);
     }
@@ -136,11 +137,11 @@ public class MapleLifeFactory {
 
         if (stats == null) {
             MapleData monsterData = null;
-	    try {
-		monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
-	    } catch (RuntimeException e) {
-		return null;
-	    }
+            try {
+                monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
+            } catch (RuntimeException e) {
+                return null;
+            }
             if (monsterData == null) {
                 return null;
             }
@@ -162,7 +163,7 @@ public class MapleLifeFactory {
             stats.setEscort(MapleDataTool.getIntConvert("escort", monsterInfoData, 0) > 0);
             stats.setPartyBonus(MapleDataTool.getIntConvert("partyBonusMob", monsterInfoData, 0) > 0);
             stats.setPartyBonusRate(MapleDataTool.getIntConvert("partyBonusR", monsterInfoData, 0));
-            if (mobStringData.getChildByPath(String.valueOf(mid)) != null) { 
+            if (mobStringData.getChildByPath(String.valueOf(mid)) != null) {
                 stats.setName(MapleDataTool.getString("name", mobStringData.getChildByPath(String.valueOf(mid)), "MISSINGNO"));
             }
             stats.setBuffToGive(MapleDataTool.getIntConvert("buff", monsterInfoData, -1));
@@ -215,9 +216,9 @@ public class MapleLifeFactory {
                 for (MapleData d : banishData.getChildByPath("banMap").getChildren()) {
                     MapleData banMsgData = banishData.getChildByPath("banMsg");
                     stats.addBanishInfo(new BanishInfo(
-                    banMsgData == null ? null : MapleDataTool.getString(banMsgData), // banMap 節點中可能沒有 banMsg 導致空值 (9441003)
-                    MapleDataTool.getInt("field", d, -1),
-                    MapleDataTool.getString("portal", d, "sp")));
+                            banMsgData == null ? null : MapleDataTool.getString(banMsgData), // banMap 節點中可能沒有 banMsg 導致空值 (9441003)
+                            MapleDataTool.getInt("field", d, -1),
+                            MapleDataTool.getString("portal", d, "sp")));
                 }
             }
 
@@ -275,7 +276,7 @@ public class MapleLifeFactory {
                 if (attackData == null || monsterAtt == null) {
                     break;
                 }
-                final MobAttackInfo ret = new MobAttackInfo();	
+                final MobAttackInfo ret = new MobAttackInfo();
 
                 boolean deadlyAttack = monsterAtt.getChildByPath("deadlyAttack") != null;
                 if (!deadlyAttack) {
@@ -327,17 +328,17 @@ public class MapleLifeFactory {
 
                 boolean magic = MapleDataTool.getInt("magic", monsterAtt, 0) > 0;
                 if (!magic) {
-		    magic = MapleDataTool.getInt("magic", attackData, 0) > 0;
+                    magic = MapleDataTool.getInt("magic", attackData, 0) > 0;
                 }
-                ret.magic = magic;				
+                ret.magic = magic;
                 ret.isElement = monsterAtt.getChildByPath("elemAttr") != null; // we handle it like this, i don't know what it does
 
                 if (attackData.getChildByPath("range") != null) { // Definitely in attackData
-		    ret.range = MapleDataTool.getInt("range/r", attackData, 0);
-		    if(attackData.getChildByPath("range/lt") != null && attackData.getChildByPath("range/rb") != null) {
-		        ret.lt = (Point)attackData.getChildByPath("range/lt").getData();
-                        ret.rb = (Point)attackData.getChildByPath("range/rb").getData();
-		    }
+                    ret.range = MapleDataTool.getInt("range/r", attackData, 0);
+                    if (attackData.getChildByPath("range/lt") != null && attackData.getChildByPath("range/rb") != null) {
+                        ret.lt = (Point) attackData.getChildByPath("range/lt").getData();
+                        ret.rb = (Point) attackData.getChildByPath("range/rb").getData();
+                    }
                 }
                 stats.addMobAttack(ret);
             }
@@ -389,20 +390,20 @@ public class MapleLifeFactory {
     public static MapleNPC getNPC(final int nid) {
         String name = npcNames.get(nid);
         if (name == null) {
-	    return null;
+            return null;
         }
         return new MapleNPC(nid, name);
     }
 
     public static int getRandomNPC() {
-	List<Integer> vals = new ArrayList<Integer>(npcNames.keySet());
-	int ret = 0;
-	while (ret <= 0) {
-	    ret = vals.get(Randomizer.nextInt(vals.size()));
-	    if (npcNames.get(ret).contains("MISSINGNO")) {
-		ret = 0;
-	    }
-	}
-	return ret;
+        List<Integer> vals = new ArrayList<Integer>(npcNames.keySet());
+        int ret = 0;
+        while (ret <= 0) {
+            ret = vals.get(Randomizer.nextInt(vals.size()));
+            if (npcNames.get(ret).contains("MISSINGNO")) {
+                ret = 0;
+            }
+        }
+        return ret;
     }
 }

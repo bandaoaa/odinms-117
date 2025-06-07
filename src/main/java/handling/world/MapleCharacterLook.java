@@ -18,10 +18,10 @@
 package handling.world;
 
 import client.MapleCharacter;
+
 import java.util.Map;
 
 /**
- *
  * @author AlphaEta
  */
 public interface MapleCharacterLook {
@@ -33,11 +33,11 @@ public interface MapleCharacterLook {
     public int getFace();
 
     public int getHair();
-	
+
     public int getDemonMarking();
-    
+
     public short getJob();
-    
+
     //public boolean isElf();
 
     public Map<Byte, Integer> getEquips();

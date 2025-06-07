@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.events;
 
 import client.MapleCharacter;
+
 import java.util.concurrent.ScheduledFuture;
+
 import server.Timer.EventTimer;
 import tools.packet.CField;
 import tools.packet.CWvsContext;
@@ -35,7 +37,7 @@ public class MapleFitness extends MapleEvent {
     private ScheduledFuture<?> fitnessSchedule, msgSchedule;
 
     public MapleFitness(final int channel, final MapleEventType type) {
-	super(channel,type);
+        super(channel, type);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class MapleFitness extends MapleEvent {
 
     @Override
     public void onMapLoad(MapleCharacter chr) {
-	super.onMapLoad(chr);
+        super.onMapLoad(chr);
         if (isTimerStarted()) {
             chr.getClient().getSession().write(CField.getClock((int) (getTimeLeft() / 1000)));
         }

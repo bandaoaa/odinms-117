@@ -26,19 +26,21 @@ import server.Randomizer;
 
 public class InnerAbility {
     private static InnerAbility instance = null;
+
     public static InnerAbility getInstance() {
         if (instance == null) {
             instance = new InnerAbility();
         }
         return instance;
     }
+
     public InnerSkillValueHolder renewSkill(int rank, int circulator) {
         return renewSkill(rank, circulator, false);
     }
-    
+
     public InnerSkillValueHolder renewSkill(int rank, int circulator, boolean ultimateCirculatorPos) {
         if (ultimateCirculatorPos && circulator == 2701000) {
-            int randomSkill = GameConstants.getInnerSkillbyRank(3)[(int) Math.floor(Math.random()*GameConstants.getInnerSkillbyRank(rank).length)];
+            int randomSkill = GameConstants.getInnerSkillbyRank(3)[(int) Math.floor(Math.random() * GameConstants.getInnerSkillbyRank(rank).length)];
             int random = Randomizer.nextInt(100);
             int skillLevel = 0;
             if (random < 38) {
@@ -50,13 +52,10 @@ public class InnerAbility {
             }
             return new InnerSkillValueHolder(randomSkill, (byte) skillLevel, (byte) SkillFactory.getSkill(randomSkill).getMaxLevel(), (byte) 3);
         }
-        
-        
-        
-        
-        
+
+
         int circulatorRank = 0;
-        
+
         int circulatorRate = 0;
         if (circulator == -1) {
             circulatorRate = 10;
@@ -86,19 +85,19 @@ public class InnerAbility {
                 circulatorRate = 70;
             }
         }
-        
-        
-            if (Randomizer.isSuccess(3 + circulatorRate)) {
-                rank = 1;
-            } else if (Randomizer.isSuccess(2 + circulatorRate / 2)) {
-                rank = 2;
-            } else if (Randomizer.isSuccess(1 + circulatorRate / 4)) {
-                rank = 3;
-            } else {
-                rank = 0;
-            }
-        
-        int randomSkill = GameConstants.getInnerSkillbyRank(rank)[(int) Math.floor(Math.random()*GameConstants.getInnerSkillbyRank(rank).length)];
+
+
+        if (Randomizer.isSuccess(3 + circulatorRate)) {
+            rank = 1;
+        } else if (Randomizer.isSuccess(2 + circulatorRate / 2)) {
+            rank = 2;
+        } else if (Randomizer.isSuccess(1 + circulatorRate / 4)) {
+            rank = 3;
+        } else {
+            rank = 0;
+        }
+
+        int randomSkill = GameConstants.getInnerSkillbyRank(rank)[(int) Math.floor(Math.random() * GameConstants.getInnerSkillbyRank(rank).length)];
         int random = Randomizer.nextInt(100);
         int skillLevel = 0;
         if (random < 3 + circulatorRate / 2) {
@@ -110,7 +109,7 @@ public class InnerAbility {
         }
         return new InnerSkillValueHolder(randomSkill, (byte) skillLevel, (byte) SkillFactory.getSkill(randomSkill).getMaxLevel(), (byte) rank);
     }
-    
+
     public int getCirculatorRank(int circulator) {
         return ((circulator % 1000) / 100) + 1;
     }

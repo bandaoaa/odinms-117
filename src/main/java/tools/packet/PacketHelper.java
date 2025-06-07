@@ -34,8 +34,10 @@ import client.inventory.MapleRing;
 import constants.GameConstants;
 import handling.Buffstat;
 import handling.world.MapleCharacterLook;
+
 import java.util.Map.Entry;
 import java.util.*;
+
 import server.MapleItemInformationProvider;
 import server.MapleShop;
 import server.MapleShopItem;
@@ -152,7 +154,7 @@ public class PacketHelper {
         mplew.writeShort(cd.size());
         for (final MapleCoolDownValueHolder cooling : cd) {
             mplew.writeInt(cooling.skillId);
-            mplew.writeInt((int)(cooling.length + cooling.startTime - System.currentTimeMillis()) / 1000);
+            mplew.writeInt((int) (cooling.length + cooling.startTime - System.currentTimeMillis()) / 1000);
         }
     }
 
@@ -345,15 +347,15 @@ public class PacketHelper {
     }
 
     public static void addCharStats(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) {
-        mplew.writeInt(chr.getId()); 
+        mplew.writeInt(chr.getId());
         mplew.writeAsciiString(chr.getName(), 13);
-        mplew.write(chr.getGender()); 
-        mplew.write(chr.getSkinColor()); 
-        mplew.writeInt(chr.getFace()); 
-        mplew.writeInt(chr.getHair()); 
-        mplew.writeZeroBytes(24); 
+        mplew.write(chr.getGender());
+        mplew.write(chr.getSkinColor());
+        mplew.writeInt(chr.getFace());
+        mplew.writeInt(chr.getHair());
+        mplew.writeZeroBytes(24);
         mplew.write(chr.getLevel());
-        mplew.writeShort(chr.getJob()); 
+        mplew.writeShort(chr.getJob());
         chr.getStat().connectData(mplew);
         mplew.writeShort(chr.getRemainingAp()); // remaining ap
         if (GameConstants.isEvan(chr.getJob()) || GameConstants.isResist(chr.getJob()) || GameConstants.isMercedes(chr.getJob()) || GameConstants.isJett(chr.getJob()) || GameConstants.isPhantom(chr.getJob()) || GameConstants.isMihile(chr.getJob())) {
@@ -369,19 +371,19 @@ public class PacketHelper {
             mplew.writeShort(chr.getRemainingSp());
         }
         mplew.writeInt(chr.getExp());
-        mplew.writeInt(chr.getFame()); 
-        mplew.writeInt(chr.getGachExp()); 
-        mplew.writeInt(chr.getMapId()); 
-        mplew.write(chr.getInitialSpawnpoint()); 
-        mplew.writeInt(0); 
-        mplew.writeShort(chr.getSubcategory()); 
+        mplew.writeInt(chr.getFame());
+        mplew.writeInt(chr.getGachExp());
+        mplew.writeInt(chr.getMapId());
+        mplew.write(chr.getInitialSpawnpoint());
+        mplew.writeInt(0);
+        mplew.writeShort(chr.getSubcategory());
         if (GameConstants.isDemon(chr.getJob())) {
             mplew.writeInt(chr.getDemonMarking());
         }
         mplew.write(chr.getFatigue());
         mplew.writeInt(GameConstants.getCurrentDate());
         for (MapleTraitType t : MapleTraitType.values()) {
-            mplew.writeInt(chr.getTrait(t).getTotalExp()); 
+            mplew.writeInt(chr.getTrait(t).getTotalExp());
         }
         for (MapleTraitType t : MapleTraitType.values()) {
             mplew.writeShort(0);
@@ -389,10 +391,10 @@ public class PacketHelper {
         mplew.write(0);
         mplew.writeReversedLong(getTime(System.currentTimeMillis()));
         mplew.writeInt(chr.getStat().pvpExp);
-        mplew.write(chr.getStat().pvpRank); 
-        mplew.writeInt(chr.getBattlePoints()); 
-        mplew.write(5); 
-        mplew.writeInt(0); 
+        mplew.write(chr.getStat().pvpRank);
+        mplew.writeInt(chr.getBattlePoints());
+        mplew.write(5);
+        mplew.writeInt(0);
         mplew.write(0);
         mplew.writeReversedLong(getTime(-2L));
         mplew.writeInt(0);
@@ -522,7 +524,7 @@ public class PacketHelper {
             addExpirationTime(mplew, item.getExpiration());
             mplew.writeInt(chr == null ? -1 : chr.getExtendedSlots().indexOf(Integer.valueOf(item.getItemId())));
             if (item.getType() == 1) {
-                Equip equip = (Equip)item;
+                Equip equip = (Equip) item;
                 mplew.write(equip.getUpgradeSlots());
                 mplew.write(equip.getLevel());
                 mplew.writeShort(equip.getStr());
@@ -610,7 +612,7 @@ public class PacketHelper {
         mplew.write(shop.getPassword().length() > 0 ? 1 : 0); //password = false
         mplew.write(shop.getGameType() == 1 ? 0 : 0); //創建房間後的角色頭頂面板顯示
         mplew.write(shop.getSize());
-        mplew.write(2); 
+        mplew.write(2);
         mplew.write(shop.isOpen() ? 0 : 1);
     }
 
@@ -678,7 +680,7 @@ public class PacketHelper {
         addPhantomSkills(mplew, chr);
         addInnerStats(mplew, chr);
         addCoreAura(mplew, chr, 0); //加载寶盒的護佑
-        mplew.writeShort(0); 
+        mplew.writeShort(0);
         addPillarData(mplew, chr); //加载楓之高校資訊
     }
 
@@ -695,21 +697,21 @@ public class PacketHelper {
             mplew.writeInt(chr.getFriendship(t).getPoints());
         }
     }
-    
+
     /*
     加載幻影複製技能資訊
     */
     public static final void addPhantomSkills(MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
         Map x = chr.sortPhantomSkills();
         for (int i = 1; i <= 4; i++) {
-            List skillids = (List)x.get(Integer.valueOf(i));
+            List skillids = (List) x.get(Integer.valueOf(i));
             for (int z = 0; z < GameConstants.getPhantomBookSlot(i); z++) {
-                mplew.writeInt(((Integer)skillids.get(z)).intValue());
+                mplew.writeInt(((Integer) skillids.get(z)).intValue());
             }
         }
         Map equipped = chr.getEquippedSkills();
         for (int i = 1; i <= 4; i++) {
-            mplew.writeInt(equipped.get(Integer.valueOf(i)) == null ? 0 : ((Integer)equipped.get(Integer.valueOf(i))).intValue());
+            mplew.writeInt(equipped.get(Integer.valueOf(i)) == null ? 0 : ((Integer) equipped.get(Integer.valueOf(i))).intValue());
         }
     }
 
@@ -722,7 +724,7 @@ public class PacketHelper {
             mplew.write(skills.get(i).getSkillLevel()); // level
             mplew.write(skills.get(i).getRank()); //rank, C, B, A, and S
         }
-        
+
         mplew.writeInt(chr.getHonourLevel()); //honor lvl
         mplew.writeInt(chr.getHonourExp()); //honor exp
     }
@@ -806,69 +808,117 @@ public class PacketHelper {
         mplew.writeInt(active ? pet.getBuffSkill() : 0);
     }
 
-   
-/*      */   public static void addShopInfo(MaplePacketLittleEndianWriter mplew, MapleShop shop, MapleClient c)
-/*      */   {
-/* 1002 */     MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-/* 1003 */     mplew.write(shop.getRanks().size() > 0 ? 1 : 0);
-/*      */ 
-/* 1006 */     if (shop.getRanks().size() > 0) {
-/* 1007 */       mplew.write(shop.getRanks().size());
-/* 1008 */       for (Pair s : shop.getRanks()) {
-/* 1009 */         mplew.writeInt(((Integer)s.left).intValue());
-/* 1010 */         mplew.writeMapleAsciiString((String)s.right);
-/*      */       }
-/*      */     }
-/* 1013 */     mplew.writeShort(shop.getItems().size() + c.getPlayer().getRebuy().size());
-/* 1014 */     for (MapleShopItem item : shop.getItems()) {
-/* 1015 */       addShopItemInfo(mplew, item, shop, ii, null);
-/*      */     }
-        for (Iterator<Item> it = c.getPlayer().getRebuy().iterator(); it.hasNext();) {
-            Item i = it.next();
-            addShopItemInfo(mplew, new MapleShopItem(i.getItemId(), (int)ii.getPrice(i.getItemId())), shop, ii, i);
+
+    /*      */
+    public static void addShopInfo(MaplePacketLittleEndianWriter mplew, MapleShop shop, MapleClient c)
+    /*      */ {
+        /* 1002 */
+        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        /* 1003 */
+        mplew.write(shop.getRanks().size() > 0 ? 1 : 0);
+        /*      */
+        /* 1006 */
+        if (shop.getRanks().size() > 0) {
+            /* 1007 */
+            mplew.write(shop.getRanks().size());
+            /* 1008 */
+            for (Pair s : shop.getRanks()) {
+                /* 1009 */
+                mplew.writeInt(((Integer) s.left).intValue());
+                /* 1010 */
+                mplew.writeMapleAsciiString((String) s.right);
+                /*      */
+            }
+            /*      */
         }
-   }
-/*      */ 
-/*      */   public static void addShopItemInfo(MaplePacketLittleEndianWriter mplew, MapleShopItem item, MapleShop shop, MapleItemInformationProvider ii, Item i)
-/*      */   {
-/* 1036 */     mplew.writeInt(item.getItemId());
-/* 1037 */     mplew.writeInt(item.getPrice());
-/* 1038 */     mplew.write(0);
-/* 1039 */     mplew.writeInt(item.getReqItem());
-/* 1040 */     mplew.writeInt(item.getReqItemQ());
-/* 1041 */     mplew.writeInt(item.getExpiration());
-/* 1042 */     mplew.writeInt(item.getMinLevel());
-/* 1043 */     mplew.writeInt(item.getCategory());
-/* 1044 */     mplew.write(0);
-/* 1045 */     mplew.writeInt(0);
-/* 1046 */     mplew.writeInt(0);
-/* 1047 */     if ((!GameConstants.isThrowingStar(item.getItemId())) && (!GameConstants.isBullet(item.getItemId()))) {
-/* 1048 */       mplew.writeShort(1);
-/* 1049 */       mplew.writeShort(1000);
-/*      */     } else {
-/* 1051 */       mplew.writeZeroBytes(6);
-/* 1052 */       mplew.writeShort(BitTools.doubleToShortBits(ii.getPrice(item.getItemId())));
-/* 1053 */       mplew.writeShort(ii.getSlotMax(item.getItemId()));
-/*      */     }
-/*      */ 
-/* 1073 */     mplew.write(i == null ? 0 : 1);
-/* 1074 */     if (i != null) {
-/* 1075 */       addItemInfo(mplew, i);
-/*      */     }
-/* 1077 */     if (shop.getRanks().size() > 0) {
-/* 1078 */       mplew.write(item.getRank() >= 0 ? 1 : 0);
-/* 1079 */       if (item.getRank() >= 0) {
-/* 1080 */         mplew.write(item.getRank());
-/*      */       }
-/*      */     }
-/* 1083 */     mplew.writeZeroBytes(16);
-/* 1085 */     for (int j = 0; j < 4; j++) {
-        mplew.writeReversedLong(System.currentTimeMillis());
+        /* 1013 */
+        mplew.writeShort(shop.getItems().size() + c.getPlayer().getRebuy().size());
+        /* 1014 */
+        for (MapleShopItem item : shop.getItems()) {
+            /* 1015 */
+            addShopItemInfo(mplew, item, shop, ii, null);
+            /*      */
+        }
+        for (Iterator<Item> it = c.getPlayer().getRebuy().iterator(); it.hasNext(); ) {
+            Item i = it.next();
+            addShopItemInfo(mplew, new MapleShopItem(i.getItemId(), (int) ii.getPrice(i.getItemId())), shop, ii, i);
+        }
     }
-/*      */   }
+
+    /*      */
+    /*      */
+    public static void addShopItemInfo(MaplePacketLittleEndianWriter mplew, MapleShopItem item, MapleShop shop, MapleItemInformationProvider ii, Item i)
+    /*      */ {
+        /* 1036 */
+        mplew.writeInt(item.getItemId());
+        /* 1037 */
+        mplew.writeInt(item.getPrice());
+        /* 1038 */
+        mplew.write(0);
+        /* 1039 */
+        mplew.writeInt(item.getReqItem());
+        /* 1040 */
+        mplew.writeInt(item.getReqItemQ());
+        /* 1041 */
+        mplew.writeInt(item.getExpiration());
+        /* 1042 */
+        mplew.writeInt(item.getMinLevel());
+        /* 1043 */
+        mplew.writeInt(item.getCategory());
+        /* 1044 */
+        mplew.write(0);
+        /* 1045 */
+        mplew.writeInt(0);
+        /* 1046 */
+        mplew.writeInt(0);
+        /* 1047 */
+        if ((!GameConstants.isThrowingStar(item.getItemId())) && (!GameConstants.isBullet(item.getItemId()))) {
+            /* 1048 */
+            mplew.writeShort(1);
+            /* 1049 */
+            mplew.writeShort(1000);
+            /*      */
+        } else {
+            /* 1051 */
+            mplew.writeZeroBytes(6);
+            /* 1052 */
+            mplew.writeShort(BitTools.doubleToShortBits(ii.getPrice(item.getItemId())));
+            /* 1053 */
+            mplew.writeShort(ii.getSlotMax(item.getItemId()));
+            /*      */
+        }
+        /*      */
+        /* 1073 */
+        mplew.write(i == null ? 0 : 1);
+        /* 1074 */
+        if (i != null) {
+            /* 1075 */
+            addItemInfo(mplew, i);
+            /*      */
+        }
+        /* 1077 */
+        if (shop.getRanks().size() > 0) {
+            /* 1078 */
+            mplew.write(item.getRank() >= 0 ? 1 : 0);
+            /* 1079 */
+            if (item.getRank() >= 0) {
+                /* 1080 */
+                mplew.write(item.getRank());
+                /*      */
+            }
+            /*      */
+        }
+        /* 1083 */
+        mplew.writeZeroBytes(16);
+        /* 1085 */
+        for (int j = 0; j < 4; j++) {
+            mplew.writeReversedLong(System.currentTimeMillis());
+        }
+        /*      */
+    }
 
     public static void addJaguarInfo(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) {
-      //  mplew.write(chr.getIntNoRecord(GameConstants.JAGUAR));
+        //  mplew.write(chr.getIntNoRecord(GameConstants.JAGUAR));
         mplew.write(0x28); // color?
         mplew.writeZeroBytes(20); //probably mobID of the 5 mobs that can be captured.
     }

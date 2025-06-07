@@ -24,12 +24,14 @@ import client.MapleCharacter;
 import client.MapleCharacterUtil;
 import handling.world.CharacterTransfer;
 import handling.world.World;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import server.Timer.PingTimer;
 
 public class PlayerStorage {
@@ -44,7 +46,7 @@ public class PlayerStorage {
     private int channel;
 
     public PlayerStorage(int channel) {
-	this.channel = channel;
+        this.channel = channel;
         // Prune once every 15 minutes
         PingTimer.getInstance().register(new PersistingTask(), 60000);
     }
@@ -66,7 +68,7 @@ public class PlayerStorage {
         } finally {
             wL.unlock();
         }
-	World.Find.register(chr.getId(), chr.getName(), channel);
+        World.Find.register(chr.getId(), chr.getName(), channel);
     }
 
     public final void registerPendingPlayer(final CharacterTransfer chr, final int playerid) {
@@ -110,7 +112,7 @@ public class PlayerStorage {
     }
 
     public final int pendingCharacterSize() {
-	return PendingCharacter.size();
+        return PendingCharacter.size();
     }
 
     public final void deregisterPendingPlayer(final int charid) {
@@ -168,7 +170,7 @@ public class PlayerStorage {
                 if (!chr.isGM() || !checkGM) {
                     chr.getClient().disconnect(false, false, true);
                     chr.getClient().getSession().close();
-		    World.Find.forceDeregister(chr.getId(), chr.getName());
+                    World.Find.forceDeregister(chr.getId(), chr.getName());
                     itr.remove();
                 }
             }
@@ -214,21 +216,21 @@ public class PlayerStorage {
     public final String getOnlinePlayers2() {
         final StringBuilder sb = new StringBuilder();
 
-            rL.lock();
-            try {
-               MapleCharacter chr;
-               final Iterator<MapleCharacter> itr = nameToChar.values().iterator();
-                while (itr.hasNext()) {
-                    chr = itr.next();
-                    if (chr.isGM()) {
+        rL.lock();
+        try {
+            MapleCharacter chr;
+            final Iterator<MapleCharacter> itr = nameToChar.values().iterator();
+            while (itr.hasNext()) {
+                chr = itr.next();
+                if (chr.isGM()) {
                     sb.append(MapleCharacterUtil.makeMapleReadable(itr.next().getName()));
                     sb.append(", ");
-                    }
                 }
-            } finally {
-                rL.unlock();
             }
-        
+        } finally {
+            rL.unlock();
+        }
+
         return sb.toString();
     }
 

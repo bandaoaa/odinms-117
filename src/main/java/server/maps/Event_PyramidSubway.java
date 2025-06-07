@@ -27,7 +27,9 @@ import handling.channel.ChannelServer;
 import handling.world.MaplePartyCharacter;
 import handling.world.World;
 import handling.world.exped.PartySearch;
+
 import java.util.concurrent.ScheduledFuture;
+
 import server.Randomizer;
 import server.Timer.MapTimer;
 import server.life.MapleLifeFactory;
@@ -50,12 +52,12 @@ public class Event_PyramidSubway {
             type = mapid % 10000 / 1000;
         }
         if (c.getParty() == null || c.getParty().getLeader().getId() == c.getId()) {
-	    if (c.getParty() != null && c.getParty().getLeader().getId() == c.getId()) {
-		PartySearch ps = World.Party.getSearch(c.getParty());
-		if (ps != null) {
-		    World.Party.removeSearch(ps, "The Party Listing has been removed because the Party Quest started.");
-		}
-	    }
+            if (c.getParty() != null && c.getParty().getLeader().getId() == c.getId()) {
+                PartySearch ps = World.Party.getSearch(c.getParty());
+                if (ps != null) {
+                    World.Party.removeSearch(ps, "The Party Listing has been removed because the Party Quest started.");
+                }
+            }
             commenceTimerNextMap(c, 1);
             energyBarDecrease = MapTimer.getInstance().register(new Runnable() {
 
@@ -93,8 +95,8 @@ public class Event_PyramidSubway {
         }
         final MapleMap ourMap = c.getMap();
         final int time = (type == -1 ? 180 : (stage == 1 ? 240 : 300)) - 1;
-	energybar = 100;
-	bar = 0;
+        energybar = 100;
+        bar = 0;
         if (c.getParty() != null && c.getParty().getMembers().size() > 1) {
             for (MaplePartyCharacter mpc : c.getParty().getMembers()) {
                 final MapleCharacter chr = ourMap.getCharacterById(mpc.getId());
@@ -115,8 +117,8 @@ public class Event_PyramidSubway {
         }
         if (type != -1 && (stage == 4 || stage == 5)) { //yetis. temporary
             for (int i = 0; i < (stage == 4 ? 1 : 2); i++) {
-		//9700023 = 90 secs removeAfter -> real yeti
-		//real yeti -> 9700022 when killed -> 15 secs removeAfter -> real yeti
+                //9700023 = 90 secs removeAfter -> real yeti
+                //real yeti -> 9700022 when killed -> 15 secs removeAfter -> real yeti
                 ourMap.spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9700023), c.getPosition());
             }
         }
@@ -139,10 +141,10 @@ public class Event_PyramidSubway {
 
     public final void onKill(final MapleCharacter c) {
         kill++;
-	bar++;
+        bar++;
         if (Randomizer.nextInt(100) < 5) { //monster properties coolDamage and coolDamageProb determine this, will code later
             cool++;
-	    bar++;
+            bar++;
             broadcastEnergy(c, "massacre_cool", cool);
         }
         energybar++;
@@ -320,7 +322,7 @@ public class Event_PyramidSubway {
             exp = ((kill + (cool * 5)) + pt) * c.getClient().getChannelServer().getExpRate();
             c.gainExp(exp, true, false, false);
         }
-	c.getTrait(MapleTraitType.will).addExp((type + 2) * 8, c);
+        c.getTrait(MapleTraitType.will).addExp((type + 2) * 8, c);
         c.getClient().getSession().write(CField.showEffect("killing/clear"));
         c.getClient().getSession().write(CField.sendPyramidResult(rank, exp));
         dispose(c);

@@ -7,7 +7,6 @@ import tools.StringUtil;
 import tools.packet.CWvsContext;
 
 /**
- *
  * @author Emilyx3
  */
 public class SRBCommands {
@@ -15,7 +14,7 @@ public class SRBCommands {
     public static PlayerGMRank getPlayerLevelRequired() {
         return PlayerGMRank.SRB;
     }
-            
+
     public static class spam extends CommandExecute {
 
         @Override
@@ -36,5 +35,5 @@ public class SRBCommands {
         }
     }
 
-    
+
 }

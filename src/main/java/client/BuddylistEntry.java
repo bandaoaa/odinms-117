@@ -27,10 +27,9 @@ public class BuddylistEntry {
     private boolean visible;
 
     /**
-     *
      * @param name
      * @param characterId
-     * @param channel should be -1 if the buddy is offline
+     * @param channel     should be -1 if the buddy is offline
      * @param visible
      */
     public BuddylistEntry(String name, int characterId, String group, int channel, boolean visible) {
@@ -82,7 +81,7 @@ public class BuddylistEntry {
     }
 
     public void setGroup(String g) {
-	this.group = g;
+        this.group = g;
     }
 
     @Override
