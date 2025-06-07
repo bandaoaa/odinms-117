@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package server.life;
 
 import client.inventory.Equip;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import constants.GameConstants;
 import client.Skill;
 import client.inventory.Item;
@@ -46,12 +44,9 @@ import client.SkillFactory;
 import client.status.MonsterStatus;
 import client.status.MonsterStatusEffect;
 import constants.ServerConstants;
-
 import handling.world.MapleParty;
 import handling.world.MaplePartyCharacter;
-
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import scripting.EventInstanceManager;
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
@@ -626,7 +621,8 @@ public class MapleMonster extends AbstractLoadedMapleLife {
                     map.spawnMonster(spongy, -2);
 
                     for (final MapleMonster i : mobs) {
-                        map.spawnMonster(i, -2);
+                        //map.spawnMonster(i, -2);
+                        map.spawnRevives(i, this.getObjectId());
                         i.setSponge(spongy);
                     }
                 }
