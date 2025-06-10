@@ -1190,6 +1190,9 @@ public class MapleServerHandler extends ChannelInboundHandlerAdapter implements 
             case UPDATE_FRIENDSHIP_POINTS: //楓之高校積分
                 NPCHandler.UpdateFriendshipPoints(slea, c, c.getPlayer());
                 break;
+            case USE_PT_EXP_POTION:
+                PlayersHandler.UsePtExpPotion(slea, c);
+                break;
             default:
                 System.out.println("[UNHANDLED] Recv [" + header.toString() + "] found");
                 break;

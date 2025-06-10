@@ -1326,4 +1326,33 @@ public class PlayersHandler {
         }
         c.getSession().write(CWvsContext.enableActions());
     }
+
+    public static void UsePtExpPotion(LittleEndianAccessor slea, MapleClient c) {
+        slea.skip(4);
+        final MapleCharacter user = c.getPlayer();
+        short slot = slea.readShort();
+        int itemId = slea.readInt();
+        Item toUse = user.getInventory(MapleInventoryType.USE).getItem(slot);
+        if (toUse == null) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        if (toUse.getItemId() / 10000 != 223) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        if (toUse.getQuantity() < 1) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        if (toUse.getItemId() != itemId) {
+            c.getSession().write(CWvsContext.enableActions());
+            return;
+        }
+        while (user.getLevel() < 18) {
+            user.levelUp();
+        }
+        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (short) 1, false);
+        c.getSession().write(CWvsContext.enableActions());
+    }
 }
